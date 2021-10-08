@@ -1,0 +1,4 @@
+enabled: true
+notifications:
+  - name: app-testing
+    in-group: mutlirepo
