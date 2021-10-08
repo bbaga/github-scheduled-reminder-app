@@ -1,6 +1,8 @@
 # github-scheduled-reminder-app
 Scheduled reminders about PRs and Issues
 
+⚠ This is all experimental work, not meant to provide any value at this stage!
+
 # Development
 ## Requirements
 You'll need [docker](https://www.docker.com/products/docker-desktop) to follow the steps in this guide.
