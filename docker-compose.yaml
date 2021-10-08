@@ -1,0 +1,12 @@
+version: "3.14"
+services:
+  app:
+    image: openjdk:11
+    volumes:
+      - ./:/sources
+    working_dir: /sources
+    command: "./mvnw spring-boot:run"
+    environment:
+      - GITHUB_APP_CERT
+      - GITHUB_ID
+      - SLACK_API_TOKEN
