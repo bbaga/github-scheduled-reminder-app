@@ -1,4 +1,3 @@
 enabled: true
 notifications:
-  - name: app-testing
-    inGroup: mutlirepo
+  - base: mutlirepo
