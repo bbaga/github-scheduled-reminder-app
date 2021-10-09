@@ -1,5 +1,5 @@
 enabled: true
 notifications:
   - extending: 
-      repository: bbaga/app-testing#main
+      repository: bbaga/app-testing
       name: mutlirepo
