@@ -54,7 +54,7 @@ public class GitHubInstallationScan implements Job {
         String jobIdentity;
 
         for (Long installationId : checkList.keySet()) {
-            jobIdentity = String.format("%s-", GitHubInstallationRepositoryScan.class.getName());
+            jobIdentity = String.format("%s-%s", GitHubInstallationRepositoryScan.class.getName(), installationId);
 
             if (!checkList.get(installationId)) {
                 installationRepository.remove(installationId);

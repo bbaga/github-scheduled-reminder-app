@@ -44,6 +44,7 @@ public class ScheduledSlackNotification implements Job {
     public void execute(JobExecutionContext context) throws JobExecutionException {
         String jobName = context.getJobDetail().getKey().getName();
         logger.info("Starting notification job for {}", jobName);
+
         Notification notification = configGraph.get(jobName).getNotification();
         ConcurrentHashMap<Integer, RepositoryRecord> repositories = configGraph.get(jobName).getRepositories();
 
@@ -53,11 +54,7 @@ public class ScheduledSlackNotification implements Job {
         for (RepositoryRecord repository : repositories.values()) {
             client = grabInstallationClient(repository.getInstallationId());
             try {
-                client.getRepository(repository.getRepository()).getIssues(GHIssueState.ALL).forEach((GHIssue issue) -> {
-                    if (issue.getState() == GHIssueState.CLOSED) {
-                        return;
-                    }
-
+                client.getRepository(repository.getRepository()).getIssues(GHIssueState.OPEN).forEach((GHIssue issue) -> {
                     if (issue.isPullRequest()) {
                         pullRequests.add(issue);
                     } else {
@@ -77,8 +74,15 @@ public class ScheduledSlackNotification implements Job {
     private void sendSlackMessage(Notification notification, Set<GHIssue> issues, Set<GHIssue> pullRequests) {
         List<Block> sections = new ArrayList<>();
         sections.add(Header.of(Text.of(TextType.PLAIN_TEXT, "Reporting open issues and pull requests")));
-        sections.add(Section.of(Text.of(TextType.MARKDOWN, "*Open Issues:*")));
-        sections.add(Divider.builder().build());
+
+        if ((issues.size() + pullRequests.size()) == 0) {
+            sections.add(Section.of(Text.of(TextType.MARKDOWN, "*There aren't any open issues or pull requests.*")));
+        }
+
+        if (issues.size() > 0) {
+            sections.add(Section.of(Text.of(TextType.MARKDOWN, "*Open Issues:*")));
+            sections.add(Divider.builder().build());
+        }
 
         String user;
         for (GHIssue issue : issues) {
@@ -89,14 +93,28 @@ public class ScheduledSlackNotification implements Job {
                 continue;
             }
 
-            Section section = Section.of(Text.of(TextType.MARKDOWN, String.format("%s *%s*%nrepository: %s", user, issue.getTitle(), issue.getRepository().getFullName())))
-                    .withAccessory(Button.of(Text.of(TextType.PLAIN_TEXT, "Open"), issue.getNodeId()).withUrl(issue.getHtmlUrl().toString()));
-            sections.add(section);
+            sections.add(
+                Section.of(
+                    Text.of(
+                        TextType.MARKDOWN,
+                        String.format(
+                            "%s *%s*%nrepository: %s",
+                            user,
+                            issue.getTitle(),
+                            issue.getRepository().getFullName()
+                        )
+                    )
+                ).withAccessory(
+                    Button.of(
+                        Text.of(TextType.PLAIN_TEXT, "Open"),
+                        issue.getNodeId()
+                    ).withUrl(issue.getHtmlUrl().toString())));
         }
 
-        sections.add(Divider.builder().build());
-        sections.add(Section.of(Text.of(TextType.MARKDOWN, "*Open Pull Requests:*")));
-        sections.add(Divider.builder().build());
+        if (pullRequests.size() > 0) {
+            sections.add(Section.of(Text.of(TextType.MARKDOWN, "*Open Pull Requests:*")));
+            sections.add(Divider.builder().build());
+        }
 
         GHRepository repository;
         GHPullRequest pullRequest;
@@ -115,10 +133,29 @@ public class ScheduledSlackNotification implements Job {
                 continue;
             }
 
-            Section section = Section.of(Text.of(TextType.MARKDOWN, String.format("%s *%s* %nrepository: %s, :heavy_minus_sign: %d :heavy_plus_sign: %d", user, issue.getTitle(), repository.getFullName(), deletions, additions)))
-                    .withAccessory(Button.of(Text.of(TextType.PLAIN_TEXT, "Open"), issue.getNodeId()).withUrl(issue.getHtmlUrl().toString()));
-            sections.add(section);
+            sections.add(
+                Section.of(
+                    Text.of(
+                        TextType.MARKDOWN,
+                        String.format(
+                            "%s *%s* %nrepository: %s, :heavy_minus_sign: %d :heavy_plus_sign: %d",
+                            user,
+                            issue.getTitle(),
+                            repository.getFullName(),
+                            deletions,
+                            additions
+                        )
+                    )
+                ).withAccessory(
+                    Button.of(
+                        Text.of(TextType.PLAIN_TEXT, "Open"),
+                        issue.getNodeId()
+                    ).withUrl(issue.getHtmlUrl().toString())
+                )
+            );
         }
+
+        sections.add(Section.of(Text.of(TextType.MARKDOWN, String.format("config id: _%s_", notification.getName()))));
 
         slackClient.postMessage(
             ChatPostMessageParams.builder()
