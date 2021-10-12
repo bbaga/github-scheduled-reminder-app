@@ -71,7 +71,8 @@ public class GitHubInstallationRepositoryScan implements Job {
 
                     for (Notification notification : inRepoConfig.getNotifications()) {
                         if (notification.getSchedule() != null) {
-                            String notificationKey = getNotificationKey(repo, notification);
+                            notification.setName(getNotificationKey(repo.getFullName(), notification.getName()));
+                            String notificationKey = notification.getName();
 
                             if (!configGraph.containsKey(notificationKey)) {
                                 configGraph.put(notificationKey, new ConfigGraphNode(installationId, notification, currentRunStamp));
@@ -108,7 +109,11 @@ public class GitHubInstallationRepositoryScan implements Job {
                     return true;
                 }
 
-                node.getRepositories().entrySet().removeIf(repoEntry -> repoEntry.getValue().getSeenAt() != currentRunStamp);
+                node.getRepositories().entrySet().removeIf(repoEntry -> {
+                    RepositoryRecord repositoryRecord = repoEntry.getValue();
+                    return repositoryRecord.getInstallationId().equals(installationId)
+                            && repositoryRecord.getSeenAt() != currentRunStamp;
+                });
 
                 return false;
             });
@@ -158,10 +163,6 @@ public class GitHubInstallationRepositoryScan implements Job {
         } catch (IOException | SchedulerException e) {
             e.printStackTrace();
         }
-    }
-
-    private String getNotificationKey(GHRepository repo, Notification notification) {
-        return getNotificationKey(repo.getFullName(), notification.getName());
     }
 
     private String getNotificationKey(Extending extending) {
