@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.Set;
 
 @Component
-@PersistJobDataAfterExecution
 @DisallowConcurrentExecution
 public class GitHubInstallationScan implements Job {
 
@@ -25,16 +24,11 @@ public class GitHubInstallationScan implements Job {
     @Autowired
     private GitHubInstallationRepository installationRepository;
 
-    private Logger logger = LoggerFactory.getLogger(GitHubInstallationScan.class);
-//
-//    @Autowired
-//    @Qualifier("GitHubInstallationRepositoryScan")
-//    private JobDetail repoScanJob;
+    private final Logger logger = LoggerFactory.getLogger(GitHubInstallationScan.class);
 
     public void execute(JobExecutionContext context) throws JobExecutionException {
 
         logger.info("Starting Installation Scan");
-        JobDataMap map = context.getJobDetail().getJobDataMap();
         PagedIterable<GHAppInstallation> list = null;
         try {
             list = gitHub.getApp().listInstallations();
@@ -55,17 +49,37 @@ public class GitHubInstallationScan implements Job {
             installationRepository.put(installation);
         }
 
+        Scheduler scheduler = context.getScheduler();
+        JobDetail job;
+        String jobIdentity;
+
         for (Long installationId : checkList.keySet()) {
+            jobIdentity = String.format("%s-", GitHubInstallationRepositoryScan.class.getName());
+
             if (!checkList.get(installationId)) {
                 installationRepository.remove(installationId);
+                try {
+                    scheduler.deleteJob(new JobKey(jobIdentity));
+                } catch (SchedulerException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            try {
+                if (scheduler.getJobDetail(new JobKey(jobIdentity)) == null) {
+                    job = JobBuilder.newJob(GitHubInstallationRepositoryScan.class)
+                            .withIdentity(jobIdentity)
+                            .usingJobData("installationId", installationId)
+                            .storeDurably(true)
+                            .build();
+                    scheduler.addJob(job, true);
+                }
+                context.getScheduler().triggerJob(new JobKey(jobIdentity));
+            } catch (SchedulerException e) {
+                e.printStackTrace();
             }
         }
 
-        try {
-            context.getScheduler().triggerJob(new JobKey(GitHubInstallationRepositoryScan.class.getName()));
-        } catch (SchedulerException e) {
-            e.printStackTrace();
-        }
         logger.info("Installation Scanning is done");
     }
 }
