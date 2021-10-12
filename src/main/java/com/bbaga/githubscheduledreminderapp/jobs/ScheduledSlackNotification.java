@@ -89,7 +89,7 @@ public class ScheduledSlackNotification implements Job {
                 continue;
             }
 
-            Section section = Section.of(Text.of(TextType.MARKDOWN, String.format("%s *%s*%nrepository: %s", user, issue.getRepository().getFullName(), issue.getTitle())))
+            Section section = Section.of(Text.of(TextType.MARKDOWN, String.format("%s *%s*%nrepository: %s", user, issue.getTitle(), issue.getRepository().getFullName())))
                     .withAccessory(Button.of(Text.of(TextType.PLAIN_TEXT, "Open"), issue.getNodeId()).withUrl(issue.getHtmlUrl().toString()));
             sections.add(section);
         }
