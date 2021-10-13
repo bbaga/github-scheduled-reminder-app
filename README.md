@@ -55,7 +55,7 @@ docker-compose up app
 
 If the application doesn't work at this point, please open an issue.
 
-#Configuration
+# Configuration
 
 ## Complete example
 ```yaml
