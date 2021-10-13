@@ -3,6 +3,11 @@ Scheduled reminders about PRs and Issues
 
 ⚠ This is all experimental work, not meant to provide any value at this stage!
 
+
+# ToC
+1. [Development](#development)
+2. [Configuration](#configuration) 
+
 # Development
 ## Requirements
 You'll need [docker](https://www.docker.com/products/docker-desktop) to follow the steps in this guide.
@@ -49,3 +54,44 @@ docker-compose up app
 ```
 
 If the application doesn't work at this point, please open an issue.
+
+#Configuration
+
+## Complete example
+```yaml
+# .demo-bot.yaml in the bbaga/app-testing repository
+
+enabled: true
+notifications:
+  - name: slack-notification
+    schedule: "*/30 * * * * ?"
+    type: slack/channel
+    config:
+      channel: "test-channel"
+  
+  - extending: 
+      repository: bbaga/app-testing
+      name: slack-notification
+```
+
+| Field | Is Required? | Description |
+|---|---|---|
+| `enabled` | No | When this is `true`, the configuration file will be processed, otherwise ignored. |
+| `notifications` | No | This field should contain a list of [`Notification`](#notification-objects) objects, these objects can be just pointers to other objects. In the example above, the first entry represents a schedule configuration, the second entry tell the application to set up notifications for this repository based on the Notification object called `slack-notification` in the `bbaga/app-testing`. Notification objects can reference schedules in other repositories. |
+
+## Notification objects
+
+### Schedules
+| Field | Is Required? | Description |
+|---|---|---|
+| `name` | Yes | This name can be used to reference the object from other repositories as well. |
+| `schedule` | Yes | Cron schedule pattern that supports seconds as well, first position is the seconds. More on the format [here](http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/crontrigger.html#format). |
+| `type` | Yes | The only supported `type` is `slack/channel`. |
+| `config` | No | Depends on the `type` field's value, each notification type may have different configuration. |
+
+### References
+| Field | Is Required? | Description |
+|---|---|---|
+| `extending` | Yes | With this field we can tell the application that we want to use an already existing schedule. |
+| `extending.repository` | Yes | In which repository will the application find the schedule we are trying to use. |
+| `extending.name` | Yes | What is the name of the schedule we are trying to use. |
