@@ -9,6 +9,20 @@ public class Notification {
     private Extending extending;
     private HashMap<String, ?> config = new HashMap<>();
 
+    public Notification() {}
+
+    public Notification(
+            String name,
+            String schedule,
+            String type,
+            HashMap<String, ?> config
+    ) {
+        this.name = name;
+        this.schedule = schedule;
+        this.type= type;
+        this.config = config;
+    }
+
     public String getName() {
         return name;
     }

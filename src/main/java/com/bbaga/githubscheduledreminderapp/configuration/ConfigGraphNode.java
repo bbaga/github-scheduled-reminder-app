@@ -11,7 +11,7 @@ public class ConfigGraphNode {
     private Instant lastSeenAt;
     private final ConcurrentHashMap<Integer, RepositoryRecord> repositories = new ConcurrentHashMap<>();
 
-    public ConfigGraphNode(Long installationId, Notification notification, Instant seenAt) {
+    public ConfigGraphNode(long installationId, Notification notification, Instant seenAt) {
         this.installationId = installationId;
         this.notification = notification;
         setSeenAt(seenAt);
