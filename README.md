@@ -57,6 +57,15 @@ If the application doesn't work at this point, please open an issue.
 
 # Configuration
 
+## Environment variables
+
+| Name | Is Required? | Default value | Description |
+|---|---|---|---|
+| GITHUB_ID | Yes | - | The GitHub application id as per the [App ID](#app-id) section. |
+| GITHUB_APP_CERT | Yes | - | Contents of the github application certificate in `pkcs8` format as per the [App certificate](#app-certificate) section. |
+| SLACK_API_TOKEN | Yes | - | Slack API token as per the [Slack](#slack) section. |
+| JOBS_GITHUB_INSTALLATION_SCAN_INTERVAL | No | 43200000 | This is the interval in milliseconds between installation scans and consequently repository scans for configuration updates.  |
+
 ## Complete example
 ```yaml
 # .demo-bot.yaml in the bbaga/app-testing repository
