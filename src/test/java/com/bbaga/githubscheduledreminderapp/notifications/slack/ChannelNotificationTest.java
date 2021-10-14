@@ -41,7 +41,7 @@ class ChannelNotificationTest {
         Set<GHIssue> pullRequests = new HashSet<>();
 
         Mockito.when(client.postMessage(Mockito.any())).thenReturn(future);
-        service.send(notification, issues, pullRequests);
+        service.send(new ChannelNotificationDataProvider.Data(notification, issues, pullRequests));
         Mockito.verify(client, Mockito.times(1)).postMessage(Mockito.any());
 
     }
@@ -91,7 +91,7 @@ class ChannelNotificationTest {
         pullRequests.add(pr);
 
         Mockito.when(client.postMessage(Mockito.any())).thenReturn(future);
-        service.send(notification, issues, pullRequests);
+        service.send(new ChannelNotificationDataProvider.Data(notification, issues, pullRequests));
         Mockito.verify(client, Mockito.times(1)).postMessage(Mockito.any());
 
     }

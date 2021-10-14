@@ -33,7 +33,11 @@ public class ChannelNotification {
         this.slackClient = slackClient;
     }
 
-    public void send(Notification notification, Set<GHIssue> issues, Set<GHIssue> pullRequests) {
+    public void send(ChannelNotificationDataProvider.Data data) {
+        Notification notification = data.getNotification();
+        Set<GHIssue> issues = data.getIssues();
+        Set<GHIssue> pullRequests = data.getPullRequests();
+
         List<Block> sections = new ArrayList<>();
         sections.add(Header.of(Text.of(TextType.PLAIN_TEXT, "Reporting open issues and pull requests")));
 

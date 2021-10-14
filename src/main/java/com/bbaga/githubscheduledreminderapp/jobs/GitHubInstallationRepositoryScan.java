@@ -163,6 +163,7 @@ public class GitHubInstallationRepositoryScan implements Job {
         } catch (IOException | SchedulerException e) {
             e.printStackTrace();
         }
+        logger.info("Repository scanning for Installation {} is complete", installationId);
     }
 
     private String getNotificationKey(Extending extending) {
