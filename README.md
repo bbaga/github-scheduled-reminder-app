@@ -1,3 +1,5 @@
+![Java CI with Maven](https://github.com/bbaga/github-scheduled-reminder-app/actions/workflows/maven.yml/badge.svg)
+
 # github-scheduled-reminder-app
 Scheduled reminders about PRs and Issues
 
