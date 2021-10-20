@@ -1,30 +1,40 @@
 package com.bbaga.githubscheduledreminderapp.notifications.slack;
 
 import com.bbaga.githubscheduledreminderapp.GitHubAppInstallationService;
-import com.bbaga.githubscheduledreminderapp.configuration.ConfigGraphNode;
 import com.bbaga.githubscheduledreminderapp.configuration.Notification;
 import com.bbaga.githubscheduledreminderapp.configuration.configgraphnode.RepositoryRecord;
-import com.bbaga.githubscheduledreminderapp.notifications.NotificationDataProvider;
+import com.bbaga.githubscheduledreminderapp.notifications.NotificationDataProviderInterface;
 import org.kohsuke.github.*;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ChannelNotificationDataProvider implements NotificationDataProvider<ChannelNotificationDataProvider.Data> {
+public class ChannelNotificationDataProvider implements NotificationDataProviderInterface<ChannelNotificationDataProvider.Data> {
 
-    private final ConfigGraphNode config;
+    private final Notification notification;
+    private final ConcurrentHashMap<Integer, RepositoryRecord> repositories;
     private final GitHubAppInstallationService appInstallationService;
 
-    public ChannelNotificationDataProvider(ConfigGraphNode config, GitHubAppInstallationService appInstallationService) {
-        this.config = config;
+    private ChannelNotificationDataProvider(
+        GitHubAppInstallationService appInstallationService,
+        Notification notification,
+        ConcurrentHashMap<Integer, RepositoryRecord> repositories
+    ) {
         this.appInstallationService = appInstallationService;
+        this.notification = notification;
+        this.repositories = repositories;
+    }
+
+    public static ChannelNotificationDataProvider create(
+        GitHubAppInstallationService appInstallationService,
+        Notification notification,
+        ConcurrentHashMap<Integer, RepositoryRecord> repositories
+    ) {
+        return new ChannelNotificationDataProvider(appInstallationService, notification, repositories);
     }
 
     public Data getData() {
-
-        Notification notification = this.config.getNotification();
-        ConcurrentHashMap<Integer, RepositoryRecord> repositories = this.config.getRepositories();
 
         GitHub client;
         Set<GHIssue> issues = new HashSet<>();

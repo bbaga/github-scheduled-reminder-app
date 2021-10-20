@@ -143,7 +143,7 @@ public class GitHubInstallationRepositoryScan implements Job {
 
                 try {
                     if (scheduler.getJobDetail(jobKey) == null) {
-                        job = JobBuilder.newJob(ScheduledSlackNotification.class)
+                        job = JobBuilder.newJob(ScheduledNotification.class)
                                 .withIdentity(jobKey)
                                 .usingJobData("repositories", node.getRepositories().toString())
                                 .storeDurably(true)

@@ -1,6 +1,7 @@
 package com.bbaga.githubscheduledreminderapp.notifications.slack;
 
 import com.bbaga.githubscheduledreminderapp.configuration.Notification;
+import com.bbaga.githubscheduledreminderapp.notifications.NotificationInterface;
 import com.hubspot.slack.client.SlackClient;
 import com.hubspot.slack.client.methods.params.chat.ChatPostMessageParams;
 import com.hubspot.slack.client.models.blocks.Block;
@@ -15,7 +16,6 @@ import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Set;
 
 @Service
-public class ChannelNotification {
+public class ChannelNotification implements NotificationInterface<ChannelNotificationDataProvider.Data> {
 
     private final SlackClient slackClient;
     private final Logger logger = LoggerFactory.getLogger(ChannelNotification.class);
@@ -33,6 +33,7 @@ public class ChannelNotification {
         this.slackClient = slackClient;
     }
 
+    @Override
     public void send(ChannelNotificationDataProvider.Data data) {
         Notification notification = data.getNotification();
         Set<GHIssue> issues = data.getIssues();
