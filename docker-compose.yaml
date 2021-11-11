@@ -6,8 +6,16 @@ services:
       - ./:/sources
     working_dir: /sources
     command: "./mvnw spring-boot:run"
+    ports:
+      - "8080:8080"
     environment:
       - GITHUB_APP_CERT
+      - GITHUB_APP_CERT_FILE
       - GITHUB_ID
       - SLACK_API_TOKEN
       - JOBS_GITHUB_INSTALLATION_SCAN_INTERVAL
+      - STATE_STORAGE_TYPE
+      - STATE_STORAGE_FS_FILEPATH
+      - STATE_STORAGE_GCS_BUCKET_NAME
+      - STATE_STORAGE_GCS_BUCKET_SECRET
+      - STATE_STORAGE_GCS_BUCKET_FILEPATH

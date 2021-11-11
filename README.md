@@ -61,10 +61,22 @@ If the application doesn't work at this point, please open an issue.
 
 | Name | Is Required? | Default value | Description |
 |---|---|---|---|
-| GITHUB_ID | Yes | - | The GitHub application id as per the [App ID](#app-id) section. |
-| GITHUB_APP_CERT | Yes | - | Contents of the github application certificate in `pkcs8` format as per the [App certificate](#app-certificate) section. |
-| SLACK_API_TOKEN | Yes | - | Slack API token as per the [Slack](#slack) section. |
-| JOBS_GITHUB_INSTALLATION_SCAN_INTERVAL | No | 43200000 | This is the interval in milliseconds between installation scans and consequently repository scans for configuration updates.  |
+| `GITHUB_ID` | Yes | - | The GitHub application id as per the [App ID](#app-id) section. |
+| `GITHUB_APP_CERT` | Yes (or `GITHUB_APP_CERT_FILE`) | - | Contents of the github application certificate in `pkcs8` format as per the [App certificate](#app-certificate) section. |
+| `GITHUB_APP_CERT_FILE` | Yes (or `GITHUB_APP_CERT`) | - | Location of the file containing the github application certificate in `pkcs8` format as per the [App certificate](#app-certificate) section. |
+| `SLACK_API_TOKEN` | Yes (or `SLACK_API_TOKEN_FILE`) | - | Slack API token as per the [Slack](#slack) section. |
+| `SLACK_API_TOKEN_FILE` | Yes (or `SLACK_API_TOKEN`) | - | Location of the file containing the Slack API token as per the [Slack](#slack) section. |
+| `JOBS_GITHUB_INSTALLATION_SCAN_INTERVAL` | No | 43200000 | This is the interval in milliseconds between installation scans and consequently repository scans for configuration updates. |
+| `STATE_STORAGE_TYPE` | No | `LOCAL_FS` | Storage type, available options: `LOCAL_FS` |
+| `STATE_STORAGE_FS_FILEPATH` | No | `/tmp/github-reminder-application.state.json` | When `LOCAL_FS` is used, the application's state will be stored at this location. |
+
+## Coming soon...
+| Name | Is Required? | Default value | Description |
+|---|---|---|---|
+| `STATE_STORAGE_GCS_BUCKET_NAME` | No | - | GCS bucket name. |
+| `STATE_STORAGE_GCS_BUCKET_SECRET` | No | - | Secret for the service account that can read and write to the bucket. |
+| `STATE_STORAGE_GCS_BUCKET_SECRET_FILE` | No | - | Location of the file containing the secret for the service account that can read and write to the bucket. |
+| `STATE_STORAGE_GCS_BUCKET_FILEPATH` | No | application.state.json | File path to the state file in the GCS bucket. |
 
 ## Complete example
 ```yaml

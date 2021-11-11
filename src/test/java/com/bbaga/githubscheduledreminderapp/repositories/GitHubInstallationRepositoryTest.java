@@ -2,13 +2,16 @@ package com.bbaga.githubscheduledreminderapp.repositories;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.kohsuke.github.GHAppInstallation;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@ExtendWith(MockitoExtension.class)
 class GitHubInstallationRepositoryTest {
 
     private GitHubInstallationRepository repository;
@@ -20,9 +23,9 @@ class GitHubInstallationRepositoryTest {
 
     @Test
     void remove() {
-        Long id = 123456L;
+        long id = 123456L;
         GHAppInstallation installation = Mockito.mock(GHAppInstallation.class);
-        Mockito.when(installation.getId()).thenReturn(id);
+        Mockito.doReturn(id).when(installation).getId();
         this.repository.put(installation);
         Mockito.verify(installation, Mockito.times(1)).getId();
 
@@ -36,9 +39,9 @@ class GitHubInstallationRepositoryTest {
         Set<Long> ids = Set.of(1L, 2L, 3L);
 
         GHAppInstallation installation;
-        for (Long id : ids) {
+        for (long id : ids) {
             installation = Mockito.mock(GHAppInstallation.class);
-            Mockito.when(installation.getId()).thenReturn(id);
+            Mockito.doReturn(id).when(installation).getId();
             this.repository.put(installation);
         }
 

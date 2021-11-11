@@ -1,10 +1,6 @@
 package com.bbaga.githubscheduledreminderapp.jobs;
 
-import com.bbaga.githubscheduledreminderapp.configuration.ConfigGraphNode;
-import com.bbaga.githubscheduledreminderapp.configuration.Extending;
-import com.bbaga.githubscheduledreminderapp.configuration.InRepoConfig;
-import com.bbaga.githubscheduledreminderapp.configuration.Notification;
-import com.bbaga.githubscheduledreminderapp.configuration.configgraphnode.RepositoryRecord;
+import com.bbaga.githubscheduledreminderapp.configuration.*;
 import com.bbaga.githubscheduledreminderapp.repositories.GitHubInstallationRepository;
 import org.kohsuke.github.*;
 import org.quartz.*;
@@ -14,10 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-import org.yaml.snakeyaml.Yaml;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -25,17 +19,29 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class GitHubInstallationRepositoryScan implements Job {
 
-    @Autowired
-    private GitHubInstallationRepository installationRepository;
+    private final ConfigGraphUpdater configGraphUpdater;
+    private final GitHubInstallationRepository installationRepository;
 
-    @Autowired
-    @Qualifier("ConfigGraph")
-    private ConcurrentHashMap<String, ConfigGraphNode> configGraph;
+    private final ConcurrentHashMap<String, ConfigGraphNode> configGraph;
 
     private final Logger logger = LoggerFactory.getLogger(GitHubInstallationRepositoryScan.class);
+    private final InRepoConfigParser inRepoConfigParser;
+
+    @Autowired
+    GitHubInstallationRepositoryScan(
+        GitHubInstallationRepository installationRepository,
+        @Qualifier("ConfigGraph") ConcurrentHashMap<String, ConfigGraphNode> configGraph,
+        ConfigGraphUpdater configGraphUpdater,
+        InRepoConfigParser inRepoConfigParser
+    ) {
+        this.installationRepository = installationRepository;
+        this.configGraph = configGraph;
+        this.configGraphUpdater = configGraphUpdater;
+        this.inRepoConfigParser = inRepoConfigParser;
+    }
 
     public void execute(JobExecutionContext context) {
-        Long installationId = context.getJobDetail().getJobDataMap().getLong("installationId");
+        long installationId = context.getJobDetail().getJobDataMap().getLong("installationId");
         Instant currentRunStamp = Instant.now();
 
         logger.info("Starting Repository scanning for Installation {}", installationId);
@@ -60,8 +66,7 @@ public class GitHubInstallationRepositoryScan implements Job {
                 GitHubClientUtil.setRoot(installation, tempGH);
 
                 try {
-                    GHContent content = repo.getFileContent(".demo-bot.yaml");
-                    InRepoConfig inRepoConfig = new Yaml().loadAs(new String(content.read().readAllBytes(), StandardCharsets.UTF_8), InRepoConfig.class);
+                    InRepoConfig inRepoConfig = inRepoConfigParser.getFrom(repo);
 
                     if (repo.isArchived() || !inRepoConfig.getEnabled()) {
                         // Hack to get around bug in the client
@@ -70,27 +75,7 @@ public class GitHubInstallationRepositoryScan implements Job {
                     }
 
                     for (Notification notification : inRepoConfig.getNotifications()) {
-                        if (notification.getSchedule() != null) {
-                            notification.setName(getNotificationKey(repo.getFullName(), notification.getName()));
-                            String notificationKey = notification.getName();
-
-                            if (!configGraph.containsKey(notificationKey)) {
-                                configGraph.put(notificationKey, new ConfigGraphNode(installationId, notification, currentRunStamp));
-                            } else {
-                                configGraph.get(notificationKey).setSeenAt(currentRunStamp);
-                            }
-                        } else {
-                            Extending extending = notification.getExtending();
-
-                            if (extending.getRepository() == null || extending.getName() == null) {
-                                continue;
-                            }
-
-                            String notificationKey = getNotificationKey(extending);
-                            if (configGraph.containsKey(notificationKey)) {
-                                configGraph.get(notificationKey).putRepository(new RepositoryRecord(repo.getFullName(), installationId, currentRunStamp));
-                            }
-                        }
+                        configGraphUpdater.updateEntry(notification, installationId, repo.getFullName(), currentRunStamp);
                     }
                 } catch (GHFileNotFoundException e) {
                     logger.debug("No config file in {}", repo.getFullName());
@@ -102,21 +87,8 @@ public class GitHubInstallationRepositoryScan implements Job {
 
             GitHubClientUtil.setRoot(installation, tempGH);
 
-            // Remove entries if they didn't appear
-            configGraph.entrySet().removeIf(entry -> {
-                ConfigGraphNode node = entry.getValue();
-                if (node.getInstallationId().equals(installationId) && node.getLastSeenAt() != currentRunStamp) {
-                    return true;
-                }
-
-                node.getRepositories().entrySet().removeIf(repoEntry -> {
-                    RepositoryRecord repositoryRecord = repoEntry.getValue();
-                    return repositoryRecord.getInstallationId().equals(installationId)
-                            && repositoryRecord.getSeenAt() != currentRunStamp;
-                });
-
-                return false;
-            });
+            // Remove entries if they didn't appear in this round
+            configGraphUpdater.clearOutdated(installationId, currentRunStamp);
 
             Scheduler scheduler = context.getScheduler();
             Set<TriggerKey> triggerKeys = scheduler.getTriggerKeys(GroupMatcher.triggerGroupEquals("notifications"));
@@ -132,7 +104,7 @@ public class GitHubInstallationRepositoryScan implements Job {
                         scheduler.deleteJob(jobKey);
                     }
                 } else {
-                    configGraph.remove(triggerKey.getName());
+//                    configGraph.remove(triggerKey.getName());
                 }
             }
 
@@ -164,13 +136,5 @@ public class GitHubInstallationRepositoryScan implements Job {
             e.printStackTrace();
         }
         logger.info("Repository scanning for Installation {} is complete", installationId);
-    }
-
-    private String getNotificationKey(Extending extending) {
-        return getNotificationKey(extending.getRepository(), extending.getName());
-    }
-
-    private String getNotificationKey(String repository, String name) {
-        return String.format("%s-%s", repository, name);
     }
 }
