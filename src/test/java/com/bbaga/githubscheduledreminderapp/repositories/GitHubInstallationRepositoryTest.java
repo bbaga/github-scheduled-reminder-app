@@ -1,6 +1,7 @@
 package com.bbaga.githubscheduledreminderapp.repositories;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.kohsuke.github.GHAppInstallation;
@@ -11,6 +12,7 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Disabled
 @ExtendWith(MockitoExtension.class)
 class GitHubInstallationRepositoryTest {
 
