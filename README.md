@@ -61,16 +61,50 @@ If the application doesn't work at this point, please open an issue.
 
 ## Environment variables
 
-| Name | Is Required? | Default value | Description |
-|---|---|---|---|
-| `GITHUB_ID` | Yes | - | The GitHub application id as per the [App ID](#app-id) section. |
-| `GITHUB_APP_CERT` | Yes | - | Mandatory when `GITHUB_APP_CERT_FILE` isn't set. Contents of the github application certificate in `pkcs8` format as per the [App certificate](#app-certificate) section. |
-| `GITHUB_APP_CERT_FILE` | Yes | - | Mandatory when `GITHUB_APP_CERT` isn't set. Location of the file containing the github application certificate in `pkcs8` format as per the [App certificate](#app-certificate) section. |
-| `SLACK_API_TOKEN` | Yes | - | Mandatory when `SLACK_API_TOKEN_FILE` isn't set. Slack API token as per the [Slack](#slack) section. |
-| `SLACK_API_TOKEN_FILE` | Yes | - | Mandatory when `SLACK_API_TOKEN` isn't set. Location of the file containing the Slack API token as per the [Slack](#slack) section. |
-| `JOBS_GITHUB_INSTALLATION_SCAN_INTERVAL` | No | 43200000 | This is the interval in milliseconds between installation scans and consequently repository scans for configuration updates. |
-| `STATE_STORAGE_TYPE` | No | `LOCAL_FS` | Storage type, available options: `LOCAL_FS` |
-| `STATE_STORAGE_FS_FILEPATH` | No | `/tmp/github-reminder-application.state.json` | When `LOCAL_FS` is used, the application's state will be stored at this location. |
+### `GITHUB_ID`
+The GitHub application id as per the [App ID](#app-id) section.
+
+**Reqiured**: true
+
+### `GITHUB_APP_CERT`
+Mandatory when `GITHUB_APP_CERT_FILE` isn't set. Contents of the github application certificate in `pkcs8` format as per the [App certificate](#app-certificate) section.
+
+**Reqiured**: true
+
+### `GITHUB_APP_CERT_FILE`
+Mandatory when `GITHUB_APP_CERT` isn't set. Location of the file containing the github application certificate in `pkcs8` format as per the [App certificate](#app-certificate) section.
+
+**Reqiured**: true
+
+### `SLACK_API_TOKEN`
+Mandatory when `SLACK_API_TOKEN_FILE` isn't set. Slack API token as per the [Slack](#slack) section.
+
+**Reqiured**: true
+
+### `SLACK_API_TOKEN_FILE`
+Mandatory when `SLACK_API_TOKEN` isn't set. Location of the file containing the Slack API token as per the [Slack](#slack) section.
+
+**Reqiured**: true
+
+### `JOBS_GITHUB_INSTALLATION_SCAN_INTERVAL`
+This is the interval in milliseconds between installation scans and consequently repository scans for configuration updates.
+
+**Reqiured**: false
+**Default**: 43200000
+
+### `STATE_STORAGE_TYPE`
+Storage type, at this time it can be local file system, GCS Bucket implementation is coming soon.
+
+**Reqiured**: false
+**Default**: `LOCAL_FS`
+**Options:**
+- `LOCAL_FS`: Local file system
+
+### `STATE_STORAGE_FS_FILEPATH`
+When `LOCAL_FS` is used in `STATE_STORAGE_TYPE`, the application's state will be stored at this location.
+
+**Reqiured**: false
+**Default**: `/tmp/github-reminder-application.state.json`
 
 ## Coming soon...
 | Name | Is Required? | Default value | Description |
