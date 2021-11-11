@@ -76,6 +76,11 @@ Mandatory when `GITHUB_APP_CERT` isn't set. Location of the file containing the 
 
 **Reqiured**: true
 
+### `GITHUB_API_ENDPOINT`
+The GitHub API endpoint in case it is a custom installation.
+
+**Reqiured**: false
+
 ### `SLACK_API_TOKEN`
 Mandatory when `SLACK_API_TOKEN_FILE` isn't set. Slack API token as per the [Slack](#slack) section.
 
