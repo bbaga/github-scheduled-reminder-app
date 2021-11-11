@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ConfigGraphNode {
     private final Long installationId;
-    private final Notification notification;
+    private Notification notification;
     private Instant lastSeenAt;
     private final ConcurrentHashMap<Integer, RepositoryRecord> repositories = new ConcurrentHashMap<>();
 
@@ -23,6 +23,10 @@ public class ConfigGraphNode {
 
     public Notification getNotification() {
         return notification;
+    }
+
+    public void setNotification(Notification notification) {
+        this.notification = notification;
     }
 
     public void putRepository(RepositoryRecord repositoryRecord) {
