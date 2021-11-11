@@ -38,6 +38,9 @@ public class Config {
     @Value("${application.configFilePath}")
     private String configFilePath;
 
+    @Value("${application.gitHubEndpoint}")
+    private String gitHubEndpoint;
+
     @Value("${application.gitHubAppCert}")
     private String gitHubAppCert;
 
@@ -80,7 +83,13 @@ public class Config {
                 .replace("-----END PRIVATE KEY-----", "")
                 .replaceAll(" ", "");
 
-        return new GitHubBuilder().withAuthorizationProvider(new JWTTokenProvider(githubApplicationId, privateKeyPEM)).build();
+        GitHubBuilder builder = new GitHubBuilder();
+
+        if (!gitHubEndpoint.isEmpty()) {
+            builder.withEndpoint(gitHubEndpoint);
+        }
+
+        return builder.withAuthorizationProvider(new JWTTokenProvider(githubApplicationId, privateKeyPEM)).build();
     }
 
     @Bean
