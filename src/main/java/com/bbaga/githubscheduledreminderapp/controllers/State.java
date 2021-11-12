@@ -1,6 +1,7 @@
 package com.bbaga.githubscheduledreminderapp.controllers;
 
 import com.bbaga.githubscheduledreminderapp.configuration.*;
+import com.bbaga.githubscheduledreminderapp.infrastructure.GitHub.GitHubBuilderFactory;
 import org.kohsuke.github.*;
 import org.quartz.SchedulerException;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,15 +18,18 @@ public class State {
     private final ConcurrentHashMap<String, ConfigGraphNode> state;
     private final ConfigGraphUpdater configGraphUpdater;
     private final GitHub gitHubClient;
+    private final GitHubBuilderFactory gitHubBuilderFactory;
     private final InRepoConfigParser inRepoConfigParser;
 
     State(
         GitHub gitHubClient,
+        GitHubBuilderFactory gitHubBuilderFactory,
         ConcurrentHashMap<String, ConfigGraphNode> state,
         ConfigGraphUpdater configGraphUpdater,
         InRepoConfigParser inRepoConfigParser
     ) {
         this.gitHubClient = gitHubClient;
+        this.gitHubBuilderFactory = gitHubBuilderFactory;
         this.state = state;
         this.configGraphUpdater = configGraphUpdater;
         this.inRepoConfigParser = inRepoConfigParser;
@@ -44,7 +48,7 @@ public class State {
         long installationId = installation.getId();
         Instant timestamp = Instant.now();
 
-        GitHub installationClient = new GitHubBuilder()
+        GitHub installationClient = gitHubBuilderFactory.create()
                 .withAppInstallationToken(token.getToken())
                 .build();
 

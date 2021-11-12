@@ -5,6 +5,7 @@ import com.bbaga.githubscheduledreminderapp.configuration.ConfigGraphUpdater;
 import com.bbaga.githubscheduledreminderapp.configuration.InRepoConfigParser;
 import com.bbaga.githubscheduledreminderapp.configuration.persistence.ConfigPersistenceFactory;
 import com.bbaga.githubscheduledreminderapp.configuration.persistence.ConfigPersistenceInterface;
+import com.bbaga.githubscheduledreminderapp.infrastructure.GitHub.GitHubBuilderFactory;
 import com.bbaga.githubscheduledreminderapp.jobs.GitHubInstallationScan;
 import com.bbaga.githubscheduledreminderapp.jobs.ScheduledStateDump;
 import com.bbaga.githubscheduledreminderapp.repositories.GitHubInstallationRepository;
@@ -66,7 +67,7 @@ public class Config {
     private String stateStorageType;
 
     @Bean
-    public GitHub getGitHubClient() throws Exception {
+    public GitHub getGitHubClient(GitHubBuilderFactory gitHubBuilderFactory) throws Exception {
         if (!gitHubAppCertFile.isEmpty() && gitHubAppCert.isEmpty()) {
             try(FileInputStream inputStream = new FileInputStream(gitHubAppCertFile)) {
                 gitHubAppCert = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
@@ -83,13 +84,7 @@ public class Config {
                 .replace("-----END PRIVATE KEY-----", "")
                 .replaceAll(" ", "");
 
-        GitHubBuilder builder = new GitHubBuilder();
-
-        if (!gitHubEndpoint.isEmpty()) {
-            builder.withEndpoint(gitHubEndpoint);
-        }
-
-        return builder.withAuthorizationProvider(new JWTTokenProvider(githubApplicationId, privateKeyPEM)).build();
+        return gitHubBuilderFactory.create().withAuthorizationProvider(new JWTTokenProvider(githubApplicationId, privateKeyPEM)).build();
     }
 
     @Bean
@@ -191,6 +186,12 @@ public class Config {
     }
 
     @Bean
+    @Qualifier("application.gitHubEndpoint")
+    public String getGitHubEndpoint() {
+        return this.gitHubEndpoint;
+    }
+
+    @Bean
     public ConfigGraphUpdater getConfigGraphUpdater(
         @Qualifier("ConfigGraph") ConcurrentHashMap<String, ConfigGraphNode> configGraph,
         @Qualifier("Scheduler") Scheduler scheduler
@@ -201,5 +202,10 @@ public class Config {
     @Bean
     public InRepoConfigParser getInRepoConfigParser(@Qualifier("application.configFilePath") String configFilePath) {
         return new InRepoConfigParser(new Yaml(), configFilePath);
+    }
+
+    @Bean
+    public GitHubBuilderFactory getGitHubBuilderFactory(@Qualifier("application.gitHubEndpoint") String gitHubEndpoint) {
+        return new GitHubBuilderFactory(gitHubEndpoint);
     }
 }

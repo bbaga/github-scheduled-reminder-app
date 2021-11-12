@@ -1,6 +1,7 @@
 package com.bbaga.githubscheduledreminderapp.jobs;
 
 import com.bbaga.githubscheduledreminderapp.configuration.*;
+import com.bbaga.githubscheduledreminderapp.infrastructure.GitHub.GitHubBuilderFactory;
 import com.bbaga.githubscheduledreminderapp.repositories.GitHubInstallationRepository;
 import org.kohsuke.github.*;
 import org.quartz.*;
@@ -20,6 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class GitHubInstallationRepositoryScan implements Job {
 
     private final ConfigGraphUpdater configGraphUpdater;
+    private final GitHubBuilderFactory gitHubBuilderFactory;
     private final GitHubInstallationRepository installationRepository;
 
     private final ConcurrentHashMap<String, ConfigGraphNode> configGraph;
@@ -29,11 +31,13 @@ public class GitHubInstallationRepositoryScan implements Job {
 
     @Autowired
     GitHubInstallationRepositoryScan(
+        GitHubBuilderFactory gitHubBuilderFactory,
         GitHubInstallationRepository installationRepository,
         @Qualifier("ConfigGraph") ConcurrentHashMap<String, ConfigGraphNode> configGraph,
         ConfigGraphUpdater configGraphUpdater,
         InRepoConfigParser inRepoConfigParser
     ) {
+        this.gitHubBuilderFactory = gitHubBuilderFactory;
         this.installationRepository = installationRepository;
         this.configGraph = configGraph;
         this.configGraphUpdater = configGraphUpdater;
@@ -52,7 +56,7 @@ public class GitHubInstallationRepositoryScan implements Job {
 
         try {
             GHAppInstallationToken token = installation.createToken().create();
-            GitHub githubAuthAsInst = new GitHubBuilder()
+            GitHub githubAuthAsInst = gitHubBuilderFactory.create()
                     .withAppInstallationToken(token.getToken())
                     .build();
 
