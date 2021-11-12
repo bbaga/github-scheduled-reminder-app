@@ -1,10 +1,9 @@
 ![Java CI with Maven](https://github.com/bbaga/github-scheduled-reminder-app/actions/workflows/maven.yml/badge.svg)
 
 # github-scheduled-reminder-app
-Scheduled reminders about PRs and Issues
+Scheduled reminders about PRs and Issues. This project may be useful for teams using GitHub Enterprise versions that doesn't have the reminder feature implemented yet. 
 
 ⚠ This is all experimental work, not meant to provide any value at this stage!
-
 
 # ToC
 1. [Development](#development)
