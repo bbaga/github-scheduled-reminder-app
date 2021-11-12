@@ -1,5 +1,6 @@
 package com.bbaga.githubscheduledreminderapp;
 
+import com.bbaga.githubscheduledreminderapp.infrastructure.GitHub.GitHubBuilderFactory;
 import com.bbaga.githubscheduledreminderapp.repositories.GitHubInstallationRepository;
 import org.kohsuke.github.GHAppInstallation;
 import org.kohsuke.github.GHAppInstallationToken;
@@ -14,10 +15,12 @@ import java.util.HashMap;
 
 @Service
 public class GitHubAppInstallationService {
+    private final GitHubBuilderFactory gitHubBuilderFactory;
     private final GitHubInstallationRepository installationRepository;
     private final HashMap<Long, GitHub> installationClientCache = new HashMap<>();
 
-    public GitHubAppInstallationService(GitHubInstallationRepository installationRepository) {
+    public GitHubAppInstallationService(GitHubBuilderFactory gitHubBuilderFactory, GitHubInstallationRepository installationRepository) {
+        this.gitHubBuilderFactory = gitHubBuilderFactory;
         this.installationRepository = installationRepository;
     }
 
@@ -43,7 +46,7 @@ public class GitHubAppInstallationService {
                     }
                 }
 
-                installationClient = new GitHubBuilder()
+                installationClient = gitHubBuilderFactory.create()
                         .withAuthorizationProvider(new AuthProv(installationRepository.get(installationId)))
                         .build();
             } catch (IOException e) {
