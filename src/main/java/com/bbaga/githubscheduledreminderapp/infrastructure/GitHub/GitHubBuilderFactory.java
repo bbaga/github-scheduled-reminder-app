@@ -3,7 +3,7 @@ package com.bbaga.githubscheduledreminderapp.infrastructure.GitHub;
 import org.kohsuke.github.GitHubBuilder;
 
 public class GitHubBuilderFactory {
-    private String endpoint;
+    private final String endpoint;
 
     public GitHubBuilderFactory(String gitHubApiEndpoint) {
         this.endpoint = gitHubApiEndpoint;
