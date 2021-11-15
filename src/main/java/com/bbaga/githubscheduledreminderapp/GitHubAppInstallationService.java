@@ -38,7 +38,7 @@ public class GitHubAppInstallationService {
 
                     @Override
                     public String getEncodedAuthorization() throws IOException {
-                        if (token == null || Instant.now().isAfter(this.token.getExpiresAt().toInstant())) {
+                        if (token == null || Instant.now().plusSeconds(300).isAfter(this.token.getExpiresAt().toInstant())) {
                             token = installation.createToken().create();
                         }
 
