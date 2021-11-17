@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
+import java.util.TimeZone;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -47,6 +48,16 @@ class NotificationTest {
         notification.setConfig(map);
 
         assertEquals("bar", notification.getConfig().get("foo"));
+    }
+
+    @Test
+    void testTimeZone() {
+        TimeZone tz = TimeZone.getTimeZone(notification.getTimeZone());
+        assertEquals("Coordinated Universal Time", tz.getDisplayName());
+
+        notification.setTimeZone("EST");
+        tz = TimeZone.getTimeZone(notification.getTimeZone());
+        assertEquals("Eastern Standard Time", tz.getDisplayName());
     }
 
     @Test

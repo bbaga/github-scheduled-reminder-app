@@ -9,6 +9,8 @@ import com.bbaga.githubscheduledreminderapp.infrastructure.GitHub.GitHubBuilderF
 import com.bbaga.githubscheduledreminderapp.jobs.GitHubInstallationScan;
 import com.bbaga.githubscheduledreminderapp.jobs.ScheduledStateDump;
 import com.bbaga.githubscheduledreminderapp.repositories.GitHubInstallationRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.hubspot.slack.client.SlackClient;
 import com.hubspot.slack.client.SlackClientFactory;
 import com.hubspot.slack.client.SlackClientRuntimeConfig;
@@ -201,7 +203,9 @@ public class Config {
 
     @Bean
     public InRepoConfigParser getInRepoConfigParser(@Qualifier("application.configFilePath") String configFilePath) {
-        return new InRepoConfigParser(new Yaml(), configFilePath);
+        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+        mapper.findAndRegisterModules();
+        return new InRepoConfigParser(mapper, configFilePath);
     }
 
     @Bean

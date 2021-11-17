@@ -147,6 +147,7 @@ notifications:
 |---|---|---|
 | `name` | Yes | This name can be used to reference the object from other repositories as well. |
 | `schedule` | Yes | Cron schedule pattern that supports seconds as well, first position is the seconds. More on the format [here](http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/crontrigger.html#format). |
+| `timezone` | No | Timezone to adjust the schedule to. Defaults to `UTC`. |
 | `type` | Yes | The only supported `type` is `slack/channel`. |
 | `config` | No | Depends on the `type` field's value, each notification type may have different configuration. |
 
