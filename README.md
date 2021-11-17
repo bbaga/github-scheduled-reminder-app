@@ -126,6 +126,7 @@ enabled: true
 notifications:
   - name: slack-notification
     schedule: "*/30 * * * * ?"
+    timezone: "EST"
     type: slack/channel
     config:
       channel: "test-channel"
