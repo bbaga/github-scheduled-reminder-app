@@ -43,10 +43,18 @@ public class ChannelNotificationDataProvider implements NotificationDataProvider
             client = appInstallationService.getClientByInstallationId(repository.getInstallationId());
             try {
                 client.getRepository(repository.getRepository()).getIssues(GHIssueState.OPEN).forEach((GHIssue issue) -> {
-                    if (issue.isPullRequest()) {
-                        pullRequests.add(issue);
-                    } else {
+                    if (!issue.isPullRequest()) {
                         issues.add(issue);
+                    }
+                });
+
+                client.getRepository(repository.getRepository()).getPullRequests(GHIssueState.OPEN).forEach((GHPullRequest pr) -> {
+                    try {
+                        if (!pr.isDraft()) {
+                            pullRequests.add(pr);
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
                 });
             } catch (IOException e) {
