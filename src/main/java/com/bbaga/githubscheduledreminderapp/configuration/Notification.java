@@ -1,13 +1,20 @@
 package com.bbaga.githubscheduledreminderapp.configuration;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.HashMap;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Notification {
     private String name;
     private String schedule;
     private String type;
     private Extending extending;
     private HashMap<String, ?> config = new HashMap<>();
+
+    @JsonProperty("timezone")
+    private String timeZone = "UTC";
 
     public Notification() {}
 
@@ -61,5 +68,13 @@ public class Notification {
 
     public void setExtending(Extending extending) {
         this.extending = extending;
+    }
+
+    public String getTimeZone() {
+        return timeZone;
+    }
+
+    public void setTimeZone(String timeZone) {
+        this.timeZone = timeZone;
     }
 }

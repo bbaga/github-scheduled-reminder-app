@@ -125,8 +125,10 @@ public class GitHubInstallationRepositoryScan implements Job {
                                 .storeDurably(true)
                                 .build();
 
+                        TimeZone timeZone = TimeZone.getTimeZone(node.getNotification().getTimeZone());
+
                         trigger = TriggerBuilder.newTrigger()
-                                .withSchedule(CronScheduleBuilder.cronSchedule(node.getNotification().getSchedule()))
+                                .withSchedule(CronScheduleBuilder.cronSchedule(node.getNotification().getSchedule()).inTimeZone(timeZone))
                                 .withIdentity(jobKey.getName()).build();
 
                         scheduler.scheduleJob(job, trigger);
