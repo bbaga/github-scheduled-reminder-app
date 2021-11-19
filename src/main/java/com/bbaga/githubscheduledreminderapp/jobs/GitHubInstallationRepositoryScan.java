@@ -2,6 +2,7 @@ package com.bbaga.githubscheduledreminderapp.jobs;
 
 import com.bbaga.githubscheduledreminderapp.configuration.*;
 import com.bbaga.githubscheduledreminderapp.infrastructure.GitHub.GitHubBuilderFactory;
+import com.bbaga.githubscheduledreminderapp.jobs.scheduling.NotificationJobScheduler;
 import com.bbaga.githubscheduledreminderapp.repositories.GitHubInstallationRepository;
 import org.kohsuke.github.*;
 import org.quartz.*;
@@ -28,6 +29,7 @@ public class GitHubInstallationRepositoryScan implements Job {
 
     private final Logger logger = LoggerFactory.getLogger(GitHubInstallationRepositoryScan.class);
     private final InRepoConfigParser inRepoConfigParser;
+    private final NotificationJobScheduler notificationJobScheduler;
 
     @Autowired
     GitHubInstallationRepositoryScan(
@@ -35,13 +37,15 @@ public class GitHubInstallationRepositoryScan implements Job {
         GitHubInstallationRepository installationRepository,
         @Qualifier("ConfigGraph") ConcurrentHashMap<String, ConfigGraphNode> configGraph,
         ConfigGraphUpdater configGraphUpdater,
-        InRepoConfigParser inRepoConfigParser
+        InRepoConfigParser inRepoConfigParser,
+        NotificationJobScheduler notificationJobScheduler
     ) {
         this.gitHubBuilderFactory = gitHubBuilderFactory;
         this.installationRepository = installationRepository;
         this.configGraph = configGraph;
         this.configGraphUpdater = configGraphUpdater;
         this.inRepoConfigParser = inRepoConfigParser;
+        this.notificationJobScheduler = notificationJobScheduler;
     }
 
     public void execute(JobExecutionContext context) {
@@ -100,44 +104,13 @@ public class GitHubInstallationRepositoryScan implements Job {
             // Unschedule notifications that don't exist anymore
             for (TriggerKey triggerKey : triggerKeys) {
                 if (!configGraph.containsKey(triggerKey.getName())) {
-                    scheduler.unscheduleJob(triggerKey);
-
                     JobKey jobKey = new JobKey(triggerKey.getName());
                     JobDetail job = scheduler.getJobDetail(jobKey);
                     if (job != null) {
                         scheduler.deleteJob(jobKey);
                     }
-                } else {
-//                    configGraph.remove(triggerKey.getName());
                 }
             }
-
-            configGraph.forEach((String notificationKey, ConfigGraphNode node) -> {
-                JobKey jobKey = new JobKey(notificationKey);
-                JobDetail job;
-                Trigger trigger;
-
-                try {
-                    if (scheduler.getJobDetail(jobKey) == null) {
-                        job = JobBuilder.newJob(ScheduledNotification.class)
-                                .withIdentity(jobKey)
-                                .usingJobData("repositories", node.getRepositories().toString())
-                                .storeDurably(true)
-                                .build();
-
-                        TimeZone timeZone = TimeZone.getTimeZone(node.getNotification().getTimeZone());
-
-                        trigger = TriggerBuilder.newTrigger()
-                                .withSchedule(CronScheduleBuilder.cronSchedule(node.getNotification().getSchedule()).inTimeZone(timeZone))
-                                .withIdentity(jobKey.getName()).build();
-
-                        scheduler.scheduleJob(job, trigger);
-                    }
-                } catch (SchedulerException e) {
-                    e.printStackTrace();
-                }
-            });
-
         } catch (IOException | SchedulerException e) {
             e.printStackTrace();
         }
