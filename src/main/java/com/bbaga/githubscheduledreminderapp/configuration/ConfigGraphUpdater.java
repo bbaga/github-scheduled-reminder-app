@@ -1,6 +1,7 @@
 package com.bbaga.githubscheduledreminderapp.configuration;
 
 import com.bbaga.githubscheduledreminderapp.configuration.configgraphnode.RepositoryRecord;
+import com.bbaga.githubscheduledreminderapp.jobs.scheduling.NotificationJobScheduler;
 import org.quartz.*;
 
 import java.time.Instant;
@@ -8,14 +9,14 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ConfigGraphUpdater {
     private final ConcurrentHashMap<String, ConfigGraphNode> configGraph;
-    private final Scheduler scheduler;
+    private final NotificationJobScheduler notificationJobScheduler;
 
     public ConfigGraphUpdater(
             ConcurrentHashMap<String, ConfigGraphNode> configGraph,
-            Scheduler scheduler
+            NotificationJobScheduler notificationJobScheduler
     ) {
         this.configGraph = configGraph;
-        this.scheduler = scheduler;
+        this.notificationJobScheduler = notificationJobScheduler;
     }
 
     public void updateEntry(
@@ -51,15 +52,12 @@ public class ConfigGraphUpdater {
 
         if (!configGraph.containsKey(notificationKey)) {
             configGraph.put(notificationKey, new ConfigGraphNode(installationId, notification, timestamp));
+            notificationJobScheduler.createSchedule(notification);
         } else {
             ConfigGraphNode node = configGraph.get(notificationKey);
             node.setNotification(notification);
             node.setSeenAt(timestamp);
-
-            Trigger newTrigger = TriggerBuilder.newTrigger()
-                    .withSchedule(CronScheduleBuilder.cronSchedule(node.getNotification().getSchedule()))
-                    .withIdentity(notificationKey).build();
-            scheduler.rescheduleJob(new TriggerKey(notificationKey), newTrigger);
+            notificationJobScheduler.updateSchedule(notification);
         }
     }
 

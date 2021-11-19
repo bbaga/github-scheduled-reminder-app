@@ -8,6 +8,7 @@ import com.bbaga.githubscheduledreminderapp.configuration.persistence.ConfigPers
 import com.bbaga.githubscheduledreminderapp.infrastructure.GitHub.GitHubBuilderFactory;
 import com.bbaga.githubscheduledreminderapp.jobs.GitHubInstallationScan;
 import com.bbaga.githubscheduledreminderapp.jobs.ScheduledStateDump;
+import com.bbaga.githubscheduledreminderapp.jobs.scheduling.NotificationJobScheduler;
 import com.bbaga.githubscheduledreminderapp.repositories.GitHubInstallationRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -196,9 +197,9 @@ public class Config {
     @Bean
     public ConfigGraphUpdater getConfigGraphUpdater(
         @Qualifier("ConfigGraph") ConcurrentHashMap<String, ConfigGraphNode> configGraph,
-        @Qualifier("Scheduler") Scheduler scheduler
+        NotificationJobScheduler notificationJobScheduler
     ) {
-        return new ConfigGraphUpdater(configGraph, scheduler);
+        return new ConfigGraphUpdater(configGraph, notificationJobScheduler);
     }
 
     @Bean
@@ -211,5 +212,10 @@ public class Config {
     @Bean
     public GitHubBuilderFactory getGitHubBuilderFactory(@Qualifier("application.gitHubEndpoint") String gitHubEndpoint) {
         return new GitHubBuilderFactory(gitHubEndpoint);
+    }
+
+    @Bean
+    public NotificationJobScheduler getNotificationJobScheduler(@Qualifier("Scheduler") Scheduler scheduler) {
+        return new NotificationJobScheduler(scheduler);
     }
 }
