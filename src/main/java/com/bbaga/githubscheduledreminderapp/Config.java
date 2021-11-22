@@ -29,6 +29,7 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.scheduling.quartz.JobDetailFactoryBean;
 import org.springframework.scheduling.quartz.SimpleTriggerFactoryBean;
 import org.springframework.web.client.RestTemplate;
@@ -245,6 +246,7 @@ public class Config {
     }
 
     @Bean
+    @Primary
     @Qualifier("JsonObjectMapper")
     public ObjectMapper getJsonObjectMapper() {
         return JsonMapper.builder().findAndAddModules().build();
