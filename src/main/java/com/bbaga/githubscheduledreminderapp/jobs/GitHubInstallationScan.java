@@ -1,5 +1,6 @@
 package com.bbaga.githubscheduledreminderapp.jobs;
 
+import com.bbaga.githubscheduledreminderapp.jobs.scheduling.InstallationScanJobScheduler;
 import com.bbaga.githubscheduledreminderapp.repositories.GitHubInstallationRepository;
 import org.kohsuke.github.GHAppInstallation;
 import org.kohsuke.github.GitHub;
@@ -18,13 +19,21 @@ import java.util.Set;
 @DisallowConcurrentExecution
 public class GitHubInstallationScan implements Job {
 
-    @Autowired
-    private GitHub gitHub;
-
-    @Autowired
-    private GitHubInstallationRepository installationRepository;
-
+    private final GitHub gitHub;
+    private final GitHubInstallationRepository installationRepository;
+    private InstallationScanJobScheduler jobScheduler;
     private final Logger logger = LoggerFactory.getLogger(GitHubInstallationScan.class);
+
+    @Autowired
+    public GitHubInstallationScan(
+            GitHub gitHub,
+            GitHubInstallationRepository installationRepository,
+            InstallationScanJobScheduler jobScheduler
+    ) {
+        this.gitHub = gitHub;
+        this.installationRepository = installationRepository;
+        this.jobScheduler = jobScheduler;
+    }
 
     public void execute(JobExecutionContext context) throws JobExecutionException {
 
@@ -49,32 +58,19 @@ public class GitHubInstallationScan implements Job {
             installationRepository.put(installation);
         }
 
-        Scheduler scheduler = context.getScheduler();
-        JobDetail job;
-        String jobIdentity;
-
         for (Long installationId : checkList.keySet()) {
-            jobIdentity = String.format("%s-%s", GitHubInstallationRepositoryScan.class.getName(), installationId);
-
             if (!checkList.get(installationId)) {
                 installationRepository.remove(installationId);
                 try {
-                    scheduler.deleteJob(new JobKey(jobIdentity));
+                    jobScheduler.deleteJob(installationId);
                 } catch (SchedulerException e) {
                     e.printStackTrace();
                 }
+                continue;
             }
 
             try {
-                if (scheduler.getJobDetail(new JobKey(jobIdentity)) == null) {
-                    job = JobBuilder.newJob(GitHubInstallationRepositoryScan.class)
-                            .withIdentity(jobIdentity)
-                            .usingJobData("installationId", installationId)
-                            .storeDurably(true)
-                            .build();
-                    scheduler.addJob(job, true);
-                }
-                context.getScheduler().triggerJob(new JobKey(jobIdentity));
+                jobScheduler.triggerJob(installationId);
             } catch (SchedulerException e) {
                 e.printStackTrace();
             }

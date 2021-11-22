@@ -1,7 +1,7 @@
 package com.bbaga.githubscheduledreminderapp.controllers;
 
 import com.bbaga.githubscheduledreminderapp.configuration.*;
-import com.bbaga.githubscheduledreminderapp.infrastructure.GitHub.GitHubBuilderFactory;
+import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubBuilderFactory;
 import org.kohsuke.github.*;
 import org.quartz.SchedulerException;
 import org.springframework.web.bind.annotation.GetMapping;

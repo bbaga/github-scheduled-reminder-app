@@ -99,6 +99,14 @@ public class ConfigGraphUpdater {
         });
     }
 
+    public void removeRepository(Long installationId, String repositoryFullName) {
+        configGraph.forEach((key, node) -> node.getRepositories().entrySet().removeIf(repoEntry -> {
+            RepositoryRecord repositoryRecord = repoEntry.getValue();
+            return repositoryRecord.getInstallationId().equals(installationId)
+                    && repositoryRecord.getRepository().equals(repositoryFullName);
+        }));
+    }
+
     private String getNotificationKey(Extending extending) {
         return getNotificationKey(extending.getRepository(), extending.getName());
     }

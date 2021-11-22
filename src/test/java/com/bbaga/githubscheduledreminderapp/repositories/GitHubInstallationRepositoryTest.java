@@ -1,9 +1,7 @@
 package com.bbaga.githubscheduledreminderapp.repositories;
 
-import com.bbaga.githubscheduledreminderapp.infrastructure.GitHub.AppInstallationContainer;
-import com.bbaga.githubscheduledreminderapp.notifications.slack.ChannelNotificationDataProvider;
+import com.bbaga.githubscheduledreminderapp.infrastructure.github.AppInstallationContainer;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.kohsuke.github.GHAppInstallation;

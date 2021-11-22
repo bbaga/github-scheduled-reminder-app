@@ -1,11 +1,10 @@
 package com.bbaga.githubscheduledreminderapp;
 
-import com.bbaga.githubscheduledreminderapp.infrastructure.GitHub.GitHubBuilderFactory;
+import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubBuilderFactory;
 import com.bbaga.githubscheduledreminderapp.repositories.GitHubInstallationRepository;
 import org.kohsuke.github.GHAppInstallation;
 import org.kohsuke.github.GHAppInstallationToken;
 import org.kohsuke.github.GitHub;
-import org.kohsuke.github.GitHubBuilder;
 import org.kohsuke.github.authorization.AuthorizationProvider;
 import org.springframework.stereotype.Service;
 
