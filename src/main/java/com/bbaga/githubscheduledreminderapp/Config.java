@@ -3,32 +3,35 @@ package com.bbaga.githubscheduledreminderapp;
 import com.bbaga.githubscheduledreminderapp.configuration.ConfigGraphNode;
 import com.bbaga.githubscheduledreminderapp.configuration.ConfigGraphUpdater;
 import com.bbaga.githubscheduledreminderapp.configuration.InRepoConfigParser;
+import com.bbaga.githubscheduledreminderapp.configuration.RepositoryInstallationEventListener;
 import com.bbaga.githubscheduledreminderapp.configuration.persistence.ConfigPersistenceFactory;
 import com.bbaga.githubscheduledreminderapp.configuration.persistence.ConfigPersistenceInterface;
-import com.bbaga.githubscheduledreminderapp.infrastructure.GitHub.GitHubBuilderFactory;
+import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubBuilderFactory;
+import com.bbaga.githubscheduledreminderapp.infrastructure.github.webhook.EventPublisher;
 import com.bbaga.githubscheduledreminderapp.jobs.GitHubInstallationScan;
 import com.bbaga.githubscheduledreminderapp.jobs.ScheduledStateDump;
+import com.bbaga.githubscheduledreminderapp.jobs.scheduling.InstallationScanJobScheduler;
 import com.bbaga.githubscheduledreminderapp.jobs.scheduling.NotificationJobScheduler;
 import com.bbaga.githubscheduledreminderapp.repositories.GitHubInstallationRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.hubspot.slack.client.SlackClient;
 import com.hubspot.slack.client.SlackClientFactory;
 import com.hubspot.slack.client.SlackClientRuntimeConfig;
 import org.apache.commons.io.IOUtils;
 import org.kohsuke.github.GitHub;
-import org.kohsuke.github.GitHubBuilder;
 import org.kohsuke.github.extras.authorization.JWTTokenProvider;
 import org.quartz.*;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.quartz.JobDetailFactoryBean;
 import org.springframework.scheduling.quartz.SimpleTriggerFactoryBean;
 import org.springframework.web.client.RestTemplate;
-import org.yaml.snakeyaml.Yaml;
 
 import java.io.FileInputStream;
 import java.nio.charset.StandardCharsets;
@@ -203,9 +206,10 @@ public class Config {
     }
 
     @Bean
-    public InRepoConfigParser getInRepoConfigParser(@Qualifier("application.configFilePath") String configFilePath) {
-        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-        mapper.findAndRegisterModules();
+    public InRepoConfigParser getInRepoConfigParser(
+        @Qualifier("YamlObjectMapper") ObjectMapper mapper,
+        @Qualifier("application.configFilePath") String configFilePath
+    ) {
         return new InRepoConfigParser(mapper, configFilePath);
     }
 
@@ -217,5 +221,49 @@ public class Config {
     @Bean
     public NotificationJobScheduler getNotificationJobScheduler(@Qualifier("Scheduler") Scheduler scheduler) {
         return new NotificationJobScheduler(scheduler);
+    }
+
+    @Bean
+    public InstallationScanJobScheduler getInstallationScanJobScheduler(@Qualifier("Scheduler") Scheduler scheduler) {
+        return new InstallationScanJobScheduler(scheduler);
+    }
+
+    @Bean
+    public EventPublisher getGitHubEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
+        EventPublisher eventPublisher = new EventPublisher();
+        eventPublisher.setApplicationEventPublisher(applicationEventPublisher);
+
+        return eventPublisher;
+    }
+
+    @Bean
+    @Qualifier("YamlObjectMapper")
+    public ObjectMapper getYamlObjectMapper() {
+        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+        mapper.findAndRegisterModules();
+        return mapper;
+    }
+
+    @Bean
+    @Qualifier("JsonObjectMapper")
+    public ObjectMapper getJsonObjectMapper() {
+        return JsonMapper.builder().findAndAddModules().build();
+    }
+
+    @Bean
+    public RepositoryInstallationEventListener getGitHubInstallationEventListener(
+        ConfigGraphUpdater configGraphUpdater,
+        InRepoConfigParser inRepoConfigParser,
+        @Qualifier("JsonObjectMapper") ObjectMapper objectMapper,
+        GitHubAppInstallationService installationService,
+        InstallationScanJobScheduler installationScanJobScheduler
+    ) {
+        return new RepositoryInstallationEventListener(
+            configGraphUpdater,
+            inRepoConfigParser,
+            objectMapper,
+            installationService,
+            installationScanJobScheduler
+        );
     }
 }

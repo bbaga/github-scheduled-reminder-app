@@ -1,8 +1,7 @@
 package com.bbaga.githubscheduledreminderapp.jobs;
 
 import com.bbaga.githubscheduledreminderapp.configuration.*;
-import com.bbaga.githubscheduledreminderapp.infrastructure.GitHub.GitHubBuilderFactory;
-import com.bbaga.githubscheduledreminderapp.jobs.scheduling.NotificationJobScheduler;
+import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubBuilderFactory;
 import com.bbaga.githubscheduledreminderapp.repositories.GitHubInstallationRepository;
 import org.kohsuke.github.*;
 import org.quartz.*;
@@ -19,6 +18,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
+@DisallowConcurrentExecution
 public class GitHubInstallationRepositoryScan implements Job {
 
     private final ConfigGraphUpdater configGraphUpdater;
@@ -29,7 +29,6 @@ public class GitHubInstallationRepositoryScan implements Job {
 
     private final Logger logger = LoggerFactory.getLogger(GitHubInstallationRepositoryScan.class);
     private final InRepoConfigParser inRepoConfigParser;
-    private final NotificationJobScheduler notificationJobScheduler;
 
     @Autowired
     GitHubInstallationRepositoryScan(
@@ -37,15 +36,13 @@ public class GitHubInstallationRepositoryScan implements Job {
         GitHubInstallationRepository installationRepository,
         @Qualifier("ConfigGraph") ConcurrentHashMap<String, ConfigGraphNode> configGraph,
         ConfigGraphUpdater configGraphUpdater,
-        InRepoConfigParser inRepoConfigParser,
-        NotificationJobScheduler notificationJobScheduler
+        InRepoConfigParser inRepoConfigParser
     ) {
         this.gitHubBuilderFactory = gitHubBuilderFactory;
         this.installationRepository = installationRepository;
         this.configGraph = configGraph;
         this.configGraphUpdater = configGraphUpdater;
         this.inRepoConfigParser = inRepoConfigParser;
-        this.notificationJobScheduler = notificationJobScheduler;
     }
 
     public void execute(JobExecutionContext context) {

@@ -1,6 +1,6 @@
 package com.bbaga.githubscheduledreminderapp.repositories;
 
-import com.bbaga.githubscheduledreminderapp.infrastructure.GitHub.AppInstallationContainer;
+import com.bbaga.githubscheduledreminderapp.infrastructure.github.AppInstallationContainer;
 import org.kohsuke.github.GHAppInstallation;
 
 import java.util.HashMap;

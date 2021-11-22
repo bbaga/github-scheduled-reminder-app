@@ -1,4 +1,4 @@
-package com.bbaga.githubscheduledreminderapp.infrastructure.GitHub;
+package com.bbaga.githubscheduledreminderapp.infrastructure.github;
 
 import org.kohsuke.github.GHAppInstallation;
 
