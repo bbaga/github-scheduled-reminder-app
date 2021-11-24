@@ -13,7 +13,6 @@ import com.hubspot.slack.client.models.blocks.objects.Text;
 import com.hubspot.slack.client.models.blocks.objects.TextType;
 import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GHPullRequest;
-import org.kohsuke.github.GHRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -22,8 +21,8 @@ import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 @Service
 public class ChannelNotification implements NotificationInterface<ChannelNotificationDataProvider.Data> {
@@ -113,10 +112,11 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
     private String getIssueAge(GHIssue issue) throws IOException {
         String ageTemplate = "%d day";
         Instant now = Instant.now();
-        long units = ChronoUnit.DAYS.between(issue.getCreatedAt().toInstant(), now);
+        Date createdAt = issue.getCreatedAt();
+        long units = ChronoUnit.DAYS.between(createdAt.toInstant(), now);
 
         if (units < 1) {
-            units = ChronoUnit.HOURS.between(issue.getCreatedAt().toInstant(), now);
+            units = ChronoUnit.HOURS.between(createdAt.toInstant(), now);
             ageTemplate = "%d hour";
         }
 
