@@ -49,7 +49,7 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
         for (GHIssue issue : issues) {
             try {
                 if (issue instanceof GHPullRequest) {
-                    prSections.add(getSection(issue));
+                    prSections.add(getSection((GHPullRequest) issue));
                     continue;
                 }
 
@@ -89,10 +89,11 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
     private Block getSection(GHPullRequest pullRequest) throws IOException {
 
         return markdownSection(
-            "%s *%s* %nrepository: %s, :heavy_minus_sign: %d :heavy_plus_sign: %d",
+            "%s *%s* %nrepository: %s, age: %s, :heavy_minus_sign: %d :heavy_plus_sign: %d",
             pullRequest.getUser().getLogin(),
             pullRequest.getTitle(),
             pullRequest.getRepository().getFullName(),
+            getIssueAge(pullRequest),
             pullRequest.getDeletions(),
             pullRequest.getAdditions()
         ).withAccessory(linkButton(pullRequest.getNodeId(), pullRequest.getHtmlUrl().toString()));
