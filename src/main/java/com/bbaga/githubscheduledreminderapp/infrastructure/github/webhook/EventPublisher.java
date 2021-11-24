@@ -24,8 +24,8 @@ public class EventPublisher implements ApplicationEventPublisherAware {
     }
 
     public void publishEvent(Object source, String type, String body) {
-        WebhookEventInterface event = eventFactory.get(type).apply(source, body);
-
-        eventPublisher.publishEvent(event);
+        if (eventFactory.containsKey(type)) {
+            eventPublisher.publishEvent(eventFactory.get(type).apply(source, body));
+        }
     }
 }
