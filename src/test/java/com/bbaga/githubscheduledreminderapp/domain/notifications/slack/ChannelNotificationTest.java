@@ -14,6 +14,7 @@ import org.mockito.Mockito;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -34,11 +35,10 @@ class ChannelNotificationTest {
         config.put("channel", "test");
         Notification notification = new Notification();
         notification.setConfig(config);
-        Set<GHIssue> issues = new HashSet<>();
-        Set<GHIssue> pullRequests = new HashSet<>();
+        ArrayList<GHIssue> issues = new ArrayList<>();
 
         Mockito.when(client.postMessage(Mockito.any())).thenReturn(future);
-        service.send(new ChannelNotificationDataProvider.Data(notification, issues, pullRequests));
+        service.send(new ChannelNotificationDataProvider.Data(notification, issues));
         Mockito.verify(client, Mockito.times(1)).postMessage(Mockito.any());
 
     }
@@ -82,13 +82,12 @@ class ChannelNotificationTest {
         config.put("channel", "test");
         Notification notification = new Notification();
         notification.setConfig(config);
-        Set<GHIssue> issues = new HashSet<>();
+        ArrayList<GHIssue> issues = new ArrayList<>();
         issues.add(issue);
-        Set<GHIssue> pullRequests = new HashSet<>();
-        pullRequests.add(pr);
+        issues.add(pr);
 
         Mockito.when(client.postMessage(Mockito.any())).thenReturn(future);
-        service.send(new ChannelNotificationDataProvider.Data(notification, issues, pullRequests));
+        service.send(new ChannelNotificationDataProvider.Data(notification, issues));
         Mockito.verify(client, Mockito.times(1)).postMessage(Mockito.any());
 
     }

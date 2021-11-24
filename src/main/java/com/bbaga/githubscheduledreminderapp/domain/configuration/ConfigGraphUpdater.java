@@ -1,7 +1,10 @@
 package com.bbaga.githubscheduledreminderapp.domain.configuration;
 
+import com.bbaga.githubscheduledreminderapp.application.jobs.GitHubInstallationRepositoryScan;
 import com.bbaga.githubscheduledreminderapp.domain.jobs.scheduling.NotificationJobScheduler;
 import org.quartz.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
 import java.util.concurrent.ConcurrentHashMap;
@@ -9,6 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ConfigGraphUpdater {
     private final ConcurrentHashMap<String, ConfigGraphNode> configGraph;
     private final NotificationJobScheduler notificationJobScheduler;
+    private final Logger logger = LoggerFactory.getLogger(ConfigGraphUpdater.class);
 
     public ConfigGraphUpdater(
             ConcurrentHashMap<String, ConfigGraphNode> configGraph,
@@ -24,7 +28,7 @@ public class ConfigGraphUpdater {
         String repositoryFullName,
         Instant timestamp
     ) throws SchedulerException {
-        if (notification.getSchedule() != null) {
+        if (notification.getSchedule().isPresent()) {
             updateSchedule(notification, installationId, repositoryFullName, timestamp);
             return;
         }
@@ -33,9 +37,14 @@ public class ConfigGraphUpdater {
     }
 
     private void updateRepoEntry(Notification notification, long installationId, String repositoryFullName, Instant timestamp) {
-        Extending extending = notification.getExtending();
+        logger.info("Updating repository entry: installation id {}, setting {} in {}", installationId, repositoryFullName, notification.getName());
+        if (notification.getExtending().isEmpty()) {
+            return;
+        }
 
-        if (extending.getRepository() == null || extending.getName() == null) {
+        Extending extending = notification.getExtending().get();
+
+        if (extending.getRepository().isBlank() || extending.getName().isBlank()) {
             return;
         }
 
@@ -46,6 +55,7 @@ public class ConfigGraphUpdater {
     }
 
     private void updateSchedule(Notification notification, long installationId, String repositoryFullName, Instant timestamp) throws SchedulerException {
+        logger.info("Updating schedule: installation id {}, {}/{}", installationId, repositoryFullName, notification.getName());
         notification.setName(getNotificationKey(repositoryFullName, notification.getName()));
         String notificationKey = notification.getName();
 

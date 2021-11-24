@@ -4,12 +4,13 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.HashMap;
+import java.util.Optional;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Notification {
-    private String name;
+    private String name = "";
     private String schedule;
-    private String type;
+    private String type = "";
     private Extending extending;
     private HashMap<String, ?> config = new HashMap<>();
 
@@ -38,8 +39,8 @@ public class Notification {
         this.name = name;
     }
 
-    public String getSchedule() {
-        return schedule;
+    public Optional<String> getSchedule() {
+        return Optional.ofNullable(schedule);
     }
 
     public void setSchedule(String schedule) {
@@ -62,8 +63,8 @@ public class Notification {
         this.config = config;
     }
 
-    public Extending getExtending() {
-        return extending;
+    public Optional<Extending> getExtending() {
+        return Optional.ofNullable(extending);
     }
 
     public void setExtending(Extending extending) {

@@ -19,6 +19,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -36,72 +38,42 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
     @Override
     public void send(ChannelNotificationDataProvider.Data data) {
         Notification notification = data.getNotification();
-        Set<GHIssue> issues = data.getIssues();
-        Set<GHIssue> pullRequests = data.getPullRequests();
+        ArrayList<GHIssue> issues = data.getIssues();
 
         List<Block> sections = new ArrayList<>();
+        List<Block> issueSections = new ArrayList<>();
+        List<Block> prSections = new ArrayList<>();
+
         sections.add(Header.of(Text.of(TextType.PLAIN_TEXT, "Reporting open issues and pull requests")));
 
-        if ((issues.size() + pullRequests.size()) == 0) {
-            sections.add(markdownSection("*There aren't any open issues or pull requests.*"));
-        }
-
-        if (issues.size() > 0) {
-            sections.add(markdownSection("*Open Issues:*"));
-            sections.add(Divider.builder().build());
-        }
-
-        String user;
         for (GHIssue issue : issues) {
             try {
-                user = issue.getUser().getLogin();
+                if (issue instanceof GHPullRequest) {
+                    prSections.add(getSection(issue));
+                    continue;
+                }
+
+                issueSections.add(getSection(issue));
             } catch (IOException e) {
                 logger.error(e.getLocalizedMessage());
-                continue;
+                return;
             }
-
-            sections.add(
-                markdownSection(
-                    "%s *%s*%nrepository: %s",
-                    user,
-                    issue.getTitle(),
-                    issue.getRepository().getFullName()
-                ).withAccessory(linkButton(issue.getNodeId(), issue.getHtmlUrl().toString()))
-            );
         }
 
-        if (pullRequests.size() > 0) {
-            sections.add(markdownSection("*Open Pull Requests:*"));
-            sections.add(Divider.builder().build());
-        }
-
-        GHRepository repository;
-        GHPullRequest pullRequest;
-        int deletions;
-        int additions;
-        for (GHIssue issue : pullRequests) {
-            repository = issue.getRepository();
-
-            try {
-                pullRequest = repository.getPullRequest(issue.getNumber());
-                deletions = pullRequest.getDeletions();
-                additions = pullRequest.getAdditions();
-                user = issue.getUser().getLogin();
-            } catch (IOException e) {
-                logger.error(e.getLocalizedMessage());
-                continue;
+        if ((issueSections.size() + prSections.size()) == 0) {
+            sections.add(markdownSection("*There aren't any open issues or pull requests.*"));
+        } else {
+            if (issueSections.size() > 0) {
+                sections.add(markdownSection("*Open Issues:*"));
+                sections.add(Divider.builder().build());
+                sections.addAll(issueSections);
             }
 
-            sections.add(
-                markdownSection(
-                    "%s *%s* %nrepository: %s, :heavy_minus_sign: %d :heavy_plus_sign: %d",
-                    user,
-                    issue.getTitle(),
-                    repository.getFullName(),
-                    deletions,
-                    additions
-                ).withAccessory(linkButton(issue.getNodeId(), issue.getHtmlUrl().toString()))
-            );
+            if (prSections.size() > 0) {
+                sections.add(markdownSection("*Open Pull Requests:*"));
+                sections.add(Divider.builder().build());
+                sections.addAll(prSections);
+            }
         }
 
         sections.add(markdownSection("config id: _%s_", notification.getName()));
@@ -112,6 +84,46 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
                 .setChannelId(notification.getConfig().get("channel").toString())
                 .build()
         ).join();
+    }
+
+    private Block getSection(GHPullRequest pullRequest) throws IOException {
+
+        return markdownSection(
+            "%s *%s* %nrepository: %s, :heavy_minus_sign: %d :heavy_plus_sign: %d",
+            pullRequest.getUser().getLogin(),
+            pullRequest.getTitle(),
+            pullRequest.getRepository().getFullName(),
+            pullRequest.getDeletions(),
+            pullRequest.getAdditions()
+        ).withAccessory(linkButton(pullRequest.getNodeId(), pullRequest.getHtmlUrl().toString()));
+    }
+
+    private Block getSection(GHIssue issue) throws IOException {
+
+        return markdownSection(
+            "%s *%s*%nrepository: %s, age: %s",
+            issue.getUser().getLogin(),
+            issue.getTitle(),
+            issue.getRepository().getFullName(),
+            getIssueAge(issue)
+        ).withAccessory(linkButton(issue.getNodeId(), issue.getHtmlUrl().toString()));
+    }
+
+    private String getIssueAge(GHIssue issue) throws IOException {
+        String ageTemplate = "%d day";
+        Instant now = Instant.now();
+        long units = ChronoUnit.DAYS.between(issue.getCreatedAt().toInstant(), now);
+
+        if (units < 1) {
+            units = ChronoUnit.HOURS.between(issue.getCreatedAt().toInstant(), now);
+            ageTemplate = "%d hour";
+        }
+
+        if (units > 1) {
+            ageTemplate = ageTemplate + "s";
+        }
+
+        return ageTemplate.formatted(units);
     }
 
     private Section markdownSection(String pattern, Object... args) {

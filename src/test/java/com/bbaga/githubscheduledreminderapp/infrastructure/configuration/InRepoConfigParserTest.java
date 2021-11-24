@@ -49,7 +49,7 @@ notifications:
 
         Notification notification = parsedConfig.getNotifications().get(0);
         Assertions.assertEquals("testing", notification.getName());
-        Assertions.assertEquals("0 1 2 3 4 5 6", notification.getSchedule());
+        Assertions.assertEquals("0 1 2 3 4 5 6", notification.getSchedule().get());
         Assertions.assertEquals("UTC", notification.getTimeZone());
         Assertions.assertEquals("slack/channel", notification.getType());
 
@@ -89,7 +89,7 @@ notifications:
 
         Notification notification = parsedConfig.getNotifications().get(0);
         Assertions.assertEquals("timezone", notification.getName());
-        Assertions.assertEquals("* * * * * *", notification.getSchedule());
+        Assertions.assertEquals("* * * * * *", notification.getSchedule().get());
         Assertions.assertEquals("EST", notification.getTimeZone());
         Assertions.assertEquals("slack/channel", notification.getType());
 
@@ -125,7 +125,7 @@ notifications:
         Assertions.assertEquals(1, parsedConfig.getNotifications().size());
 
         Notification notification = parsedConfig.getNotifications().get(0);
-        Extending extension = notification.getExtending();
+        Extending extension = notification.getExtending().get();
         Assertions.assertEquals("some/repository", extension.getRepository());
         Assertions.assertEquals("something", extension.getName());
     }
