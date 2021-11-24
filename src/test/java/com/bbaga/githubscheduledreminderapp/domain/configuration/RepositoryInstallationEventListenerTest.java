@@ -107,7 +107,7 @@ class RepositoryInstallationEventListenerTest {
 
         Notification notification = notificationCaptor.getValue();
         assertEquals("testing", notification.getName());
-        assertEquals("* * * * * ?", notification.getSchedule());
+        assertEquals("* * * * * ?", notification.getSchedule().get());
 
         Long installationId = installationIdCaptor.getValue();
         assertEquals(987654321L, installationId);

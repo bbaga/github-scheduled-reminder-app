@@ -1,8 +1,8 @@
 package com.bbaga.githubscheduledreminderapp.domain.configuration;
 
 public class Extending {
-    private String repository;
-    private String name;
+    private String repository = "";
+    private String name = "";
 
     public String getRepository() {
         return repository;

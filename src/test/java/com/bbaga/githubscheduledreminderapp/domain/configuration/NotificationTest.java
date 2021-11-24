@@ -32,7 +32,7 @@ class NotificationTest {
         final String schedule = "* * * * *";
         notification.setSchedule(schedule);
 
-        assertEquals(schedule, notification.getSchedule());
+        assertEquals(schedule, notification.getSchedule().get());
     }
 
     @Test
@@ -69,8 +69,8 @@ class NotificationTest {
         extending.setRepository("repo");
         notification.setExtending(extending);
 
-        assertEquals("name", notification.getExtending().getName());
-        assertEquals("repo", notification.getExtending().getRepository());
+        assertEquals("name", notification.getExtending().get().getName());
+        assertEquals("repo", notification.getExtending().get().getRepository());
 
     }
 }

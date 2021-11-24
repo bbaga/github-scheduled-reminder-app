@@ -4,8 +4,11 @@ import com.bbaga.githubscheduledreminderapp.domain.GitHubAppInstallationService;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.Notification;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.RepositoryRecord;
 import com.bbaga.githubscheduledreminderapp.domain.notifications.NotificationDataProviderInterface;
+import com.bbaga.githubscheduledreminderapp.domain.sources.github.RepositoryIssuesSource;
+import com.bbaga.githubscheduledreminderapp.domain.sources.github.RepositoryPRsSource;
 import org.kohsuke.github.*;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -37,55 +40,46 @@ public class ChannelNotificationDataProvider implements NotificationDataProvider
     public Data getData() {
 
         GitHub client;
-        Set<GHIssue> issues = new HashSet<>();
-        Set<GHIssue> pullRequests = new HashSet<>();
+        ArrayList<GHIssue> issues = new ArrayList<>();
         for (RepositoryRecord repository : repositories.values()) {
             client = appInstallationService.getClientByInstallationId(repository.getInstallationId());
             try {
-                client.getRepository(repository.getRepository()).getIssues(GHIssueState.OPEN).forEach((GHIssue issue) -> {
-                    if (!issue.isPullRequest()) {
-                        issues.add(issue);
-                    }
-                });
-
-                client.getRepository(repository.getRepository()).getPullRequests(GHIssueState.OPEN).forEach((GHPullRequest pr) -> {
-                    try {
-                        if (!pr.isDraft()) {
-                            pullRequests.add(pr);
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                });
+                GHRepository repo = client.getRepository(repository.getRepository());
+                issues.addAll(RepositoryIssuesSource.get(repo));
+                issues.addAll(RepositoryPRsSource.get(repo));
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
 
-        return new Data(notification, issues, pullRequests);
+        issues.sort((GHIssue issueA, GHIssue issueB) -> {
+            try {
+                return issueA.getCreatedAt().compareTo(issueB.getCreatedAt());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            return 0;
+        });
+
+        return new Data(notification, issues);
     }
 
     public static class Data {
         private final Notification notification;
-        private final Set<GHIssue> issues;
-        private final Set<GHIssue> pullRequests;
+        private final ArrayList<GHIssue> issues;
 
-        public Data(Notification notification, Set<GHIssue> issues, Set<GHIssue> pullRequests) {
+        public Data(Notification notification, ArrayList<GHIssue> issues) {
             this.notification = notification;
             this.issues = issues;
-            this.pullRequests = pullRequests;
         }
 
         public Notification getNotification() {
             return notification;
         }
 
-        public Set<GHIssue> getIssues() {
+        public ArrayList<GHIssue> getIssues() {
             return issues;
-        }
-
-        public Set<GHIssue> getPullRequests() {
-            return pullRequests;
         }
     }
 }
