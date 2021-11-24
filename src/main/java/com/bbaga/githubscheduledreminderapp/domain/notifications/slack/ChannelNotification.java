@@ -123,7 +123,7 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
             ageTemplate = ageTemplate + "s";
         }
 
-        return ageTemplate.formatted(units);
+        return String.format(ageTemplate, units);
     }
 
     private Section markdownSection(String pattern, Object... args) {
