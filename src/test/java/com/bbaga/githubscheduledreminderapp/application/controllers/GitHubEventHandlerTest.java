@@ -1,6 +1,5 @@
 package com.bbaga.githubscheduledreminderapp.application.controllers;
 
-import com.bbaga.githubscheduledreminderapp.application.controllers.GitHubEventHandler;
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.webhook.EventPublisher;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
