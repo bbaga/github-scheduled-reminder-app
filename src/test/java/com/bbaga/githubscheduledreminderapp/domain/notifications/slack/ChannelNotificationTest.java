@@ -14,10 +14,8 @@ import org.mockito.Mockito;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.time.Instant;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 class ChannelNotificationTest {
@@ -61,6 +59,7 @@ class ChannelNotificationTest {
             Mockito.when(issue.getHtmlUrl()).thenReturn(new URL("https://google.com"));
             Mockito.when(issue.getNodeId()).thenReturn("1234567");
             Mockito.when(issue.getRepository()).thenReturn(repository);
+            Mockito.when(issue.getCreatedAt()).thenReturn(Date.from(Instant.now()));
 
             Mockito.when(pr.getTitle()).thenReturn("PR title");
             Mockito.when(pr.getNumber()).thenReturn(1);
@@ -68,6 +67,7 @@ class ChannelNotificationTest {
             Mockito.when(pr.getHtmlUrl()).thenReturn(new URL("https://google.com"));
             Mockito.when(pr.getNodeId()).thenReturn("1234567");
             Mockito.when(pr.getRepository()).thenReturn(repository);
+            Mockito.when(pr.getCreatedAt()).thenReturn(Date.from(Instant.now()));
             Mockito.when(repository.getPullRequest(1)).thenReturn(pullRequest);
         } catch (IOException e) {
             e.printStackTrace();
