@@ -27,7 +27,8 @@ public class ConfigGraphUpdater {
         String repositoryFullName,
         Instant timestamp
     ) throws SchedulerException {
-        if (notification instanceof Notification main) {
+        if (notification instanceof Notification) {
+            Notification main = (Notification) notification;
             if (main.getSchedule().isPresent()) {
                 updateSchedule(main, installationId, repositoryFullName, timestamp);
                 return;
