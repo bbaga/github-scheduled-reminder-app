@@ -3,6 +3,7 @@ package com.bbaga.githubscheduledreminderapp.application.controllers;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.ConfigGraphNode;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.ConfigGraphUpdater;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.Notification;
+import com.bbaga.githubscheduledreminderapp.domain.configuration.NotificationInterface;
 import com.bbaga.githubscheduledreminderapp.infrastructure.configuration.InRepoConfig;
 import com.bbaga.githubscheduledreminderapp.infrastructure.configuration.InRepoConfigParser;
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubBuilderFactory;
@@ -65,7 +66,7 @@ public class State {
                 return "Repository is archived or the config is disabled";
             }
 
-            for (Notification notification : inRepoConfig.getNotifications()) {
+            for (NotificationInterface notification : inRepoConfig.getNotifications()) {
                 configGraphUpdater.updateEntry(notification, installationId, repositoryFullName, timestamp);
             }
 

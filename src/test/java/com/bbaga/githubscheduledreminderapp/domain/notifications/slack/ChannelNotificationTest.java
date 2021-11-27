@@ -41,7 +41,7 @@ class ChannelNotificationTest {
         ChannelNotification service = new ChannelNotification(client);
         SlackNotification config = new SlackNotification();
         config.setChannel("test");
-        Notification<SlackNotification> notification = new Notification<>();
+        Notification notification = new Notification();
         notification.setConfig(config);
         ArrayList<GHIssue> issues = new ArrayList<>();
 
@@ -84,7 +84,7 @@ class ChannelNotificationTest {
         ChannelNotification service = new ChannelNotification(client);
         SlackNotification config = new SlackNotification();
         config.setChannel("test");
-        Notification<SlackNotification> notification = new Notification<>();
+        Notification notification = new Notification();
         notification.setConfig(config);
         ArrayList<GHIssue> issues = new ArrayList<>();
         issues.add(issue);

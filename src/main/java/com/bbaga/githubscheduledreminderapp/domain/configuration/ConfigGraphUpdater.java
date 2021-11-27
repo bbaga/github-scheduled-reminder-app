@@ -22,28 +22,30 @@ public class ConfigGraphUpdater {
     }
 
     public void updateEntry(
-        Notification<?> notification,
+        NotificationInterface notification,
         long installationId,
         String repositoryFullName,
         Instant timestamp
     ) throws SchedulerException {
-        if (notification.getSchedule().isPresent()) {
-            updateSchedule(notification, installationId, repositoryFullName, timestamp);
-            return;
+        if (notification instanceof Notification main) {
+            if (main.getSchedule().isPresent()) {
+                updateSchedule(main, installationId, repositoryFullName, timestamp);
+                return;
+            }
         }
 
         updateRepoEntry(notification, installationId, repositoryFullName, timestamp);
     }
 
-    private void updateRepoEntry(Notification<?> notification, long installationId, String repositoryFullName, Instant timestamp) {
-        logger.info("Updating repository entry: installation id {}, setting {} in {}", installationId, repositoryFullName, notification.getName());
-        if (notification.getExtending().isEmpty()) {
-            return;
+    private void updateRepoEntry(NotificationInterface notification, long installationId, String repositoryFullName, Instant timestamp) {
+        logger.info("Updating repository entry: installation id {}, in {}", installationId, repositoryFullName);
+        Extending extending = null;
+
+        if (notification instanceof Extending) {
+            extending = (Extending) notification;
         }
 
-        Extending extending = notification.getExtending().get();
-
-        if (extending.getRepository().isBlank() || extending.getName().isBlank()) {
+        if (extending == null || extending.getExtending().getRepository().isBlank() || extending.getExtending().getName().isBlank()) {
             return;
         }
 
@@ -53,7 +55,7 @@ public class ConfigGraphUpdater {
         }
     }
 
-    private void updateSchedule(Notification<?> notification, long installationId, String repositoryFullName, Instant timestamp) throws SchedulerException {
+    private void updateSchedule(Notification notification, long installationId, String repositoryFullName, Instant timestamp) throws SchedulerException {
         logger.info("Updating schedule: installation id {}, {}/{}", installationId, repositoryFullName, notification.getName());
         notification.setName(getNotificationKey(repositoryFullName, notification.getName()));
         String notificationKey = notification.getName();
@@ -116,7 +118,7 @@ public class ConfigGraphUpdater {
     }
 
     private String getNotificationKey(Extending extending) {
-        return getNotificationKey(extending.getRepository(), extending.getName());
+        return getNotificationKey(extending.getExtending().getRepository(), extending.getExtending().getName());
     }
 
     private String getNotificationKey(String repository, String name) {

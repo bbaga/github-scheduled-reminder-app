@@ -3,7 +3,6 @@ package com.bbaga.githubscheduledreminderapp.domain.notifications.slack;
 import com.bbaga.githubscheduledreminderapp.domain.GitHubAppInstallationService;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.Notification;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.RepositoryRecord;
-import com.bbaga.githubscheduledreminderapp.domain.configuration.SlackNotification;
 import com.bbaga.githubscheduledreminderapp.domain.notifications.NotificationDataProviderInterface;
 import com.bbaga.githubscheduledreminderapp.domain.sources.github.RepositoryIssuesSource;
 import com.bbaga.githubscheduledreminderapp.domain.sources.github.RepositoryPRsSource;
@@ -14,13 +13,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ChannelNotificationDataProvider implements NotificationDataProviderInterface<ChannelNotificationDataProvider.Data> {
 
-    private final Notification<SlackNotification> notification;
+    private final Notification notification;
     private final ConcurrentHashMap<Integer, RepositoryRecord> repositories;
     private final GitHubAppInstallationService appInstallationService;
 
     private ChannelNotificationDataProvider(
         GitHubAppInstallationService appInstallationService,
-        Notification<SlackNotification> notification,
+        Notification notification,
         ConcurrentHashMap<Integer, RepositoryRecord> repositories
     ) {
         this.appInstallationService = appInstallationService;
@@ -30,7 +29,7 @@ public class ChannelNotificationDataProvider implements NotificationDataProvider
 
     public static ChannelNotificationDataProvider create(
         GitHubAppInstallationService appInstallationService,
-        Notification<SlackNotification> notification,
+        Notification notification,
         ConcurrentHashMap<Integer, RepositoryRecord> repositories
     ) {
         return new ChannelNotificationDataProvider(appInstallationService, notification, repositories);
@@ -65,15 +64,15 @@ public class ChannelNotificationDataProvider implements NotificationDataProvider
     }
 
     public static class Data {
-        private final Notification<SlackNotification> notification;
+        private final Notification notification;
         private final ArrayList<GHIssue> issues;
 
-        public Data(Notification<SlackNotification> notification, ArrayList<GHIssue> issues) {
+        public Data(Notification notification, ArrayList<GHIssue> issues) {
             this.notification = notification;
             this.issues = issues;
         }
 
-        public Notification<SlackNotification> getNotification() {
+        public Notification getNotification() {
             return notification;
         }
 

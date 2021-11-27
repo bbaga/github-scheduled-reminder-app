@@ -8,17 +8,16 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import java.util.Optional;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Notification <T> {
+public class Notification implements NotificationInterface {
     private String name = "";
     private String schedule;
     private String type = "";
-    private Extending extending;
 
     @JsonSubTypes({
         @JsonSubTypes.Type(value = SlackNotification.class, name = "slack/channel"),
     })
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = "type", defaultImpl = NotificationConfiguration.class)
-    private T config;
+    private NotificationConfigurationInterface config;
 
     @JsonProperty("timezone")
     private String timeZone = "UTC";
@@ -29,7 +28,7 @@ public class Notification <T> {
             String name,
             String schedule,
             String type,
-            T config
+            NotificationConfigurationInterface config
     ) {
         this.name = name;
         this.schedule = schedule;
@@ -61,20 +60,14 @@ public class Notification <T> {
         this.type = type;
     }
 
-    public T getConfig() {
+//    @Override
+    public NotificationConfigurationInterface getConfig() {
         return config;
     }
 
-    public void setConfig(T config) {
+//    @Override
+    public void setConfig(NotificationConfigurationInterface config) {
         this.config = config;
-    }
-
-    public Optional<Extending> getExtending() {
-        return Optional.ofNullable(extending);
-    }
-
-    public void setExtending(Extending extending) {
-        this.extending = extending;
     }
 
     public String getTimeZone() {

@@ -72,7 +72,7 @@ public class RepositoryInstallationEventListener implements ApplicationListener<
                             return;
                         }
 
-                        for (Notification notification : inRepoConfig.getNotifications()) {
+                        for (NotificationInterface notification : inRepoConfig.getNotifications()) {
                             configGraphUpdater.updateEntry(notification, installation.getId(), repo.getFullName(), Instant.now());
                         }
                     } catch (IOException | SchedulerException e) {

@@ -37,7 +37,7 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
 
     @Override
     public void send(ChannelNotificationDataProvider.Data data) {
-        Notification<SlackNotification> notification = data.getNotification();
+        Notification notification = data.getNotification();
         ArrayList<GHIssue> issues = data.getIssues();
 
         List<Block> sections = new ArrayList<>();
@@ -81,7 +81,7 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
         slackClient.postMessage(
             ChatPostMessageParams.builder()
                 .setBlocks(sections)
-                .setChannelId(notification.getConfig().getChannel())
+                .setChannelId(((SlackNotification) notification.getConfig()).getChannel())
                 .build()
         ).join();
     }

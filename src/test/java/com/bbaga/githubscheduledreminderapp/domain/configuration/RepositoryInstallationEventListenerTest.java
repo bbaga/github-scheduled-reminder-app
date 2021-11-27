@@ -17,7 +17,6 @@ import org.quartz.SchedulerException;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -57,8 +56,8 @@ class RepositoryInstallationEventListenerTest {
 }
             """;
 
-        ArrayList<Notification> notificationList = new ArrayList<>();
-        notificationList.add(new Notification("testing", "* * * * * ?", "slack/channel", new HashMap<>()));
+        ArrayList<NotificationInterface> notificationList = new ArrayList<>();
+        notificationList.add(new Notification("testing", "* * * * * ?", "slack/channel", new SlackNotification()));
 
         InRepoConfig inRepoConfig = new InRepoConfig();
         inRepoConfig.setEnabled(true);

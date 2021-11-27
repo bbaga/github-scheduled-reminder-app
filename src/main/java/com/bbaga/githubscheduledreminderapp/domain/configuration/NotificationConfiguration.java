@@ -4,13 +4,17 @@ import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.Source;
 
 import java.util.ArrayList;
 
-public class NotificationConfiguration {
+public class NotificationConfiguration implements NotificationConfigurationInterface {
     private ArrayList<Source> sources = new ArrayList<>();
 
+    public NotificationConfiguration() {}
+
+    @Override
     public ArrayList<Source> getSources() {
         return sources.size() == 0 ? NotificationConfiguration.getDefaultSources() : sources;
     }
 
+    @Override
     public void setSources(ArrayList<Source> sources) {
         this.sources = sources;
     }

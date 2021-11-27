@@ -9,11 +9,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class NotificationTest {
 
-    private Notification<SlackNotification> notification;
+    private Notification notification;
 
     @BeforeEach
     void setUp() {
-        notification = new Notification<SlackNotification>();
+        notification = new Notification();
     }
 
     @Test
@@ -46,7 +46,7 @@ class NotificationTest {
         config.setChannel("test-channel");
         notification.setConfig(config);
 
-        assertEquals("test-channel", notification.getConfig().getChannel());
+        assertEquals("test-channel", ((SlackNotification) notification.getConfig()).getChannel());
     }
 
     @Test
@@ -57,17 +57,5 @@ class NotificationTest {
         notification.setTimeZone("EST");
         tz = TimeZone.getTimeZone(notification.getTimeZone());
         assertEquals("Eastern Standard Time", tz.getDisplayName());
-    }
-
-    @Test
-    void setExtending() {
-        final Extending extending = new Extending();
-        extending.setName("name");
-        extending.setRepository("repo");
-        notification.setExtending(extending);
-
-        assertEquals("name", notification.getExtending().get().getName());
-        assertEquals("repo", notification.getExtending().get().getRepository());
-
     }
 }

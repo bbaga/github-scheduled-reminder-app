@@ -47,13 +47,13 @@ notifications:
         Assertions.assertEquals(true, parsedConfig.getEnabled());
         Assertions.assertEquals(1, parsedConfig.getNotifications().size());
 
-        Notification<SlackNotification> notification = parsedConfig.getNotifications().get(0);
+        Notification notification = (Notification) parsedConfig.getNotifications().get(0);
         Assertions.assertEquals("testing", notification.getName());
         Assertions.assertEquals("0 1 2 3 4 5 6", notification.getSchedule().get());
         Assertions.assertEquals("UTC", notification.getTimeZone());
         Assertions.assertEquals("slack/channel", notification.getType());
 
-        SlackNotification notificationConfig = notification.getConfig();
+        SlackNotification notificationConfig = (SlackNotification) notification.getConfig();
         Assertions.assertEquals("test-channel", notificationConfig.getChannel());
     }
 
@@ -87,13 +87,13 @@ notifications:
         Assertions.assertEquals(true, parsedConfig.getEnabled());
         Assertions.assertEquals(1, parsedConfig.getNotifications().size());
 
-        Notification<SlackNotification> notification = parsedConfig.getNotifications().get(0);
+        Notification notification = (Notification) parsedConfig.getNotifications().get(0);
         Assertions.assertEquals("timezone", notification.getName());
         Assertions.assertEquals("* * * * * *", notification.getSchedule().get());
         Assertions.assertEquals("EST", notification.getTimeZone());
         Assertions.assertEquals("slack/channel", notification.getType());
 
-        SlackNotification notificationConfig = notification.getConfig();
+        SlackNotification notificationConfig = ((SlackNotification) notification.getConfig());
         Assertions.assertEquals("dev-channel", notificationConfig.getChannel());
     }
 
@@ -124,10 +124,9 @@ notifications:
         Assertions.assertEquals(true, parsedConfig.getEnabled());
         Assertions.assertEquals(1, parsedConfig.getNotifications().size());
 
-        Notification<?> notification = parsedConfig.getNotifications().get(0);
-        Extending extension = notification.getExtending().get();
-        Assertions.assertEquals("some/repository", extension.getRepository());
-        Assertions.assertEquals("something", extension.getName());
+        Extending notification = (Extending) parsedConfig.getNotifications().get(0);
+        Assertions.assertEquals("some/repository", notification.getExtending().getRepository());
+        Assertions.assertEquals("something", notification.getExtending().getName());
     }
 
     @Test
@@ -141,6 +140,7 @@ notifications:
       repository: some/repository
       name: something
     config:
+      channel: gijdskgfjsd
       sources:
         - type: issues
         - type: pull-requests
@@ -164,9 +164,8 @@ notifications:
         Assertions.assertEquals(true, parsedConfig.getEnabled());
         Assertions.assertEquals(1, parsedConfig.getNotifications().size());
 
-        Notification<?> notification = parsedConfig.getNotifications().get(0);
-        Extending extension = notification.getExtending().get();
-        Assertions.assertEquals("some/repository", extension.getRepository());
-        Assertions.assertEquals("something", extension.getName());
+        Extending notification = (Extending) parsedConfig.getNotifications().get(0);
+        Assertions.assertEquals("some/repository", notification.getExtending().getRepository());
+        Assertions.assertEquals("something", notification.getExtending().getName());
     }
 }
