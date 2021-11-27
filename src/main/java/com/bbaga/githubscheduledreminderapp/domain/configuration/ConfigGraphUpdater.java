@@ -1,6 +1,5 @@
 package com.bbaga.githubscheduledreminderapp.domain.configuration;
 
-import com.bbaga.githubscheduledreminderapp.application.jobs.GitHubInstallationRepositoryScan;
 import com.bbaga.githubscheduledreminderapp.domain.jobs.scheduling.NotificationJobScheduler;
 import org.quartz.*;
 import org.slf4j.Logger;
@@ -23,7 +22,7 @@ public class ConfigGraphUpdater {
     }
 
     public void updateEntry(
-        Notification notification,
+        Notification<?> notification,
         long installationId,
         String repositoryFullName,
         Instant timestamp
@@ -36,7 +35,7 @@ public class ConfigGraphUpdater {
         updateRepoEntry(notification, installationId, repositoryFullName, timestamp);
     }
 
-    private void updateRepoEntry(Notification notification, long installationId, String repositoryFullName, Instant timestamp) {
+    private void updateRepoEntry(Notification<?> notification, long installationId, String repositoryFullName, Instant timestamp) {
         logger.info("Updating repository entry: installation id {}, setting {} in {}", installationId, repositoryFullName, notification.getName());
         if (notification.getExtending().isEmpty()) {
             return;
@@ -54,7 +53,7 @@ public class ConfigGraphUpdater {
         }
     }
 
-    private void updateSchedule(Notification notification, long installationId, String repositoryFullName, Instant timestamp) throws SchedulerException {
+    private void updateSchedule(Notification<?> notification, long installationId, String repositoryFullName, Instant timestamp) throws SchedulerException {
         logger.info("Updating schedule: installation id {}, {}/{}", installationId, repositoryFullName, notification.getName());
         notification.setName(getNotificationKey(repositoryFullName, notification.getName()));
         String notificationKey = notification.getName();

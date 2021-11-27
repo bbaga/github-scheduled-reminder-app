@@ -1,22 +1,19 @@
 package com.bbaga.githubscheduledreminderapp.domain.configuration;
 
-import com.bbaga.githubscheduledreminderapp.domain.configuration.Extending;
-import com.bbaga.githubscheduledreminderapp.domain.configuration.Notification;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.HashMap;
 import java.util.TimeZone;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class NotificationTest {
 
-    private Notification notification;
+    private Notification<SlackNotification> notification;
 
     @BeforeEach
     void setUp() {
-        notification = new Notification();
+        notification = new Notification<SlackNotification>();
     }
 
     @Test
@@ -45,11 +42,11 @@ class NotificationTest {
 
     @Test
     void setConfig() {
-        final HashMap<String, String> map = new HashMap<>();
-        map.put("foo", "bar");
-        notification.setConfig(map);
+        SlackNotification config = new SlackNotification();
+        config.setChannel("test-channel");
+        notification.setConfig(config);
 
-        assertEquals("bar", notification.getConfig().get("foo"));
+        assertEquals("test-channel", notification.getConfig().getChannel());
     }
 
     @Test

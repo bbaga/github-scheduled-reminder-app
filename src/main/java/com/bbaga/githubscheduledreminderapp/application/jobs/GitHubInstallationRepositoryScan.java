@@ -83,7 +83,7 @@ public class GitHubInstallationRepositoryScan implements Job {
                         continue;
                     }
 
-                    for (Notification notification : inRepoConfig.getNotifications()) {
+                    for (Notification<?> notification : inRepoConfig.getNotifications()) {
                         configGraphUpdater.updateEntry(notification, installationId, repo.getFullName(), currentRunStamp);
                     }
                 } catch (GHFileNotFoundException e) {
