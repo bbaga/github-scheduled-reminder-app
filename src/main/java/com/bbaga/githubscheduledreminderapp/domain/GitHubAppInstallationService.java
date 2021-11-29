@@ -14,13 +14,23 @@ import java.util.HashMap;
 
 @Service
 public class GitHubAppInstallationService {
+    private final GitHub gitHub;
     private final GitHubBuilderFactory gitHubBuilderFactory;
     private final GitHubInstallationRepository installationRepository;
     private final HashMap<Long, GitHub> installationClientCache = new HashMap<>();
 
-    public GitHubAppInstallationService(GitHubBuilderFactory gitHubBuilderFactory, GitHubInstallationRepository installationRepository) {
+    public GitHubAppInstallationService(
+        GitHub gitHub,
+        GitHubBuilderFactory gitHubBuilderFactory,
+        GitHubInstallationRepository installationRepository
+    ) {
+        this.gitHub = gitHub;
         this.gitHubBuilderFactory = gitHubBuilderFactory;
         this.installationRepository = installationRepository;
+    }
+
+    public GitHub getGitHub() {
+        return gitHub;
     }
 
     public GitHub getClientByInstallationId(Long installationId) {

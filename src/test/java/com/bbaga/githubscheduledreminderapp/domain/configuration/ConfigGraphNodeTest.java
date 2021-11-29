@@ -36,7 +36,7 @@ class ConfigGraphNodeTest {
         long installationId = 12;
         String repoName = "repository-name";
         Instant lastSeen = Instant.now();
-        RepositoryRecord repoRecord = new RepositoryRecord(repoName, installationId, lastSeen);
+        RepositoryRecord repoRecord = new RepositoryRecord(repoName, installationId, lastSeen, null);
 
         assertEquals(0, node.getRepositories().size());
         node.putRepository(repoRecord);

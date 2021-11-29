@@ -6,11 +6,13 @@ public class RepositoryRecord {
     private final String repository;
     private final Long installationId;
     private final Instant seenAt;
+    private final NotificationConfigurationInterface config;
 
-    public RepositoryRecord(String repository, Long installationId, Instant seenAt) {
+    public RepositoryRecord(String repository, Long installationId, Instant seenAt, NotificationConfigurationInterface config) {
         this.repository = repository;
         this.installationId = installationId;
         this.seenAt = seenAt;
+        this.config = config;
     }
 
     public String getRepository() {
@@ -23,6 +25,10 @@ public class RepositoryRecord {
 
     public Instant getSeenAt() {
         return seenAt;
+    }
+
+    public NotificationConfigurationInterface getConfig() {
+        return config;
     }
 
     @Override

@@ -52,7 +52,7 @@ public class ConfigGraphUpdater {
 
         String notificationKey = getNotificationKey(extending);
         if (configGraph.containsKey(notificationKey)) {
-            configGraph.get(notificationKey).putRepository(new RepositoryRecord(repositoryFullName, installationId, timestamp));
+            configGraph.get(notificationKey).putRepository(new RepositoryRecord(repositoryFullName, installationId, timestamp, notification.getConfig()));
         }
     }
 
@@ -63,13 +63,13 @@ public class ConfigGraphUpdater {
 
         if (!configGraph.containsKey(notificationKey)) {
             configGraph.put(notificationKey, new ConfigGraphNode(installationId, notification, timestamp));
-            notificationJobScheduler.createSchedule(notification);
         } else {
             ConfigGraphNode node = configGraph.get(notificationKey);
             node.setNotification(notification);
             node.setSeenAt(timestamp);
-            notificationJobScheduler.updateSchedule(notification);
         }
+
+        notificationJobScheduler.upsertSchedule(notification);
     }
 
     public void clearOutdated(Long installationId, Instant timestamp) {

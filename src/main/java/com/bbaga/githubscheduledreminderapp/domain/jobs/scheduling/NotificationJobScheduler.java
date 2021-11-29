@@ -14,6 +14,22 @@ public class NotificationJobScheduler {
         this.scheduler = scheduler;
     }
 
+    public void upsertSchedule(Notification notification) throws SchedulerException {
+        Optional<String> schedule = notification.getSchedule();
+
+        if (schedule.isEmpty()) {
+            return;
+        }
+
+        JobKey jobKey = new JobKey(notification.getName());
+
+        if (scheduler.checkExists(jobKey)) {
+            updateSchedule(notification);
+        } else {
+            createSchedule(notification);
+        }
+    }
+
     public void createSchedule(Notification notification) throws SchedulerException {
         Optional<String> schedule = notification.getSchedule();
 

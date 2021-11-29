@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DraftFilter extends AbstractFilter {
+
     @JsonProperty("include-drafts")
     private Boolean includeDrafts = false;
 

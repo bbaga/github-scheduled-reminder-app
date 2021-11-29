@@ -140,13 +140,18 @@ notifications:
       repository: some/repository
       name: something
     config:
-      channel: gijdskgfjsd
       sources:
-        - type: issues
-        - type: pull-requests
+        - type: search-issues
+          query: "alma barack"
+        - type: repository-issues
+        - type: repository-prs
           filters:
             - type: draft-filter
               include-drafts: true
+        - type: search-prs-by-reviewers
+          users:
+            - foo
+            - bar
 """;
 
         InputStream stream = new ByteArrayInputStream(config.getBytes(StandardCharsets.UTF_8));

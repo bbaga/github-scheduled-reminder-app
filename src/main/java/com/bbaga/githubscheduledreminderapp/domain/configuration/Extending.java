@@ -7,8 +7,7 @@ public class Extending implements NotificationInterface {
     private MainConfig extending;
 
     @JsonSubTypes({
-            @JsonSubTypes.Type(value = SlackNotification.class),
-            @JsonSubTypes.Type(value = NotificationConfiguration.class),
+        @JsonSubTypes.Type(value = NotificationConfiguration.class),
     })
     @JsonTypeInfo(use = JsonTypeInfo.Id.DEDUCTION, defaultImpl = NotificationConfiguration.class)
     private NotificationConfigurationInterface config;
