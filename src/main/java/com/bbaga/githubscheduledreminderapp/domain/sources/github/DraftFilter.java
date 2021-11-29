@@ -5,7 +5,7 @@ import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GHPullRequest;
 
 public class DraftFilter implements IssueFilterInterface {
-    com.bbaga.githubscheduledreminderapp.domain.configuration.sources.filters.DraftFilter config;
+    private com.bbaga.githubscheduledreminderapp.domain.configuration.sources.filters.DraftFilter config;
 
     @Override
     public void configure(AbstractFilter config) {
@@ -20,7 +20,7 @@ public class DraftFilter implements IssueFilterInterface {
     @Override
     public Boolean filter(GHPullRequest pr) {
         try {
-            return pr.isDraft();
+            return !config.getIncludeDrafts() && pr.isDraft();
         } catch (java.io.IOException e) {
             e.printStackTrace();
         }
