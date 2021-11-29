@@ -1,6 +1,7 @@
 package com.bbaga.githubscheduledreminderapp.domain.notifications.slack;
 
 import com.bbaga.githubscheduledreminderapp.domain.configuration.Notification;
+import com.bbaga.githubscheduledreminderapp.domain.configuration.SlackNotification;
 import com.hubspot.algebra.Result;
 import com.hubspot.slack.client.SlackClient;
 import com.hubspot.slack.client.methods.params.chat.ChatPostMessageParams;
@@ -38,8 +39,8 @@ class ChannelNotificationTest {
         future.complete(result);
 
         ChannelNotification service = new ChannelNotification(client);
-        HashMap<String, String> config = new HashMap<>();
-        config.put("channel", "test");
+        SlackNotification config = new SlackNotification();
+        config.setChannel("test");
         Notification notification = new Notification();
         notification.setConfig(config);
         ArrayList<GHIssue> issues = new ArrayList<>();
@@ -81,8 +82,8 @@ class ChannelNotificationTest {
         future.complete(result);
 
         ChannelNotification service = new ChannelNotification(client);
-        HashMap<String, String> config = new HashMap<>();
-        config.put("channel", "test");
+        SlackNotification config = new SlackNotification();
+        config.setChannel("test");
         Notification notification = new Notification();
         notification.setConfig(config);
         ArrayList<GHIssue> issues = new ArrayList<>();

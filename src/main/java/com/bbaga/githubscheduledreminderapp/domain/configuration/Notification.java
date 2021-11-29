@@ -2,17 +2,22 @@ package com.bbaga.githubscheduledreminderapp.domain.configuration;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
-import java.util.HashMap;
 import java.util.Optional;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Notification {
+public class Notification implements NotificationInterface {
     private String name = "";
     private String schedule;
     private String type = "";
-    private Extending extending;
-    private HashMap<String, ?> config = new HashMap<>();
+
+    @JsonSubTypes({
+        @JsonSubTypes.Type(value = SlackNotification.class, name = "slack/channel"),
+    })
+    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = "type", defaultImpl = NotificationConfiguration.class)
+    private NotificationConfigurationInterface config;
 
     @JsonProperty("timezone")
     private String timeZone = "UTC";
@@ -23,7 +28,7 @@ public class Notification {
             String name,
             String schedule,
             String type,
-            HashMap<String, ?> config
+            NotificationConfigurationInterface config
     ) {
         this.name = name;
         this.schedule = schedule;
@@ -55,20 +60,14 @@ public class Notification {
         this.type = type;
     }
 
-    public HashMap<String, ?> getConfig() {
+//    @Override
+    public NotificationConfigurationInterface getConfig() {
         return config;
     }
 
-    public void setConfig(HashMap<String, String> config) {
+//    @Override
+    public void setConfig(NotificationConfigurationInterface config) {
         this.config = config;
-    }
-
-    public Optional<Extending> getExtending() {
-        return Optional.ofNullable(extending);
-    }
-
-    public void setExtending(Extending extending) {
-        this.extending = extending;
     }
 
     public String getTimeZone() {

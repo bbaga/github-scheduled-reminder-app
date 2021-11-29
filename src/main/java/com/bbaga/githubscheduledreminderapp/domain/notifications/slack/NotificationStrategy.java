@@ -8,12 +8,18 @@ public class NotificationStrategy implements NotificationStrategyInterface {
     private final GitHubAppInstallationService appInstallationService;
     private final ChannelNotification notificationService;
 
-    private NotificationStrategy(GitHubAppInstallationService appInstallationService, ChannelNotification notificationService) {
+    private NotificationStrategy(
+        GitHubAppInstallationService appInstallationService,
+        ChannelNotification notificationService
+    ) {
         this.appInstallationService = appInstallationService;
         this.notificationService = notificationService;
     }
 
-    public static NotificationStrategy create(GitHubAppInstallationService appInstallationService, ChannelNotification notificationService) {
+    public static NotificationStrategy create(
+        GitHubAppInstallationService appInstallationService,
+        ChannelNotification notificationService
+    ) {
         return new NotificationStrategy(appInstallationService, notificationService);
     }
 
@@ -24,9 +30,9 @@ public class NotificationStrategy implements NotificationStrategyInterface {
 
     private ChannelNotificationDataProvider getDataProvider(ConfigGraphNode node) {
         return ChannelNotificationDataProvider.create(
-                appInstallationService,
-                node.getNotification(),
-                node.getRepositories()
+            appInstallationService,
+            node.getNotification(),
+            node.getRepositories()
         );
     }
 }

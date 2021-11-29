@@ -1,22 +1,57 @@
 package com.bbaga.githubscheduledreminderapp.domain.configuration;
 
-public class Extending {
-    private String repository = "";
-    private String name = "";
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
-    public String getRepository() {
-        return repository;
+public class Extending implements NotificationInterface {
+    private MainConfig extending;
+
+    @JsonSubTypes({
+        @JsonSubTypes.Type(value = NotificationConfiguration.class),
+    })
+    @JsonTypeInfo(use = JsonTypeInfo.Id.DEDUCTION, defaultImpl = NotificationConfiguration.class)
+    private NotificationConfigurationInterface config;
+
+    public Extending() {}
+
+    public MainConfig getExtending() {
+        return extending;
     }
 
-    public void setRepository(String repository) {
-        this.repository = repository;
+    public void setExtending(MainConfig extending) {
+        this.extending = extending;
     }
 
-    public String getName() {
-        return name;
+    @Override
+    public NotificationConfigurationInterface getConfig() {
+        return this.config;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    @Override
+    public void setConfig(NotificationConfigurationInterface config) {
+        this.config = config;
+    }
+
+    public static class MainConfig {
+        private String repository = "";
+        private String name = "";
+
+        public MainConfig() {}
+
+        public String getRepository() {
+            return repository;
+        }
+
+        public void setRepository(String repository) {
+            this.repository = repository;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
     }
 }

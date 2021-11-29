@@ -1,6 +1,7 @@
 package com.bbaga.githubscheduledreminderapp.domain.notifications.slack;
 
 import com.bbaga.githubscheduledreminderapp.domain.configuration.Notification;
+import com.bbaga.githubscheduledreminderapp.domain.configuration.SlackNotification;
 import com.bbaga.githubscheduledreminderapp.domain.notifications.NotificationInterface;
 import com.hubspot.slack.client.SlackClient;
 import com.hubspot.slack.client.methods.params.chat.ChatPostMessageParams;
@@ -80,7 +81,7 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
         slackClient.postMessage(
             ChatPostMessageParams.builder()
                 .setBlocks(sections)
-                .setChannelId(notification.getConfig().get("channel").toString())
+                .setChannelId(((SlackNotification) notification.getConfig()).getChannel())
                 .build()
         ).join();
     }

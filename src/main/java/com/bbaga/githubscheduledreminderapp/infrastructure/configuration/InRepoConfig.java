@@ -1,13 +1,15 @@
 package com.bbaga.githubscheduledreminderapp.infrastructure.configuration;
 
-import com.bbaga.githubscheduledreminderapp.domain.configuration.Notification;
+import com.bbaga.githubscheduledreminderapp.domain.configuration.*;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class InRepoConfig {
     private Boolean enabled;
-    private List<Notification> notifications = new ArrayList<>();
+    private List<NotificationInterface> notifications = new ArrayList<>();
 
     public Boolean getEnabled() {
         return enabled;
@@ -17,11 +19,16 @@ public class InRepoConfig {
         this.enabled = enabled;
     }
 
-    public List<Notification> getNotifications() {
+    @JsonSubTypes({
+        @JsonSubTypes.Type(value = Notification.class),
+        @JsonSubTypes.Type(value = Extending.class),
+    })
+    @JsonTypeInfo(use = JsonTypeInfo.Id.DEDUCTION)
+    public List<NotificationInterface> getNotifications() {
         return notifications;
     }
 
-    public void setNotifications(List<Notification> notifications) {
+    public void setNotifications(List<NotificationInterface> notifications) {
         this.notifications = notifications;
     }
 }

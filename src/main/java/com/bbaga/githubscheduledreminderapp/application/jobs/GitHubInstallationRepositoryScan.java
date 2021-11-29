@@ -3,6 +3,7 @@ package com.bbaga.githubscheduledreminderapp.application.jobs;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.ConfigGraphNode;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.ConfigGraphUpdater;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.Notification;
+import com.bbaga.githubscheduledreminderapp.domain.configuration.NotificationInterface;
 import com.bbaga.githubscheduledreminderapp.infrastructure.configuration.InRepoConfig;
 import com.bbaga.githubscheduledreminderapp.infrastructure.configuration.InRepoConfigParser;
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubBuilderFactory;
@@ -83,7 +84,7 @@ public class GitHubInstallationRepositoryScan implements Job {
                         continue;
                     }
 
-                    for (Notification notification : inRepoConfig.getNotifications()) {
+                    for (NotificationInterface notification : inRepoConfig.getNotifications()) {
                         configGraphUpdater.updateEntry(notification, installationId, repo.getFullName(), currentRunStamp);
                     }
                 } catch (GHFileNotFoundException e) {

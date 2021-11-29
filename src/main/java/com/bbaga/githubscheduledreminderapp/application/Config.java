@@ -159,8 +159,8 @@ public class Config {
         }
 
         SlackClientRuntimeConfig runtimeConfig = SlackClientRuntimeConfig.builder()
-                .setTokenSupplier(() -> slackApiToken)
-                .build();
+            .setTokenSupplier(() -> slackApiToken)
+            .build();
 
         return SlackClientFactory.defaultFactory().build(runtimeConfig);
     }
@@ -173,8 +173,8 @@ public class Config {
 
         if (Objects.equals(this.stateStorageType, ConfigPersistenceFactory.PersistenceType.LOCAL_FS.label)) {
             configPersistence = factory.create(
-                    ConfigPersistenceFactory.PersistenceType.LOCAL_FS,
-                    new HashMap<>(Map.of("filePath", stateStorageFsFilePath))
+                ConfigPersistenceFactory.PersistenceType.LOCAL_FS,
+                new HashMap<>(Map.of("filePath", stateStorageFsFilePath))
             );
         } else {
             throw new RuntimeException("Could not create state loader instance");

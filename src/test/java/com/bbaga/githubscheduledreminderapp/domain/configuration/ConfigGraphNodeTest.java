@@ -1,14 +1,10 @@
 package com.bbaga.githubscheduledreminderapp.domain.configuration;
 
-import com.bbaga.githubscheduledreminderapp.domain.configuration.RepositoryRecord;
-import com.bbaga.githubscheduledreminderapp.domain.configuration.ConfigGraphNode;
-import com.bbaga.githubscheduledreminderapp.domain.configuration.Notification;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.time.Instant;
-import java.util.HashMap;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -18,7 +14,7 @@ class ConfigGraphNodeTest {
     private static Stream<Arguments> testSubjectProvider() {
         final long installationId = 1;
         final String notificationName = "notification-name";
-        final Notification notification = new Notification(notificationName, "", "", new HashMap<>());
+        final Notification notification = new Notification(notificationName, "", "", new SlackNotification());
         final Instant instant = Instant.now();
 
         return Stream.of(
@@ -40,7 +36,7 @@ class ConfigGraphNodeTest {
         long installationId = 12;
         String repoName = "repository-name";
         Instant lastSeen = Instant.now();
-        RepositoryRecord repoRecord = new RepositoryRecord(repoName, installationId, lastSeen);
+        RepositoryRecord repoRecord = new RepositoryRecord(repoName, installationId, lastSeen, null);
 
         assertEquals(0, node.getRepositories().size());
         node.putRepository(repoRecord);

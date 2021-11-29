@@ -1,6 +1,5 @@
 package com.bbaga.githubscheduledreminderapp.domain.configuration;
 
-import com.bbaga.githubscheduledreminderapp.application.jobs.GitHubInstallationRepositoryScan;
 import com.bbaga.githubscheduledreminderapp.domain.jobs.scheduling.NotificationJobScheduler;
 import org.quartz.*;
 import org.slf4j.Logger;
@@ -23,34 +22,37 @@ public class ConfigGraphUpdater {
     }
 
     public void updateEntry(
-        Notification notification,
+        NotificationInterface notification,
         long installationId,
         String repositoryFullName,
         Instant timestamp
     ) throws SchedulerException {
-        if (notification.getSchedule().isPresent()) {
-            updateSchedule(notification, installationId, repositoryFullName, timestamp);
-            return;
+        if (notification instanceof Notification) {
+            Notification main = (Notification) notification;
+            if (main.getSchedule().isPresent()) {
+                updateSchedule(main, installationId, repositoryFullName, timestamp);
+                return;
+            }
         }
 
         updateRepoEntry(notification, installationId, repositoryFullName, timestamp);
     }
 
-    private void updateRepoEntry(Notification notification, long installationId, String repositoryFullName, Instant timestamp) {
-        logger.info("Updating repository entry: installation id {}, setting {} in {}", installationId, repositoryFullName, notification.getName());
-        if (notification.getExtending().isEmpty()) {
-            return;
+    private void updateRepoEntry(NotificationInterface notification, long installationId, String repositoryFullName, Instant timestamp) {
+        logger.info("Updating repository entry: installation id {}, in {}", installationId, repositoryFullName);
+        Extending extending = null;
+
+        if (notification instanceof Extending) {
+            extending = (Extending) notification;
         }
 
-        Extending extending = notification.getExtending().get();
-
-        if (extending.getRepository().isBlank() || extending.getName().isBlank()) {
+        if (extending == null || extending.getExtending().getRepository().isBlank() || extending.getExtending().getName().isBlank()) {
             return;
         }
 
         String notificationKey = getNotificationKey(extending);
         if (configGraph.containsKey(notificationKey)) {
-            configGraph.get(notificationKey).putRepository(new RepositoryRecord(repositoryFullName, installationId, timestamp));
+            configGraph.get(notificationKey).putRepository(new RepositoryRecord(repositoryFullName, installationId, timestamp, notification.getConfig()));
         }
     }
 
@@ -61,13 +63,13 @@ public class ConfigGraphUpdater {
 
         if (!configGraph.containsKey(notificationKey)) {
             configGraph.put(notificationKey, new ConfigGraphNode(installationId, notification, timestamp));
-            notificationJobScheduler.createSchedule(notification);
         } else {
             ConfigGraphNode node = configGraph.get(notificationKey);
             node.setNotification(notification);
             node.setSeenAt(timestamp);
-            notificationJobScheduler.updateSchedule(notification);
         }
+
+        notificationJobScheduler.upsertSchedule(notification);
     }
 
     public void clearOutdated(Long installationId, Instant timestamp) {
@@ -117,7 +119,7 @@ public class ConfigGraphUpdater {
     }
 
     private String getNotificationKey(Extending extending) {
-        return getNotificationKey(extending.getRepository(), extending.getName());
+        return getNotificationKey(extending.getExtending().getRepository(), extending.getExtending().getName());
     }
 
     private String getNotificationKey(String repository, String name) {

@@ -3,15 +3,17 @@ package com.bbaga.githubscheduledreminderapp.domain.notifications.slack;
 import com.bbaga.githubscheduledreminderapp.domain.GitHubAppInstallationService;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.Notification;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.RepositoryRecord;
+import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.Source;
 import com.bbaga.githubscheduledreminderapp.domain.notifications.NotificationDataProviderInterface;
-import com.bbaga.githubscheduledreminderapp.domain.sources.github.RepositoryIssuesSource;
-import com.bbaga.githubscheduledreminderapp.domain.sources.github.RepositoryPRsSource;
+import com.bbaga.githubscheduledreminderapp.domain.sources.github.RepositoryAsSourceInterface;
+import com.bbaga.githubscheduledreminderapp.domain.sources.github.SearchAsSourceInterface;
+import com.bbaga.githubscheduledreminderapp.domain.sources.github.SourceProvider;
 import org.kohsuke.github.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 public class ChannelNotificationDataProvider implements NotificationDataProviderInterface<ChannelNotificationDataProvider.Data> {
 
@@ -41,16 +43,60 @@ public class ChannelNotificationDataProvider implements NotificationDataProvider
 
         GitHub client;
         ArrayList<GHIssue> issues = new ArrayList<>();
-        for (RepositoryRecord repository : repositories.values()) {
-            client = appInstallationService.getClientByInstallationId(repository.getInstallationId());
-            try {
-                GHRepository repo = client.getRepository(repository.getRepository());
-                issues.addAll(RepositoryIssuesSource.get(repo));
-                issues.addAll(RepositoryPRsSource.get(repo));
-            } catch (IOException e) {
-                e.printStackTrace();
+        ArrayList<Source> repoAsSource = new ArrayList<>();
+
+        for (Source sourceConfig : notification.getConfig().getSources()) {
+            if (sourceConfig.isRepositoryAsSource()) {
+                repoAsSource.add(sourceConfig);
             }
         }
+
+        for (RepositoryRecord repository : repositories.values()) {
+            client = appInstallationService.getClientByInstallationId(repository.getInstallationId());
+            GHRepository repo;
+            try {
+                repo = client.getRepository(repository.getRepository());
+            } catch (IOException e) {
+                e.printStackTrace();
+                continue;
+            }
+
+            if (repository.getConfig() != null && repository.getConfig().getSources().size() > 0) {
+                for (Source sourceConfig : repository.getConfig().getSources()) {
+                    if (sourceConfig.isSearchAsSource()) {
+                        SearchAsSourceInterface<GHIssue> source = SourceProvider.getSearchAsSourceProvider(sourceConfig);
+                        try {
+                            issues.addAll(source.get(repo, client));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+
+                continue;
+            }
+
+            for (Source sourceConfig : repoAsSource) {
+                RepositoryAsSourceInterface<GHIssue> source = SourceProvider.getRepositoryAsSourceProvider(sourceConfig);
+                try {
+                    issues.addAll(source.get(repo));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        HashSet<String> uniqueIssues = new HashSet<>();
+        issues = issues.stream().filter((GHIssue issue) -> {
+            String id = issue.getRepository().getFullName() + "/" + issue.getNumber();
+            if (!uniqueIssues.contains(id)) {
+                uniqueIssues.add(id);
+                return true;
+            }
+
+            return false;
+        }).collect(Collectors.toCollection(ArrayList::new));
+        uniqueIssues.clear();
 
         issues.sort((GHIssue issueA, GHIssue issueB) -> {
             try {

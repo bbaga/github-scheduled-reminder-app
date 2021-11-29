@@ -1,11 +1,8 @@
 package com.bbaga.githubscheduledreminderapp.domain.configuration;
 
-import com.bbaga.githubscheduledreminderapp.domain.configuration.Extending;
-import com.bbaga.githubscheduledreminderapp.domain.configuration.Notification;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.HashMap;
 import java.util.TimeZone;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -45,11 +42,11 @@ class NotificationTest {
 
     @Test
     void setConfig() {
-        final HashMap<String, String> map = new HashMap<>();
-        map.put("foo", "bar");
-        notification.setConfig(map);
+        SlackNotification config = new SlackNotification();
+        config.setChannel("test-channel");
+        notification.setConfig(config);
 
-        assertEquals("bar", notification.getConfig().get("foo"));
+        assertEquals("test-channel", ((SlackNotification) notification.getConfig()).getChannel());
     }
 
     @Test
@@ -60,17 +57,5 @@ class NotificationTest {
         notification.setTimeZone("EST");
         tz = TimeZone.getTimeZone(notification.getTimeZone());
         assertEquals("Eastern Standard Time", tz.getDisplayName());
-    }
-
-    @Test
-    void setExtending() {
-        final Extending extending = new Extending();
-        extending.setName("name");
-        extending.setRepository("repo");
-        notification.setExtending(extending);
-
-        assertEquals("name", notification.getExtending().get().getName());
-        assertEquals("repo", notification.getExtending().get().getRepository());
-
     }
 }
