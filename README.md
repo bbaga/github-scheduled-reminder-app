@@ -3,11 +3,12 @@
 # github-scheduled-reminder-app
 Scheduled reminders about PRs and Issues. This project may be useful for teams using GitHub Enterprise versions that doesn't have the reminder feature implemented yet. 
 
-⚠ This is all experimental work, not meant to provide any value at this stage!
+> ⚠ This tool comes with no guaranties, use it with a healthy dose of caution!
 
 # ToC
 1. [Development](#development)
-2. [Configuration](#configuration) 
+2. [Configuration](#configuration)
+   1. [Sources](docs/sources.md)
 
 # Development
 ## Requirements
