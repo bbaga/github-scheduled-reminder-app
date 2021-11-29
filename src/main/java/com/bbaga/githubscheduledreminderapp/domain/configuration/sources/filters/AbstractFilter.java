@@ -6,6 +6,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public abstract class AbstractFilter {
     private String type;
 
+    public AbstractFilter(String type) {
+        this.type = type;
+    }
+
     public String getType() {
         return type;
     }

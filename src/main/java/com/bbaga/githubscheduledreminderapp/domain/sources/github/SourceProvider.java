@@ -22,6 +22,7 @@ public class SourceProvider {
 
         return source;
     }
+
     public static SearchAsSourceInterface<GHIssue> getSearchAsSourceProvider(Source config) {
         SearchAsSourceInterface<GHIssue> source;
         String type = config.getType();

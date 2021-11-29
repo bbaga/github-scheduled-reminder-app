@@ -1,6 +1,7 @@
 package com.bbaga.githubscheduledreminderapp.domain.sources.github;
 
 import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.Source;
+import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.filters.AbstractFilter;
 import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GHIssueState;
 import org.kohsuke.github.GHPullRequest;
@@ -19,14 +20,15 @@ public class RepositoryPRsSource implements RepositoryAsSourceInterface <GHIssue
 
     public ArrayList<GHIssue> get(GHRepository repository) throws IOException {
         ArrayList<GHIssue> pullRequests = new ArrayList<>();
+
         repository.getPullRequests(GHIssueState.OPEN).forEach((GHPullRequest pr) -> {
-            try {
-                if (!pr.isDraft()) {
-                    pullRequests.add(pr);
+            for (AbstractFilter filter : source.getFilters()) {
+                if (FilterProvider.get(filter).filter(pr)) {
+                    return;
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
             }
+
+            pullRequests.add(pr);
         });
 
         return pullRequests;

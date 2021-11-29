@@ -2,7 +2,11 @@ package com.bbaga.githubscheduledreminderapp.infrastructure.configuration;
 
 import com.bbaga.githubscheduledreminderapp.domain.configuration.Extending;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.Notification;
+import com.bbaga.githubscheduledreminderapp.domain.configuration.NotificationConfigurationInterface;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.SlackNotification;
+import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.*;
+import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.filters.AbstractFilter;
+import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.filters.DraftFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.junit.jupiter.api.Assertions;
@@ -15,6 +19,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 
 class InRepoConfigParserTest {
 
@@ -172,5 +177,19 @@ notifications:
         Extending notification = (Extending) parsedConfig.getNotifications().get(0);
         Assertions.assertEquals("some/repository", notification.getExtending().getRepository());
         Assertions.assertEquals("something", notification.getExtending().getName());
+
+        Assertions.assertNotNull(notification.getConfig());
+
+        ArrayList<Source> sources = notification.getConfig().getSources();
+        Assertions.assertEquals(4, sources.size());
+        Assertions.assertTrue(sources.get(0) instanceof SearchIssuesSource);
+        Assertions.assertTrue(sources.get(1) instanceof RepositoryIssuesSource);
+        Assertions.assertTrue(sources.get(2) instanceof RepositoryPRsSource);
+        Assertions.assertTrue(sources.get(3) instanceof SearchPRsByReviewersSource);
+
+        ArrayList<AbstractFilter> filters = sources.get(2).getFilters();
+        Assertions.assertEquals(1, filters.size());
+        Assertions.assertTrue(filters.get(0) instanceof DraftFilter);
+        Assertions.assertTrue(((DraftFilter) filters.get(0)).getIncludeDrafts());
     }
 }

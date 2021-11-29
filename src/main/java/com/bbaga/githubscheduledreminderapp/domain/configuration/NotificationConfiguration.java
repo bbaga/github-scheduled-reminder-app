@@ -1,6 +1,8 @@
 package com.bbaga.githubscheduledreminderapp.domain.configuration;
 
 import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.*;
+import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.filters.AbstractFilter;
+import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.filters.DraftFilter;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
@@ -39,8 +41,11 @@ public class NotificationConfiguration implements NotificationConfigurationInter
 
     public static ArrayList<Source> getDefaultSources() {
         ArrayList<Source> sources = new ArrayList<>();
+        ArrayList<AbstractFilter> prFilters = new ArrayList<>();
+        prFilters.add(new DraftFilter());
+
         sources.add(new RepositoryIssuesSource(REPOSITORY_ISSUES));
-        sources.add(new RepositoryPRsSource(REPOSITORY_PRS));
+        sources.add(new RepositoryPRsSource(REPOSITORY_PRS, prFilters));
 
         return sources;
     }

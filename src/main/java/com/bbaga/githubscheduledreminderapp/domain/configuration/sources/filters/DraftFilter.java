@@ -9,6 +9,10 @@ public class DraftFilter extends AbstractFilter {
     @JsonProperty("include-drafts")
     private Boolean includeDrafts = false;
 
+    public DraftFilter() {
+        super(Filters.DraftFilter.label);
+    }
+
     public Boolean getIncludeDrafts() {
         return includeDrafts;
     }
