@@ -7,7 +7,30 @@ For example, by default, draft PRs will be filtered out as work in progress is r
 
 > ⚠ Once a source is configured, all other default sources will be disabled!
 
-## Example
+## Examples
+
+```yaml
+enabled: true
+notifications:
+  - name: something
+    schedule: "0 0 12 * * ?"
+    type: slack/channel
+    timezone: "My/TimeZone"
+    config:
+      channel: "some-slack-channel"
+      sources:
+        - type: repository-issues
+        - type: repository-prs
+          filters:
+            - type: draft-filter
+              include-drafts: true
+        - type: search-prs-by-reviewers
+          users:
+            - foo
+            - bar
+        - type: search-issues
+          query: "label:\"help wanted\""
+```
 
 ```yaml
 enabled: true
@@ -17,11 +40,6 @@ notifications:
       name: something
     config:
       sources:
-        - type: repository-issues
-        - type: repository-prs
-          filters:
-            - type: draft-filter
-              include-drafts: true
         - type: search-prs-by-reviewers
           users:
             - foo
