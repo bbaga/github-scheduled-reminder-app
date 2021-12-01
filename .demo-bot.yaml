@@ -3,3 +3,6 @@ notifications:
   - extending: 
       repository: bbaga/app-testing
       name: multirepo
+    config:
+      sources:
+        - type: repository-issues
