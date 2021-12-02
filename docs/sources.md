@@ -28,6 +28,8 @@ notifications:
           users:
             - foo
             - bar
+          teams:
+            - my-org/my-team
         - type: search-issues
           query: "label:\"help wanted\""
 ```
@@ -44,6 +46,8 @@ notifications:
           users:
             - foo
             - bar
+          teams:
+            - my-org/my-team
         - type: search-issues
           query: "label:\"help wanted\""
 ```
@@ -79,6 +83,8 @@ config:
       users:
         - user-a
         - user-b
+      teams:
+        - my-org/my-team
 ```
 
 ## Search issues with a custom query
