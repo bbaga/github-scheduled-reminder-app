@@ -20,12 +20,18 @@ public class RepositoryIssuesSource implements RepositoryAsSourceInterface<GHIss
         return get(repository, GHIssueState.OPEN);
     }
 
-    public static ArrayList<GHIssue> get(GHRepository repository, GHIssueState state) throws IOException {
+    public ArrayList<GHIssue> get(GHRepository repository, GHIssueState state) throws IOException {
         ArrayList<GHIssue> issues = new ArrayList<>();
         repository.getIssues(state).forEach((GHIssue issue) -> {
             if (!issue.isPullRequest()) {
-                issues.add(issue);
+                return;
             }
+
+            if (FilterChain.filter(source.getFilters(), issue)) {
+                return;
+            }
+
+            issues.add(issue);
         });
 
         return issues;

@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.List;
 
 class InRepoConfigParserTest {
 
@@ -157,6 +158,9 @@ notifications:
           users:
             - foo
             - bar
+          teams:
+            - team1
+            - team2
 """;
 
         InputStream stream = new ByteArrayInputStream(config.getBytes(StandardCharsets.UTF_8));
@@ -191,5 +195,9 @@ notifications:
         Assertions.assertEquals(1, filters.size());
         Assertions.assertTrue(filters.get(0) instanceof DraftFilter);
         Assertions.assertTrue(((DraftFilter) filters.get(0)).getIncludeDrafts());
+
+        SearchPRsByReviewersSource source = (SearchPRsByReviewersSource) sources.get(3);
+        Assertions.assertEquals(List.of("foo", "bar"), source.getUsers());
+        Assertions.assertEquals(List.of("team1", "team2"), source.getTeams());
     }
 }
