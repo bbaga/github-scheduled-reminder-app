@@ -25,7 +25,13 @@ public class SearchByReviewersPRsSource implements SearchAsSourceInterface <GHIs
                 int issueNumber = issue.getNumber();
                 if (!issues.containsKey(issueNumber)) {
                     try {
-                        issues.put(issueNumber, repo.getPullRequest(issueNumber));
+                        GHIssue properIssue = repo.getPullRequest(issueNumber);
+
+                        if (FilterChain.filter(source.getFilters(), properIssue)) {
+                            return;
+                        }
+
+                        issues.put(issueNumber, properIssue);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

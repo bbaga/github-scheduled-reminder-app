@@ -25,11 +25,20 @@ public class SearchIssuesSource implements SearchAsSourceInterface <GHIssue> {
             int issueNumber = issue.getNumber();
             if (!issues.containsKey(issueNumber)) {
                 try {
+                    GHIssue properIssue;
+
                     if (issue.isPullRequest()) {
-                        issues.put(issueNumber, repo.getPullRequest(issueNumber));
+                        properIssue = repo.getPullRequest(issueNumber);
                     } else {
-                        issues.put(issueNumber, repo.getIssue(issueNumber));
+                        properIssue = repo.getIssue(issueNumber);
                     }
+
+                    if (FilterChain.filter(source.getFilters(), properIssue)) {
+                        return;
+                    }
+
+                    issues.put(issueNumber, properIssue);
+
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
