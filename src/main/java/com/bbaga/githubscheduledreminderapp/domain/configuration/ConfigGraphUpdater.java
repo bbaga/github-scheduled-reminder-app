@@ -6,10 +6,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ConfigGraphUpdater {
     private final ConcurrentHashMap<String, ConfigGraphNode> configGraph;
+    private final ConcurrentHashMap<String, ConcurrentHashMap<Integer, RepositoryRecord>> buffer;
     private final NotificationJobScheduler notificationJobScheduler;
     private final Logger logger = LoggerFactory.getLogger(ConfigGraphUpdater.class);
 
@@ -19,6 +21,7 @@ public class ConfigGraphUpdater {
     ) {
         this.configGraph = configGraph;
         this.notificationJobScheduler = notificationJobScheduler;
+        this.buffer = new ConcurrentHashMap<>();
     }
 
     public void updateEntry(
@@ -51,8 +54,12 @@ public class ConfigGraphUpdater {
         }
 
         String notificationKey = getNotificationKey(extending);
+        RepositoryRecord record = new RepositoryRecord(repositoryFullName, installationId, timestamp, notification.getConfig());
+
         if (configGraph.containsKey(notificationKey)) {
-            configGraph.get(notificationKey).putRepository(new RepositoryRecord(repositoryFullName, installationId, timestamp, notification.getConfig()));
+            configGraph.get(notificationKey).putRepository(record);
+        } else {
+            addToBuffer(notificationKey, record);
         }
     }
 
@@ -70,6 +77,7 @@ public class ConfigGraphUpdater {
         }
 
         notificationJobScheduler.upsertSchedule(notification);
+        addBuffered(notification);
     }
 
     public void clearOutdated(Long installationId, Instant timestamp) {
@@ -118,11 +126,46 @@ public class ConfigGraphUpdater {
         }));
     }
 
+    public ConcurrentHashMap<String, ConcurrentHashMap<Integer, RepositoryRecord>> getBuffer() {
+        return buffer;
+    }
+
     private String getNotificationKey(Extending extending) {
         return getNotificationKey(extending.getExtending().getRepository(), extending.getExtending().getName());
     }
 
     private String getNotificationKey(String repository, String name) {
         return String.format("%s-%s", repository, name);
+    }
+
+    private void addToBuffer(String key, RepositoryRecord record) {
+        synchronized (this) {
+            if (!buffer.containsKey(key)) {
+                buffer.put(key, new ConcurrentHashMap<>());
+            }
+
+            Map<Integer, RepositoryRecord> map = buffer.get(key);
+
+            synchronized (map) {
+                map.put(record.hashCode(), record);
+            }
+        }
+    }
+
+    private synchronized void addBuffered(Notification notification) {
+        String key = notification.getName();
+
+        if (buffer.containsKey(key) && configGraph.containsKey(key)) {
+            Map<Integer, RepositoryRecord> bufferedMap = buffer.get(key);
+            ConfigGraphNode configGraphNode = configGraph.get(key);
+
+            synchronized (bufferedMap) {
+                bufferedMap.forEach((Integer index, RepositoryRecord record) -> {
+                    configGraphNode.putRepository(record);
+                });
+
+                buffer.remove(key);
+            }
+        }
     }
 }
