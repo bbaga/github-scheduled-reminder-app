@@ -3,7 +3,7 @@ package com.bbaga.githubscheduledreminderapp.domain.notifications.slack;
 import com.bbaga.githubscheduledreminderapp.domain.GitHubAppInstallationService;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.Notification;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.RepositoryRecord;
-import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.Source;
+import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.SourceConfig;
 import com.bbaga.githubscheduledreminderapp.domain.notifications.NotificationDataProviderInterface;
 import com.bbaga.githubscheduledreminderapp.domain.sources.github.RepositoryAsSourceInterface;
 import com.bbaga.githubscheduledreminderapp.domain.sources.github.SearchAsSourceInterface;
@@ -43,9 +43,9 @@ public class ChannelNotificationDataProvider implements NotificationDataProvider
 
         GitHub client;
         ArrayList<GHIssue> issues = new ArrayList<>();
-        ArrayList<Source> repoAsSource = new ArrayList<>();
+        ArrayList<SourceConfig> repoAsSource = new ArrayList<>();
 
-        for (Source sourceConfig : notification.getConfig().getSources()) {
+        for (SourceConfig sourceConfig : notification.getConfig().getSources()) {
             if (sourceConfig.isRepositoryAsSource()) {
                 repoAsSource.add(sourceConfig);
             }
@@ -62,7 +62,7 @@ public class ChannelNotificationDataProvider implements NotificationDataProvider
             }
 
             if (repository.getConfig() != null && repository.getConfig().getSources().size() > 0) {
-                for (Source sourceConfig : repository.getConfig().getSources()) {
+                for (SourceConfig sourceConfig : repository.getConfig().getSources()) {
                     if (sourceConfig.isSearchAsSource()) {
                         SearchAsSourceInterface<GHIssue> source = SourceProvider.getSearchAsSourceProvider(sourceConfig);
                         try {
@@ -76,7 +76,7 @@ public class ChannelNotificationDataProvider implements NotificationDataProvider
                 continue;
             }
 
-            for (Source sourceConfig : repoAsSource) {
+            for (SourceConfig sourceConfig : repoAsSource) {
                 RepositoryAsSourceInterface<GHIssue> source = SourceProvider.getRepositoryAsSourceProvider(sourceConfig);
                 try {
                     issues.addAll(source.get(repo));

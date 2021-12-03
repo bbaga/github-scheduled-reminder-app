@@ -3,10 +3,10 @@ package com.bbaga.githubscheduledreminderapp.domain.configuration.sources.filter
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public abstract class AbstractFilter {
+public abstract class AbstractFilterConfig {
     private String type;
 
-    public AbstractFilter(String type) {
+    public AbstractFilterConfig(String type) {
         this.type = type;
     }
 

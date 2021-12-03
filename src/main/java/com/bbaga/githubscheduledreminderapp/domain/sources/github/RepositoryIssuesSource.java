@@ -1,6 +1,7 @@
 package com.bbaga.githubscheduledreminderapp.domain.sources.github;
 
-import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.Source;
+import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.SourceConfig;
+import com.bbaga.githubscheduledreminderapp.domain.sources.github.filters.FilterChain;
 import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GHIssueState;
 import org.kohsuke.github.GHRepository;
@@ -9,11 +10,11 @@ import java.util.ArrayList;
 
 public class RepositoryIssuesSource implements RepositoryAsSourceInterface<GHIssue> {
 
-    private Source source;
+    private SourceConfig sourceConfig;
 
     @Override
-    public void configure(Source source) {
-        this.source = source;
+    public void configure(SourceConfig sourceConfig) {
+        this.sourceConfig = sourceConfig;
     }
 
     public ArrayList<GHIssue> get(GHRepository repository) throws IOException {
@@ -23,11 +24,11 @@ public class RepositoryIssuesSource implements RepositoryAsSourceInterface<GHIss
     public ArrayList<GHIssue> get(GHRepository repository, GHIssueState state) throws IOException {
         ArrayList<GHIssue> issues = new ArrayList<>();
         repository.getIssues(state).forEach((GHIssue issue) -> {
-            if (!issue.isPullRequest()) {
+            if (issue.isPullRequest()) {
                 return;
             }
 
-            if (FilterChain.filter(source.getFilters(), issue)) {
+            if (FilterChain.filter(sourceConfig.getFilters(), issue)) {
                 return;
             }
 

@@ -20,10 +20,18 @@ notifications:
       channel: "some-slack-channel"
       sources:
         - type: repository-issues
+          filters:
+            - type: label-filter
+              exclude-labels:
+                - acknowledged
+                - pinned
+                - wontfix
+              expiry-days: 90
         - type: repository-prs
           filters:
             - type: draft-filter
-              include-drafts: true
+              include-drafts: false
+              expiry-days: 90
         - type: search-prs-by-reviewers
           users:
             - foo
@@ -53,12 +61,17 @@ notifications:
 ```
 
 ## Repository Issues
-Pulls open issues from the repositories. This source is added as a default.
+Pulls open issues from the repositories. This source is added as a default, it is configured with `label-filter` to ignore.
 
 ```yaml
 config:
   sources:
     - type: repository-issues
+      filters:
+        - type: label-filter
+          exclude-labels:
+            - acknowledged
+          expiry-days: 90
 ```
 
 ## Repository PRs
@@ -70,7 +83,8 @@ config:
     - type: repository-prs
       filters:
         - type: draft-filter
-          include-drafts: true #default
+          include-drafts: false
+          expiry-days: 90
 ```
 
 ## Search PRs by reviewers
@@ -95,4 +109,27 @@ config:
   sources:
     - type: search-issues
        query: "label:\"help wanted\""
+```
+
+## Filters
+
+### Draft-filter
+This filter will remove the draft PRs from the report by default. If the PR hasn't been updated in 90 days, it will appear in the reports again. 
+
+```yaml
+filters:
+  - type: draft-filter
+    include-drafts: false
+    expiry-days: 90
+```
+
+### Label-filter
+This filter will remove the PRs and Issues from the report based on the configured labels. If the PR or Issue hasn't been updated in 90 days, they will appear in the reports again.
+
+```yaml
+filters:
+  - type: label-filter
+    exclude-labels:
+      - acknowledged
+    expiry-days: 90
 ```

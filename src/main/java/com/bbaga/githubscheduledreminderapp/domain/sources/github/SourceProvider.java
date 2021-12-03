@@ -1,12 +1,12 @@
 package com.bbaga.githubscheduledreminderapp.domain.sources.github;
 
-import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.Source;
+import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.SourceConfig;
 import org.kohsuke.github.GHIssue;
 
 import static com.bbaga.githubscheduledreminderapp.domain.configuration.sources.Sources.Constants.*;
 
 public class SourceProvider {
-    public static RepositoryAsSourceInterface<GHIssue> getRepositoryAsSourceProvider(Source config) {
+    public static RepositoryAsSourceInterface<GHIssue> getRepositoryAsSourceProvider(SourceConfig config) {
         RepositoryAsSourceInterface<GHIssue> source;
         String type = config.getType();
 
@@ -23,7 +23,7 @@ public class SourceProvider {
         return source;
     }
 
-    public static SearchAsSourceInterface<GHIssue> getSearchAsSourceProvider(Source config) {
+    public static SearchAsSourceInterface<GHIssue> getSearchAsSourceProvider(SourceConfig config) {
         SearchAsSourceInterface<GHIssue> source;
         String type = config.getType();
 

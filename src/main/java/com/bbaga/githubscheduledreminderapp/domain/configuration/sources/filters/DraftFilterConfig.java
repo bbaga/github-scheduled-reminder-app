@@ -4,13 +4,16 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class DraftFilter extends AbstractFilter {
+public class DraftFilterConfig extends AbstractFilterConfig {
 
     @JsonProperty("include-drafts")
     private Boolean includeDrafts = false;
 
-    public DraftFilter() {
-        super(Filters.DraftFilter.label);
+    @JsonProperty("expiry-days")
+    private int expiryDays = 90;
+
+    public DraftFilterConfig() {
+        super(Filters.DRAFT_FILTER.label);
     }
 
     public Boolean getIncludeDrafts() {
@@ -19,5 +22,13 @@ public class DraftFilter extends AbstractFilter {
 
     public void setIncludeDrafts(Boolean includeDrafts) {
         this.includeDrafts = includeDrafts;
+    }
+
+    public int getExpiryDays() {
+        return expiryDays;
+    }
+
+    public void setExpiryDays(int expiryDays) {
+        this.expiryDays = expiryDays;
     }
 }

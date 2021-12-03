@@ -1,6 +1,9 @@
 package com.bbaga.githubscheduledreminderapp.domain.sources.github;
 
-import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.Source;
+import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.SearchIssuesSourceConfig;
+import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.SourceConfig;
+import com.bbaga.githubscheduledreminderapp.domain.sources.github.filters.FilterChain;
+import com.bbaga.githubscheduledreminderapp.domain.sources.github.search.SearchIssueBuilder;
 import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
@@ -10,18 +13,20 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class SearchIssuesSource implements SearchAsSourceInterface <GHIssue> {
-    private com.bbaga.githubscheduledreminderapp.domain.configuration.sources.SearchIssuesSource source;
+    private SearchIssuesSourceConfig source;
 
     @Override
-    public void configure(Source source) {
-        this.source = (com.bbaga.githubscheduledreminderapp.domain.configuration.sources.SearchIssuesSource) source;
+    public void configure(SourceConfig sourceConfig) {
+        this.source = (SearchIssuesSourceConfig) sourceConfig;
     }
 
     @Override
     public ArrayList<GHIssue> get(GHRepository repo, GitHub client) throws IOException {
         HashMap<Integer, GHIssue> issues = new HashMap<>();
 
-        client.searchIssues().q(String.format("repo:%s %s", repo.getFullName(), source.getQuery())).list().forEach((GHIssue issue) -> {
+        SearchIssueBuilder builder = SearchIssueBuilder.from(client.searchIssues());
+
+        builder.query(String.format("repo:%s %s", repo.getFullName(), source.getQuery())).forEach((GHIssue issue) -> {
             int issueNumber = issue.getNumber();
             if (!issues.containsKey(issueNumber)) {
                 try {
