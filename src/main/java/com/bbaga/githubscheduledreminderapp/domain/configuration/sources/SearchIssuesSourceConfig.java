@@ -1,26 +1,25 @@
 package com.bbaga.githubscheduledreminderapp.domain.configuration.sources;
 
-import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.filters.AbstractFilter;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.filters.AbstractFilterConfig;
 
 import java.util.ArrayList;
 
-public class SearchIssuesSource extends SearchAsSource {
+public class SearchIssuesSourceConfig extends SearchAsSourceConfig {
     private String query = "";
 
-    public SearchIssuesSource() {
+    public SearchIssuesSourceConfig() {
         super(Sources.SEARCH_ISSUES.label);
     }
 
-    public SearchIssuesSource(String type) {
+    public SearchIssuesSourceConfig(String type) {
         super(type, new ArrayList<>());
     }
 
-    public SearchIssuesSource(String type, ArrayList<AbstractFilter> filters) {
+    public SearchIssuesSourceConfig(String type, ArrayList<AbstractFilterConfig> filters) {
         super(type, filters);
     }
 
-    public SearchIssuesSource(String type, String query) {
+    public SearchIssuesSourceConfig(String type, String query) {
         super(type, new ArrayList<>());
         this.query = query;
     }

@@ -2,11 +2,10 @@ package com.bbaga.githubscheduledreminderapp.infrastructure.configuration;
 
 import com.bbaga.githubscheduledreminderapp.domain.configuration.Extending;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.Notification;
-import com.bbaga.githubscheduledreminderapp.domain.configuration.NotificationConfigurationInterface;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.SlackNotification;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.*;
-import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.filters.AbstractFilter;
-import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.filters.DraftFilter;
+import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.filters.AbstractFilterConfig;
+import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.filters.DraftFilterConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.junit.jupiter.api.Assertions;
@@ -184,19 +183,19 @@ notifications:
 
         Assertions.assertNotNull(notification.getConfig());
 
-        ArrayList<Source> sources = notification.getConfig().getSources();
-        Assertions.assertEquals(4, sources.size());
-        Assertions.assertTrue(sources.get(0) instanceof SearchIssuesSource);
-        Assertions.assertTrue(sources.get(1) instanceof RepositoryIssuesSource);
-        Assertions.assertTrue(sources.get(2) instanceof RepositoryPRsSource);
-        Assertions.assertTrue(sources.get(3) instanceof SearchPRsByReviewersSource);
+        ArrayList<SourceConfig> sourceConfigs = notification.getConfig().getSources();
+        Assertions.assertEquals(4, sourceConfigs.size());
+        Assertions.assertTrue(sourceConfigs.get(0) instanceof SearchIssuesSourceConfig);
+        Assertions.assertTrue(sourceConfigs.get(1) instanceof RepositoryIssuesSourceConfig);
+        Assertions.assertTrue(sourceConfigs.get(2) instanceof RepositoryPRsSourceConfig);
+        Assertions.assertTrue(sourceConfigs.get(3) instanceof SearchPRsByReviewersSourceConfig);
 
-        ArrayList<AbstractFilter> filters = sources.get(2).getFilters();
+        ArrayList<AbstractFilterConfig> filters = sourceConfigs.get(2).getFilters();
         Assertions.assertEquals(1, filters.size());
-        Assertions.assertTrue(filters.get(0) instanceof DraftFilter);
-        Assertions.assertTrue(((DraftFilter) filters.get(0)).getIncludeDrafts());
+        Assertions.assertTrue(filters.get(0) instanceof DraftFilterConfig);
+        Assertions.assertTrue(((DraftFilterConfig) filters.get(0)).getIncludeDrafts());
 
-        SearchPRsByReviewersSource source = (SearchPRsByReviewersSource) sources.get(3);
+        SearchPRsByReviewersSourceConfig source = (SearchPRsByReviewersSourceConfig) sourceConfigs.get(3);
         Assertions.assertEquals(List.of("foo", "bar"), source.getUsers());
         Assertions.assertEquals(List.of("team1", "team2"), source.getTeams());
     }

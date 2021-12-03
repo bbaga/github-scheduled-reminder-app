@@ -1,7 +1,9 @@
 package com.bbaga.githubscheduledreminderapp.domain.sources.github;
 
-import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.filters.AbstractFilter;
-import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.filters.DraftFilter;
+import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.filters.AbstractFilterConfig;
+import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.filters.DraftFilterConfig;
+import com.bbaga.githubscheduledreminderapp.domain.sources.github.filters.DraftFilter;
+import com.bbaga.githubscheduledreminderapp.domain.sources.github.filters.FilterProvider;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -10,15 +12,15 @@ class FilterProviderTest {
 
     @Test
     void get() {
-        DraftFilter config = new DraftFilter();
+        DraftFilterConfig config = new DraftFilterConfig();
         Assertions.assertTrue(
-            FilterProvider.get(config) instanceof com.bbaga.githubscheduledreminderapp.domain.sources.github.DraftFilter
+            FilterProvider.get(config) instanceof DraftFilter
         );
     }
 
     @Test
     void getUnknown() {
-        AbstractFilter config = Mockito.mock(AbstractFilter.class);
+        AbstractFilterConfig config = Mockito.mock(AbstractFilterConfig.class);
         Mockito.when(config.getType()).thenReturn("FooBar");
         Exception exception = Assertions.assertThrows(RuntimeException.class, () -> FilterProvider.get(config));
 
