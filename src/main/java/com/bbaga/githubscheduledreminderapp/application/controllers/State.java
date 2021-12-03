@@ -1,9 +1,6 @@
 package com.bbaga.githubscheduledreminderapp.application.controllers;
 
-import com.bbaga.githubscheduledreminderapp.domain.configuration.ConfigGraphNode;
-import com.bbaga.githubscheduledreminderapp.domain.configuration.ConfigGraphUpdater;
-import com.bbaga.githubscheduledreminderapp.domain.configuration.Notification;
-import com.bbaga.githubscheduledreminderapp.domain.configuration.NotificationInterface;
+import com.bbaga.githubscheduledreminderapp.domain.configuration.*;
 import com.bbaga.githubscheduledreminderapp.infrastructure.configuration.InRepoConfig;
 import com.bbaga.githubscheduledreminderapp.infrastructure.configuration.InRepoConfigParser;
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubBuilderFactory;
@@ -43,6 +40,11 @@ public class State {
     @GetMapping("/state/config")
     public ConcurrentHashMap<String, ConfigGraphNode> config() {
         return this.state;
+    }
+
+    @GetMapping("/state/config/buffer")
+    public ConcurrentHashMap<String, ConcurrentHashMap<Integer, RepositoryRecord>> configBuffer() {
+        return configGraphUpdater.getBuffer();
     }
 
     @GetMapping("/state/update/repo/{org}/{repository}")
