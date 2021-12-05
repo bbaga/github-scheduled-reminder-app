@@ -3,6 +3,7 @@ package com.bbaga.githubscheduledreminderapp.domain.notifications.slack;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.Notification;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.SlackNotification;
 import com.bbaga.githubscheduledreminderapp.domain.notifications.NotificationInterface;
+import com.bbaga.githubscheduledreminderapp.domain.statistics.UrlBuilderInterface;
 import com.hubspot.slack.client.SlackClient;
 import com.hubspot.slack.client.methods.params.chat.ChatPostMessageParams;
 import com.hubspot.slack.client.models.blocks.Block;
@@ -19,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -30,9 +32,11 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
 
     private final SlackClient slackClient;
     private final Logger logger = LoggerFactory.getLogger(ChannelNotification.class);
+    private final UrlBuilderInterface urlBuilder;
 
-    public ChannelNotification(SlackClient slackClient) {
+    public ChannelNotification(SlackClient slackClient, UrlBuilderInterface urlBuilder) {
         this.slackClient = slackClient;
+        this.urlBuilder = urlBuilder;
     }
 
     @Override
@@ -96,7 +100,7 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
             getIssueAge(pullRequest),
             pullRequest.getDeletions(),
             pullRequest.getAdditions()
-        ).withAccessory(linkButton(pullRequest.getNodeId(), pullRequest.getHtmlUrl().toString()));
+        ).withAccessory(linkButton(pullRequest));
     }
 
     private Block getSection(GHIssue issue) throws IOException {
@@ -107,7 +111,7 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
             issue.getTitle(),
             issue.getRepository().getFullName(),
             getIssueAge(issue)
-        ).withAccessory(linkButton(issue.getNodeId(), issue.getHtmlUrl().toString()));
+        ).withAccessory(linkButton(issue));
     }
 
     private String getIssueAge(GHIssue issue) throws IOException {
@@ -132,7 +136,18 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
         return Section.of(Text.of(TextType.MARKDOWN, String.format(pattern, args)));
     }
 
-    private Button linkButton(String id, String url) {
-        return Button.of(Text.of(TextType.PLAIN_TEXT, "Open"), id).withUrl(url);
+    private Button linkButton(GHIssue issue) {
+        String action = (issue instanceof GHPullRequest ? "pull-request" : "issue") + ".view";
+        String targetUrl = issue.getHtmlUrl().toString();
+        String url;
+
+        try {
+            url = urlBuilder.from("slack.channel", action, targetUrl);
+        } catch (UnsupportedEncodingException e) {
+            logger.error(e.getMessage(), e);
+            url = targetUrl;
+        }
+
+        return Button.of(Text.of(TextType.PLAIN_TEXT, "Open"), issue.getNodeId()).withUrl(url);
     }
 }

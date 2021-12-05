@@ -2,6 +2,7 @@ package com.bbaga.githubscheduledreminderapp.domain.notifications.slack;
 
 import com.bbaga.githubscheduledreminderapp.domain.configuration.Notification;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.SlackNotification;
+import com.bbaga.githubscheduledreminderapp.domain.statistics.UrlBuilderInterface;
 import com.hubspot.algebra.Result;
 import com.hubspot.slack.client.SlackClient;
 import com.hubspot.slack.client.methods.params.chat.ChatPostMessageParams;
@@ -33,12 +34,13 @@ class ChannelNotificationTest {
     @Test
     void sendCalledWithEmptySets() {
         SlackClient client = Mockito.mock(SlackClient.class);
+        UrlBuilderInterface urlBuilder = Mockito.mock(UrlBuilderInterface.class);
         //noinspection unchecked
         Result<ChatPostMessageResponse, SlackError> result = (Result<ChatPostMessageResponse, SlackError>) Mockito.mock(Result.class);
         CompletableFuture<Result<ChatPostMessageResponse, SlackError>> future = new CompletableFuture<>();
         future.complete(result);
 
-        ChannelNotification service = new ChannelNotification(client);
+        ChannelNotification service = new ChannelNotification(client, urlBuilder);
         SlackNotification config = new SlackNotification();
         config.setChannel("test");
         Notification notification = new Notification();
@@ -54,6 +56,7 @@ class ChannelNotificationTest {
     @Test
     void sendCalled() throws IOException {
         SlackClient client = Mockito.mock(SlackClient.class);
+        UrlBuilderInterface urlBuilder = Mockito.mock(UrlBuilderInterface.class);
         GHIssue issue = Mockito.mock(GHIssue.class);
         GHUser user = Mockito.mock(GHUser.class);
         GHRepository repository = Mockito.mock(GHRepository.class);
@@ -81,7 +84,7 @@ class ChannelNotificationTest {
         CompletableFuture<Result<ChatPostMessageResponse, SlackError>> future = new CompletableFuture<>();
         future.complete(result);
 
-        ChannelNotification service = new ChannelNotification(client);
+        ChannelNotification service = new ChannelNotification(client, urlBuilder);
         SlackNotification config = new SlackNotification();
         config.setChannel("test");
         Notification notification = new Notification();

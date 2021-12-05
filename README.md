@@ -64,43 +64,43 @@ If the application doesn't work at this point, please open an issue.
 ### `GITHUB_ID`
 The GitHub application id as per the [App ID](#app-id) section.
 
-**Reqiured**: true
+**Required**: true
 
 ### `GITHUB_APP_CERT`
 Mandatory when `GITHUB_APP_CERT_FILE` isn't set. Contents of the github application certificate in `pkcs8` format as per the [App certificate](#app-certificate) section.
 
-**Reqiured**: true
+**Required**: true
 
 ### `GITHUB_APP_CERT_FILE`
 Mandatory when `GITHUB_APP_CERT` isn't set. Location of the file containing the github application certificate in `pkcs8` format as per the [App certificate](#app-certificate) section.
 
-**Reqiured**: true
+**Required**: true
 
 ### `GITHUB_API_ENDPOINT`
 The GitHub API endpoint in case it is a custom installation.
 
-**Reqiured**: false
+**Required**: false
 
 ### `SLACK_API_TOKEN`
 Mandatory when `SLACK_API_TOKEN_FILE` isn't set. Slack API token as per the [Slack](#slack) section.
 
-**Reqiured**: true
+**Required**: true
 
 ### `SLACK_API_TOKEN_FILE`
 Mandatory when `SLACK_API_TOKEN` isn't set. Location of the file containing the Slack API token as per the [Slack](#slack) section.
 
-**Reqiured**: true
+**Required**: true
 
 ### `JOBS_GITHUB_INSTALLATION_SCAN_INTERVAL`
 This is the interval in milliseconds between installation scans and consequently repository scans for configuration updates.
 
-**Reqiured**: false
+**Required**: false
 **Default**: 43200000
 
 ### `STATE_STORAGE_TYPE`
 Storage type, at this time it can be local file system, GCS Bucket implementation is coming soon.
 
-**Reqiured**: false
+**Required**: false
 **Default**: `LOCAL_FS`
 **Options:**
 - `LOCAL_FS`: Local file system
@@ -108,8 +108,20 @@ Storage type, at this time it can be local file system, GCS Bucket implementatio
 ### `STATE_STORAGE_FS_FILEPATH`
 When `LOCAL_FS` is used in `STATE_STORAGE_TYPE`, the application's state will be stored at this location.
 
-**Reqiured**: false
+**Required**: false
 **Default**: `/tmp/github-reminder-application.state.json`
+
+### ACTIVITY_TRACKING_ENABLED
+Enables tracking clicks on the links/buttons posted with the notifications.
+
+**Required**: false
+**Default**: `false`
+
+### ACTIVITY_TRACKING_ENDPOINT_URL
+The application has to know its own endpoint to build tracking urls that will forward users to the target urls.
+
+**Required**: false
+**Default**: `http://localhost:8080`
 
 ## Coming soon...
 | Name | Is Required? | Default value | Description |
