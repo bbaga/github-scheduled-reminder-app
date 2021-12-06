@@ -111,13 +111,13 @@ When `LOCAL_FS` is used in `STATE_STORAGE_TYPE`, the application's state will be
 **Required**: false
 **Default**: `/tmp/github-reminder-application.state.json`
 
-### ACTIVITY_TRACKING_ENABLED
+### `ACTIVITY_TRACKING_ENABLED`
 Enables tracking clicks on the links/buttons posted with the notifications.
 
 **Required**: false
 **Default**: `false`
 
-### ACTIVITY_TRACKING_ENDPOINT_URL
+### `ACTIVITY_TRACKING_ENDPOINT_URL`
 The application has to know its own endpoint to build tracking urls that will forward users to the target urls.
 
 **Required**: false
