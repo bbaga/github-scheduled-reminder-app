@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.kohsuke.github.GHAppInstallation;
+import org.kohsuke.github.GHUser;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -28,6 +29,7 @@ class GitHubInstallationRepositoryTest {
     void remove() {
         long id = 123456L;
         GHAppInstallation installation = Mockito.mock(GHAppInstallation.class);
+        GHUser account = Mockito.mock(GHUser.class);
         AppInstallationContainer installationContainer = Mockito.mock(AppInstallationContainer.class);
 
         MockedStatic<AppInstallationContainer> provider = Mockito.mockStatic(AppInstallationContainer.class);
@@ -35,9 +37,11 @@ class GitHubInstallationRepositoryTest {
                 .thenReturn(installationContainer);
 
         Mockito.doReturn(id).when(installationContainer).getId();
+        Mockito.doReturn(account).when(installationContainer).getAccount();
+        Mockito.doReturn("bbaga").when(account).getLogin();
         Mockito.doReturn(installation).when(installationContainer).unwrap();
         this.repository.put(installation);
-        Mockito.verify(installationContainer, Mockito.times(1)).getId();
+        Mockito.verify(installationContainer, Mockito.times(2)).getId();
 
         assertSame(installation, this.repository.get(id));
         this.repository.remove(id);
@@ -50,6 +54,7 @@ class GitHubInstallationRepositoryTest {
 
         for (long id : ids) {
             GHAppInstallation installation = Mockito.mock(GHAppInstallation.class);
+            GHUser account = Mockito.mock(GHUser.class);
             AppInstallationContainer installationContainer = Mockito.mock(AppInstallationContainer.class);
 
             MockedStatic<AppInstallationContainer> provider = Mockito.mockStatic(AppInstallationContainer.class);
@@ -57,6 +62,8 @@ class GitHubInstallationRepositoryTest {
                     .thenReturn(installationContainer);
 
             Mockito.doReturn(id).when(installationContainer).getId();
+            Mockito.doReturn(account).when(installationContainer).getAccount();
+            Mockito.doReturn("bbaga").when(account).getLogin();
             this.repository.put(installation);
             provider.close();
         }

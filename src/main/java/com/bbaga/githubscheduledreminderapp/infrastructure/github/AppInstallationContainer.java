@@ -1,6 +1,7 @@
 package com.bbaga.githubscheduledreminderapp.infrastructure.github;
 
 import org.kohsuke.github.GHAppInstallation;
+import org.kohsuke.github.GHUser;
 
 public class AppInstallationContainer {
     private final GHAppInstallation installation;
@@ -10,6 +11,10 @@ public class AppInstallationContainer {
 
     public long getId() {
         return installation.getId();
+    }
+
+    public GHUser getAccount() {
+        return installation.getAccount();
     }
 
     public GHAppInstallation unwrap() {

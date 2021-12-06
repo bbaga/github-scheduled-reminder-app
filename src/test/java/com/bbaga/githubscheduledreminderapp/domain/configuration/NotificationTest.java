@@ -19,9 +19,10 @@ class NotificationTest {
     @Test
     void setName() {
         final String name = "notification-name";
-        notification.setName(name);
+        notification.setRepository("notification");
+        notification.setName("name");
 
-        assertEquals(name, notification.getName());
+        assertEquals(name, notification.getFullName());
     }
 
     @Test

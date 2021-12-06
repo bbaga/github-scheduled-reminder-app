@@ -1,8 +1,6 @@
 package com.bbaga.githubscheduledreminderapp.infrastructure.configuration;
 
-import com.bbaga.githubscheduledreminderapp.domain.configuration.Extending;
-import com.bbaga.githubscheduledreminderapp.domain.configuration.Notification;
-import com.bbaga.githubscheduledreminderapp.domain.configuration.SlackNotification;
+import com.bbaga.githubscheduledreminderapp.domain.configuration.*;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.*;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.filters.AbstractFilterConfig;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.filters.DraftFilterConfig;
@@ -20,6 +18,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 class InRepoConfigParserTest {
 
@@ -198,5 +197,94 @@ notifications:
         SearchPRsByReviewersSourceConfig source = (SearchPRsByReviewersSourceConfig) sourceConfigs.get(3);
         Assertions.assertEquals(List.of("foo", "bar"), source.getUsers());
         Assertions.assertEquals(List.of("team1", "team2"), source.getTeams());
+    }
+
+    @Test
+    void parseExtensionWithoutConfigOverwriteTest() throws IOException {
+        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+        String configPath = "path/to/config.yaml";
+        String config = """
+enabled: true
+notifications:
+  - extending:
+      repository: some/repository
+      name: something
+""";
+
+        InputStream stream = new ByteArrayInputStream(config.getBytes(StandardCharsets.UTF_8));
+
+        GHContent content = Mockito.mock(GHContent.class);
+        Mockito.doReturn(stream).when(content).read();
+
+        GHRepository repository = Mockito.mock(GHRepository.class);
+        Mockito.doReturn(content).when(repository).getFileContent(configPath);
+
+        InRepoConfigParser parser = new InRepoConfigParser(mapper, configPath);
+
+        InRepoConfig parsedConfig = parser.getFrom(repository);
+
+        Assertions.assertEquals(true, parsedConfig.getEnabled());
+        Assertions.assertEquals(1, parsedConfig.getNotifications().size());
+
+        Extending notification = (Extending) parsedConfig.getNotifications().get(0);
+        Assertions.assertEquals("some/repository", notification.getExtending().getRepository());
+        Assertions.assertEquals("something", notification.getExtending().getName());
+    }
+
+    @Test
+    void parseInScheduleExtensionConfigTest() throws IOException {
+        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+        String configPath = "path/to/config.yaml";
+        String config = """
+enabled: true
+notifications:
+  - name: testing
+    schedule: "0 1 2 3 4 5 6"
+    type: slack/channel
+    config:
+      channel: "test-channel"
+      sources:
+        - type: search-issues
+          query: "alma barack"
+        - type: repository-issues
+        - type: repository-prs
+          filters:
+            - type: draft-filter
+              include-drafts: true
+    repositories:
+      some/other-repository:
+        sources:
+          - type: search-prs-by-reviewers
+            users:
+              - foo
+              - bar
+            teams:
+              - team1
+              - team2
+""";
+
+        InputStream stream = new ByteArrayInputStream(config.getBytes(StandardCharsets.UTF_8));
+
+        GHContent content = Mockito.mock(GHContent.class);
+        Mockito.doReturn(stream).when(content).read();
+
+        GHRepository repository = Mockito.mock(GHRepository.class);
+        Mockito.doReturn(content).when(repository).getFileContent(configPath);
+
+        InRepoConfigParser parser = new InRepoConfigParser(mapper, configPath);
+
+        InRepoConfig parsedConfig = parser.getFrom(repository);
+
+        Assertions.assertEquals(true, parsedConfig.getEnabled());
+        Assertions.assertEquals(1, parsedConfig.getNotifications().size());
+
+        Notification notification = (Notification) parsedConfig.getNotifications().get(0);
+        Assertions.assertNotNull(notification.getRepositories());
+
+        Map<String, NotificationConfiguration> repoConfigs = notification.getRepositories();
+        Assertions.assertEquals(1, repoConfigs.size());
+
+        NotificationConfiguration repoConfig = notification.getRepositories().get("some/other-repository");
+        Assertions.assertEquals(1, repoConfig.getSources().size());
     }
 }

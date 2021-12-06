@@ -3,6 +3,7 @@ package com.bbaga.githubscheduledreminderapp.application.jobs;
 import com.bbaga.githubscheduledreminderapp.domain.jobs.scheduling.InstallationScanJobScheduler;
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.repositories.GitHubInstallationRepository;
 import org.kohsuke.github.GHAppInstallation;
+import org.kohsuke.github.GHUser;
 import org.kohsuke.github.GitHub;
 import org.kohsuke.github.PagedIterable;
 import org.quartz.*;

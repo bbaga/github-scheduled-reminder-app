@@ -21,7 +21,7 @@ public class NotificationJobScheduler {
             return;
         }
 
-        JobKey jobKey = new JobKey(notification.getName());
+        JobKey jobKey = new JobKey(notification.getRepository());
 
         if (scheduler.checkExists(jobKey)) {
             updateSchedule(notification);
@@ -37,7 +37,7 @@ public class NotificationJobScheduler {
             return;
         }
 
-        JobKey jobKey = new JobKey(notification.getName());
+        JobKey jobKey = new JobKey(notification.getRepository());
 
         JobDetail job = JobBuilder.newJob(ScheduledNotification.class)
             .withIdentity(jobKey)
@@ -64,7 +64,7 @@ public class NotificationJobScheduler {
 
         Trigger newTrigger = TriggerBuilder.newTrigger()
             .withSchedule(CronScheduleBuilder.cronSchedule(schedule.get()).inTimeZone(timeZone))
-            .withIdentity(notification.getName()).build();
-        scheduler.rescheduleJob(new TriggerKey(notification.getName()), newTrigger);
+            .withIdentity(notification.getRepository()).build();
+        scheduler.rescheduleJob(new TriggerKey(notification.getRepository()), newTrigger);
     }
 }
