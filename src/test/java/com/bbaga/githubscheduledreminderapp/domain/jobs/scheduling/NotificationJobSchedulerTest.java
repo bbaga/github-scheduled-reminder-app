@@ -38,8 +38,8 @@ class NotificationJobSchedulerTest {
         JobDetail capturedJobDetail = jobDetailCaptor.getValue();
         CronTrigger capturedTrigger = triggerCaptor.getValue();
 
-        assertEquals(notification.getRepository(), capturedJobDetail.getKey().getName());
-        assertEquals(notification.getRepository(), capturedTrigger.getKey().getName());
+        assertEquals(notification.getFullName(), capturedJobDetail.getKey().getName());
+        assertEquals(notification.getFullName(), capturedTrigger.getKey().getName());
         assertEquals(notification.getSchedule().get(), capturedTrigger.getCronExpression());
         assertEquals(TimeZone.getTimeZone(notification.getTimeZone()), capturedTrigger.getTimeZone());
     }
@@ -63,7 +63,7 @@ class NotificationJobSchedulerTest {
         TriggerKey capturedTriggerKey = triggerKeyCaptor.getValue();
         CronTrigger capturedTrigger = triggerCaptor.getValue();
 
-        assertEquals(notification.getRepository(), capturedTriggerKey.getName());
+        assertEquals(notification.getFullName(), capturedTriggerKey.getName());
         assertEquals(notification.getSchedule().get(), capturedTrigger.getCronExpression());
         assertEquals(TimeZone.getTimeZone(notification.getTimeZone()), capturedTrigger.getTimeZone());
     }
