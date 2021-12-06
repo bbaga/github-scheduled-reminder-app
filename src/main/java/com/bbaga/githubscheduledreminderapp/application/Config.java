@@ -205,9 +205,10 @@ public class Config {
     @Bean
     public ConfigGraphUpdater getConfigGraphUpdater(
         @Qualifier("ConfigGraph") ConcurrentHashMap<String, ConfigGraphNode> configGraph,
-        NotificationJobScheduler notificationJobScheduler
+        NotificationJobScheduler notificationJobScheduler,
+        GitHubInstallationRepository installationRepository
     ) {
-        return new ConfigGraphUpdater(configGraph, notificationJobScheduler);
+        return new ConfigGraphUpdater(installationRepository, configGraph, notificationJobScheduler);
     }
 
     @Bean

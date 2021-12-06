@@ -5,13 +5,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
+import java.util.Map;
 import java.util.Optional;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Notification implements NotificationInterface {
+    private String repository = "";
     private String name = "";
     private String schedule;
     private String type = "";
+    private Map<String, NotificationConfiguration> repositories;
 
     @JsonSubTypes({
         @JsonSubTypes.Type(value = SlackNotification.class, name = "slack/channel"),
@@ -36,12 +39,24 @@ public class Notification implements NotificationInterface {
         this.config = config;
     }
 
+    public String getRepository() {
+        return repository;
+    }
+
+    public void setRepository(String repository) {
+        this.repository = repository;
+    }
+
     public String getName() {
         return name;
     }
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getFullName() {
+        return getRepository() + "-" + getName();
     }
 
     public Optional<String> getSchedule() {
@@ -76,5 +91,13 @@ public class Notification implements NotificationInterface {
 
     public void setTimeZone(String timeZone) {
         this.timeZone = timeZone;
+    }
+
+    public Map<String, NotificationConfiguration> getRepositories() {
+        return repositories;
+    }
+
+    public void setRepositories(Map<String, NotificationConfiguration> repositories) {
+        this.repositories = repositories;
     }
 }

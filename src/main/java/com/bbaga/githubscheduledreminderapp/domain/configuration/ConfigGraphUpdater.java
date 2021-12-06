@@ -1,6 +1,7 @@
 package com.bbaga.githubscheduledreminderapp.domain.configuration;
 
 import com.bbaga.githubscheduledreminderapp.domain.jobs.scheduling.NotificationJobScheduler;
+import com.bbaga.githubscheduledreminderapp.infrastructure.github.repositories.GitHubInstallationRepository;
 import org.quartz.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,11 +15,14 @@ public class ConfigGraphUpdater {
     private final ConcurrentHashMap<String, ConcurrentHashMap<Integer, RepositoryRecord>> buffer;
     private final NotificationJobScheduler notificationJobScheduler;
     private final Logger logger = LoggerFactory.getLogger(ConfigGraphUpdater.class);
+    private final GitHubInstallationRepository installationRepository;
 
     public ConfigGraphUpdater(
+            GitHubInstallationRepository installationRepository,
             ConcurrentHashMap<String, ConfigGraphNode> configGraph,
             NotificationJobScheduler notificationJobScheduler
     ) {
+        this.installationRepository = installationRepository;
         this.configGraph = configGraph;
         this.notificationJobScheduler = notificationJobScheduler;
         this.buffer = new ConcurrentHashMap<>();
@@ -34,6 +38,24 @@ public class ConfigGraphUpdater {
             Notification main = (Notification) notification;
             if (main.getSchedule().isPresent()) {
                 updateSchedule(main, installationId, repositoryFullName, timestamp);
+                Map<String, NotificationConfiguration> repositoryConfigs = main.getRepositories();
+
+                if (repositoryConfigs != null) {
+                    for (Map.Entry<String, NotificationConfiguration> entry : repositoryConfigs.entrySet()) {
+                        String subRepositoryFullName = entry.getKey();
+                        String org = subRepositoryFullName.replaceAll("^(.+)(/.+)", "$1");
+                        NotificationConfiguration config = entry.getValue();
+
+                        Long repoInstallationId = installationRepository.getIdByOrg(org);
+
+                        if (repoInstallationId != null) {
+                            Extending.MainConfig mainConfig = new Extending.MainConfig(repositoryFullName, main.getName());
+                            Extending extending = new Extending(mainConfig, config);
+                            updateEntry(extending, repoInstallationId, subRepositoryFullName, timestamp);
+                        }
+                    }
+                }
+
                 return;
             }
         }
@@ -65,8 +87,8 @@ public class ConfigGraphUpdater {
 
     private void updateSchedule(Notification notification, long installationId, String repositoryFullName, Instant timestamp) throws SchedulerException {
         logger.info("Updating schedule: installation id {}, {}/{}", installationId, repositoryFullName, notification.getName());
-        notification.setName(getNotificationKey(repositoryFullName, notification.getName()));
-        String notificationKey = notification.getName();
+        notification.setRepository(repositoryFullName);
+        String notificationKey = notification.getFullName();
 
         if (!configGraph.containsKey(notificationKey)) {
             configGraph.put(notificationKey, new ConfigGraphNode(installationId, notification, timestamp));
@@ -101,7 +123,7 @@ public class ConfigGraphUpdater {
         configGraph.entrySet().removeIf(entry -> {
             ConfigGraphNode node = entry.getValue();
             if (node.getInstallationId().equals(installationId)
-                && node.getNotification().getName().startsWith(repositoryFullName)
+                && node.getNotification().getFullName().startsWith(repositoryFullName)
                 && node.getLastSeenAt() != timestamp
             ) {
                 return true;
@@ -153,7 +175,7 @@ public class ConfigGraphUpdater {
     }
 
     private synchronized void addBuffered(Notification notification) {
-        String key = notification.getName();
+        String key = notification.getFullName();
 
         if (buffer.containsKey(key) && configGraph.containsKey(key)) {
             Map<Integer, RepositoryRecord> bufferedMap = buffer.get(key);

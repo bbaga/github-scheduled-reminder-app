@@ -14,6 +14,11 @@ public class Extending implements NotificationInterface {
 
     public Extending() {}
 
+    public Extending(MainConfig mainConfig, NotificationConfigurationInterface config) {
+        this.setExtending(mainConfig);
+        this.setConfig(config);
+    }
+
     public MainConfig getExtending() {
         return extending;
     }
@@ -37,6 +42,11 @@ public class Extending implements NotificationInterface {
         private String name = "";
 
         public MainConfig() {}
+
+        public MainConfig(String repository, String name) {
+            this.setRepository(repository);
+            this.setName(name);
+        }
 
         public String getRepository() {
             return repository;

@@ -80,7 +80,7 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
             }
         }
 
-        sections.add(markdownSection("config id: _%s_", notification.getName()));
+        sections.add(markdownSection("config id: _%s_", notification.getRepository()));
 
         slackClient.postMessage(
             ChatPostMessageParams.builder()

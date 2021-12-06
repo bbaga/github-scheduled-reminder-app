@@ -143,10 +143,9 @@ notifications:
     type: slack/channel
     config:
       channel: "test-channel"
-  
-  - extending: 
-      repository: bbaga/app-testing
-      name: slack-notification
+    repositories:
+       bbaga/app-testing:
+         sources: ... # Sources config is optional. See more at docs/sources.md 
 ```
 
 | Field | Is Required? | Description |
@@ -164,6 +163,7 @@ notifications:
 | `timezone` | No | Timezone to adjust the schedule to. Defaults to `UTC`. |
 | `type` | Yes | The only supported `type` is `slack/channel`. |
 | `config` | No | Depends on the `type` field's value, each notification type may have different configuration. |
+| `repositories` | No | Map of repositories to configuration values. |
 
 ### References
 | Field | Is Required? | Description |

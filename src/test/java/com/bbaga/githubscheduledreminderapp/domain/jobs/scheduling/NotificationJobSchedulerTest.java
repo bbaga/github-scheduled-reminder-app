@@ -1,7 +1,6 @@
 package com.bbaga.githubscheduledreminderapp.domain.jobs.scheduling;
 
 import com.bbaga.githubscheduledreminderapp.domain.configuration.Notification;
-import com.bbaga.githubscheduledreminderapp.domain.jobs.scheduling.NotificationJobScheduler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
@@ -23,7 +22,8 @@ class NotificationJobSchedulerTest {
     @Test
     void createSchedule() throws SchedulerException {
         Notification notification = new Notification();
-        notification.setName("test-schedule");
+        notification.setRepository("test");
+        notification.setName("schedule");
         notification.setSchedule("* * * * * ?");
         notification.setTimeZone("Europe/Berlin");
 
@@ -38,8 +38,8 @@ class NotificationJobSchedulerTest {
         JobDetail capturedJobDetail = jobDetailCaptor.getValue();
         CronTrigger capturedTrigger = triggerCaptor.getValue();
 
-        assertEquals(notification.getName(), capturedJobDetail.getKey().getName());
-        assertEquals(notification.getName(), capturedTrigger.getKey().getName());
+        assertEquals(notification.getRepository(), capturedJobDetail.getKey().getName());
+        assertEquals(notification.getRepository(), capturedTrigger.getKey().getName());
         assertEquals(notification.getSchedule().get(), capturedTrigger.getCronExpression());
         assertEquals(TimeZone.getTimeZone(notification.getTimeZone()), capturedTrigger.getTimeZone());
     }
@@ -47,7 +47,8 @@ class NotificationJobSchedulerTest {
     @Test
     void updateSchedule() throws SchedulerException {
         Notification notification = new Notification();
-        notification.setName("test-schedule");
+        notification.setRepository("test");
+        notification.setName("schedule");
         notification.setSchedule("* * * * * ?");
         notification.setTimeZone("Europe/Berlin");
 
@@ -62,7 +63,7 @@ class NotificationJobSchedulerTest {
         TriggerKey capturedTriggerKey = triggerKeyCaptor.getValue();
         CronTrigger capturedTrigger = triggerCaptor.getValue();
 
-        assertEquals(notification.getName(), capturedTriggerKey.getName());
+        assertEquals(notification.getRepository(), capturedTriggerKey.getName());
         assertEquals(notification.getSchedule().get(), capturedTrigger.getCronExpression());
         assertEquals(TimeZone.getTimeZone(notification.getTimeZone()), capturedTrigger.getTimeZone());
     }
