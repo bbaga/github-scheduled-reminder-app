@@ -1,5 +1,0 @@
-enabled: true
-notifications:
-  - extending: 
-      repository: bbaga/app-testing
-      name: multirepo
