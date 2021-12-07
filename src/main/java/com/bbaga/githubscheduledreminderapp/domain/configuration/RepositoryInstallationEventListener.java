@@ -1,5 +1,6 @@
 package com.bbaga.githubscheduledreminderapp.domain.configuration;
 
+import com.bbaga.githubscheduledreminderapp.application.jobs.GitHubInstallationScan;
 import com.bbaga.githubscheduledreminderapp.domain.GitHubAppInstallationService;
 import com.bbaga.githubscheduledreminderapp.infrastructure.configuration.InRepoConfig;
 import com.bbaga.githubscheduledreminderapp.infrastructure.configuration.InRepoConfigParser;
@@ -12,6 +13,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
 import org.quartz.SchedulerException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationListener;
 
 import java.io.IOException;
@@ -25,6 +28,7 @@ public class RepositoryInstallationEventListener implements ApplicationListener<
     private final ObjectMapper objectMapper;
     private final GitHubAppInstallationService installationService;
     private final InstallationScanJobScheduler installationScanJobScheduler;
+    private final Logger logger = LoggerFactory.getLogger(RepositoryInstallationEventListener.class);
 
     public RepositoryInstallationEventListener(
             ConfigGraphUpdater configGraphUpdater,
@@ -75,8 +79,10 @@ public class RepositoryInstallationEventListener implements ApplicationListener<
                         for (NotificationInterface notification : inRepoConfig.getNotifications()) {
                             configGraphUpdater.updateEntry(notification, installation.getId(), repo.getFullName(), Instant.now());
                         }
-                    } catch (IOException | SchedulerException e) {
-                        e.printStackTrace();
+                    } catch (IOException e) {
+                        logger.debug("No config file in {}", repository.getFullName());
+                    } catch (SchedulerException e) {
+                        logger.error(e.getMessage(), e);
                     }
                 });
             } else if (payload.getAction().equals("removed")) {
@@ -88,7 +94,7 @@ public class RepositoryInstallationEventListener implements ApplicationListener<
             try {
                 installationScanJobScheduler.triggerJob(installation.getId());
             } catch (SchedulerException e) {
-                e.printStackTrace();
+                logger.error(e.getMessage(), e);
             }
         }
     }

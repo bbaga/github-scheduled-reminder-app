@@ -23,8 +23,8 @@ public class SearchByReviewersPRsSource implements SearchAsSourceInterface <GHIs
     public ArrayList<GHIssue> get(GHRepository repo, GitHub client) throws IOException {
         HashMap<Integer, GHIssue> issues = new HashMap<>();
 
-        findIssues(client, repo, issues, source.getUsers(), "is:pr repo:%s review-requested:%s");
-        findIssues(client, repo, issues, source.getTeams(), "is:pr repo:%s team-review-requested:%s");
+        findIssues(client, repo, issues, source.getUsers(), "is:pr is:open repo:%s review-requested:%s");
+        findIssues(client, repo, issues, source.getTeams(), "is:pr is:open repo:%s team-review-requested:%s");
 
         return new ArrayList<>(issues.values());
     }
