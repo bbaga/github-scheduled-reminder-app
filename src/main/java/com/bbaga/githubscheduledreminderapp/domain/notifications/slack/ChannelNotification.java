@@ -23,9 +23,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class ChannelNotification implements NotificationInterface<ChannelNotificationDataProvider.Data> {
@@ -64,18 +62,40 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
             }
         }
 
-        if ((issueSections.size() + prSections.size()) == 0) {
+        int maxNumberOfIssues = 40; // There are 7 static sections and the max allowed is 50 sections
+        int maxGroupSize = maxNumberOfIssues / 2;
+        boolean mustTruncate = issues.size() > maxNumberOfIssues;
+        int issueSectionsSize = issueSections.size();
+        int prSectionsSize = prSections.size();
+
+        if ((issueSectionsSize + prSectionsSize) == 0) {
             sections.add(markdownSection("*There aren't any open issues or pull requests.*"));
         } else {
-            if (issueSections.size() > 0) {
-                sections.add(markdownSection("*Open Issues:*"));
+            if (issueSectionsSize > 0) {
+                String displayCount = String.format("%d", issueSectionsSize);;
+
+                if (mustTruncate && issueSectionsSize > maxGroupSize) {
+                    displayCount = String.format("showing last %d out of %d", maxGroupSize, issueSectionsSize);
+                    issueSections = getTruncatedGroup(issueSections, issueSectionsSize, maxGroupSize);
+                }
+
+                sections.add(markdownSection(String.format("*Open Issues (%s):*", displayCount)));
                 sections.add(Divider.builder().build());
+
                 sections.addAll(issueSections);
             }
 
-            if (prSections.size() > 0) {
-                sections.add(markdownSection("*Open Pull Requests:*"));
+            if (prSectionsSize > 0) {
+                String displayCount = String.format("%d", prSectionsSize);;
+
+                if (mustTruncate && prSectionsSize > maxGroupSize) {
+                    displayCount = String.format("showing last %d out of %d", maxGroupSize, prSectionsSize);
+                    prSections = getTruncatedGroup(prSections, prSectionsSize, maxGroupSize);
+                }
+
+                sections.add(markdownSection(String.format("*Open Pull Requests (%s):*", displayCount)));
                 sections.add(Divider.builder().build());
+
                 sections.addAll(prSections);
             }
         }
@@ -90,10 +110,26 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
         ).join();
     }
 
+    private List<Block> getTruncatedGroup(List<Block> sections, int sectionsSize, int maxGroupSize) {
+        return sections.subList(sectionsSize - maxGroupSize, sectionsSize);
+    }
+
     private Block getSection(GHPullRequest pullRequest) throws IOException {
 
+        String mergeableState = pullRequest.getMergeableState();
+        String mergeableEmoji;
+
+        if (List.of("clean", "has_hooks").contains(mergeableState)) {
+            mergeableEmoji = ":large_green_circle:";
+        } else if (List.of("dirty", "blocked", "behind", "draft").contains(mergeableState)) {
+            mergeableEmoji = ":large_red_circle:";
+        } else {
+            mergeableEmoji = ":large_yellow_circle:";
+        }
+
         return markdownSection(
-            "%s *%s* %nrepository: %s, age: %s, :heavy_minus_sign: %d :heavy_plus_sign: %d",
+            "%s %s *%s*%nrepository: %s, age: %s, :heavy_minus_sign: %d :heavy_plus_sign: %d",
+            mergeableEmoji,
             pullRequest.getUser().getLogin(),
             pullRequest.getTitle(),
             pullRequest.getRepository().getFullName(),

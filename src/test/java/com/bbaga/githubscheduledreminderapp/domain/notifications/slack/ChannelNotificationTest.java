@@ -78,6 +78,7 @@ class ChannelNotificationTest {
         Mockito.when(pr.getNodeId()).thenReturn("1234567");
         Mockito.when(pr.getRepository()).thenReturn(repository);
         Mockito.when(pr.getCreatedAt()).thenReturn(Date.from(Instant.now()));
+        Mockito.when(pr.getMergeableState()).thenReturn("clean");
 
         //noinspection unchecked
         Result<ChatPostMessageResponse, SlackError> result = (Result<ChatPostMessageResponse, SlackError>) Mockito.mock(Result.class);
