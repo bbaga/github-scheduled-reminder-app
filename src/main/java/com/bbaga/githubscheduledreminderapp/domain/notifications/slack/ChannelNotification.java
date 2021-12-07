@@ -122,7 +122,7 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
         if (List.of("clean", "has_hooks").contains(mergeableState)) {
             mergeableEmoji = ":large_green_circle:";
         } else if (List.of("dirty", "blocked", "behind", "draft").contains(mergeableState)) {
-            mergeableEmoji = ":large_red_circle:";
+            mergeableEmoji = ":red_circle:";
         } else {
             mergeableEmoji = ":large_yellow_circle:";
         }
