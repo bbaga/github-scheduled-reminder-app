@@ -3,6 +3,9 @@ package com.bbaga.githubscheduledreminderapp.domain.notifications.slack;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.Notification;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.SlackNotification;
 import com.bbaga.githubscheduledreminderapp.domain.statistics.UrlBuilderInterface;
+import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubIssue;
+import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubPullRequest;
+import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubUser;
 import com.hubspot.algebra.Result;
 import com.hubspot.slack.client.SlackClient;
 import com.hubspot.slack.client.methods.params.chat.ChatPostMessageParams;
@@ -45,7 +48,7 @@ class ChannelNotificationTest {
         config.setChannel("test");
         Notification notification = new Notification();
         notification.setConfig(config);
-        ArrayList<GHIssue> issues = new ArrayList<>();
+        ArrayList<GitHubIssue> issues = new ArrayList<>();
 
         Mockito.when(client.postMessage(Mockito.any())).thenReturn(future);
         service.send(new ChannelNotificationDataProvider.Data(notification, issues));
@@ -57,10 +60,10 @@ class ChannelNotificationTest {
     void sendCalled() throws IOException {
         SlackClient client = Mockito.mock(SlackClient.class);
         UrlBuilderInterface urlBuilder = Mockito.mock(UrlBuilderInterface.class);
-        GHIssue issue = Mockito.mock(GHIssue.class);
-        GHUser user = Mockito.mock(GHUser.class);
+        GitHubIssue issue = Mockito.mock(GitHubIssue.class);
+        GitHubUser user = Mockito.mock(GitHubUser.class);
         GHRepository repository = Mockito.mock(GHRepository.class);
-        GHPullRequest pr = Mockito.mock(GHPullRequest.class);
+        GitHubPullRequest pr = Mockito.mock(GitHubPullRequest.class);
         Mockito.when(user.getLogin()).thenReturn("userLogin");
         Mockito.when(repository.getFullName()).thenReturn("org/repo");
 
@@ -90,7 +93,7 @@ class ChannelNotificationTest {
         config.setChannel("test");
         Notification notification = new Notification();
         notification.setConfig(config);
-        ArrayList<GHIssue> issues = new ArrayList<>();
+        ArrayList<GitHubIssue> issues = new ArrayList<>();
         issues.add(issue);
         issues.add(pr);
 

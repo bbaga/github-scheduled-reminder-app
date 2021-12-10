@@ -1,13 +1,13 @@
 package com.bbaga.githubscheduledreminderapp.domain.sources.github;
 
 import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.SourceConfig;
-import org.kohsuke.github.GHIssue;
+import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubIssue;
 
 import static com.bbaga.githubscheduledreminderapp.domain.configuration.sources.Sources.Constants.*;
 
 public class SourceProvider {
-    public static RepositoryAsSourceInterface<GHIssue> getRepositoryAsSourceProvider(SourceConfig config) {
-        RepositoryAsSourceInterface<GHIssue> source;
+    public static RepositoryAsSourceInterface<GitHubIssue> getRepositoryAsSourceProvider(SourceConfig config) {
+        RepositoryAsSourceInterface<GitHubIssue> source;
         String type = config.getType();
 
         if (type.equals(REPOSITORY_PRS)) {
@@ -23,8 +23,8 @@ public class SourceProvider {
         return source;
     }
 
-    public static SearchAsSourceInterface<GHIssue> getSearchAsSourceProvider(SourceConfig config) {
-        SearchAsSourceInterface<GHIssue> source;
+    public static SearchAsSourceInterface<GitHubIssue> getSearchAsSourceProvider(SourceConfig config) {
+        SearchAsSourceInterface<GitHubIssue> source;
         String type = config.getType();
 
         if (type.equals(SEARCH_PRS_BY_REVIEWERS)) {

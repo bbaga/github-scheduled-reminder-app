@@ -3,6 +3,7 @@ package com.bbaga.githubscheduledreminderapp.domain.sources.github;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.SearchIssuesSourceConfig;
 import com.bbaga.githubscheduledreminderapp.domain.notifications.slack.ChannelNotificationDataProvider;
 import com.bbaga.githubscheduledreminderapp.domain.sources.github.search.SearchIssueBuilder;
+import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubIssue;
 import com.hubspot.algebra.Result;
 import com.hubspot.slack.client.models.response.SlackError;
 import com.hubspot.slack.client.models.response.chat.ChatPostMessageResponse;
@@ -24,11 +25,18 @@ class SearchIssuesSourceTest {
     void get() throws IOException {
 
         GHIssue issueMock = Mockito.mock(GHIssue.class);
-        Mockito.when(issueMock.getNumber()).thenReturn(1);
         Mockito.when(issueMock.isPullRequest()).thenReturn(false);
+        Mockito.when(issueMock.getNumber()).thenReturn(1);
+        GitHubIssue gitHubIssueMock = Mockito.mock(GitHubIssue.class);
+        Mockito.when(gitHubIssueMock.unwrap()).thenReturn(issueMock);
 
         ArrayList<GHIssue> resultIssues = new ArrayList<>();
         resultIssues.add(issueMock);
+
+
+        MockedStatic<GitHubIssue> gitHubIssue = Mockito.mockStatic(GitHubIssue.class);
+        gitHubIssue.when(() -> GitHubIssue.create(issueMock)).thenReturn(gitHubIssueMock);
+
 
         GHRepository repository = Mockito.mock(GHRepository.class);
         Mockito.when(repository.getIssue(1)).thenReturn(issueMock);
@@ -53,8 +61,8 @@ class SearchIssuesSourceTest {
 
         Mockito.when(searchIssueBuilderMock.query("repo:some/repo is:pr")).thenReturn(resultIssues);
 
-        List<GHIssue> issues = source.get(repository, client);
+        List<GitHubIssue> issues = source.get(repository, client);
 
-        assertSame(issueMock, issues.get(0));
+        assertSame(issueMock, issues.get(0).unwrap());
     }
 }

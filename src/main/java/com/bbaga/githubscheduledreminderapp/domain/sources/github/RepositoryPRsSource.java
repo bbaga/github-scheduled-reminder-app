@@ -2,7 +2,8 @@ package com.bbaga.githubscheduledreminderapp.domain.sources.github;
 
 import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.SourceConfig;
 import com.bbaga.githubscheduledreminderapp.domain.sources.github.filters.FilterChain;
-import org.kohsuke.github.GHIssue;
+import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubIssue;
+import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubPullRequest;
 import org.kohsuke.github.GHIssueState;
 import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHRepository;
@@ -10,7 +11,7 @@ import org.kohsuke.github.GHRepository;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class RepositoryPRsSource implements RepositoryAsSourceInterface <GHIssue> {
+public class RepositoryPRsSource implements RepositoryAsSourceInterface <GitHubIssue> {
     private SourceConfig sourceConfig;
 
     @Override
@@ -18,15 +19,17 @@ public class RepositoryPRsSource implements RepositoryAsSourceInterface <GHIssue
         this.sourceConfig = sourceConfig;
     }
 
-    public ArrayList<GHIssue> get(GHRepository repository) throws IOException {
-        ArrayList<GHIssue> pullRequests = new ArrayList<>();
+    public ArrayList<GitHubIssue> get(GHRepository repository) throws IOException {
+        ArrayList<GitHubIssue> pullRequests = new ArrayList<>();
 
         repository.getPullRequests(GHIssueState.OPEN).forEach((GHPullRequest pr) -> {
-            if (FilterChain.filter(sourceConfig.getFilters(), pr)) {
+            GitHubPullRequest wrappedPr = GitHubPullRequest.create(pr);
+
+            if (FilterChain.filter(sourceConfig.getFilters(), wrappedPr)) {
                 return;
             }
 
-            pullRequests.add(pr);
+            pullRequests.add(wrappedPr);
         });
 
         return pullRequests;

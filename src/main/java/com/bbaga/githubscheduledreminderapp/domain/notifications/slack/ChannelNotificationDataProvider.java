@@ -8,6 +8,7 @@ import com.bbaga.githubscheduledreminderapp.domain.notifications.NotificationDat
 import com.bbaga.githubscheduledreminderapp.domain.sources.github.RepositoryAsSourceInterface;
 import com.bbaga.githubscheduledreminderapp.domain.sources.github.SearchAsSourceInterface;
 import com.bbaga.githubscheduledreminderapp.domain.sources.github.SourceProvider;
+import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubIssue;
 import org.kohsuke.github.*;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -42,7 +43,7 @@ public class ChannelNotificationDataProvider implements NotificationDataProvider
     public Data getData() {
 
         GitHub client;
-        ArrayList<GHIssue> issues = new ArrayList<>();
+        ArrayList<GitHubIssue> issues = new ArrayList<>();
         ArrayList<SourceConfig> repoAsSource = new ArrayList<>();
 
         for (SourceConfig sourceConfig : notification.getConfig().getSources()) {
@@ -64,7 +65,7 @@ public class ChannelNotificationDataProvider implements NotificationDataProvider
             if (repository.getConfig() != null && repository.getConfig().getSources().size() > 0) {
                 for (SourceConfig sourceConfig : repository.getConfig().getSources()) {
                     if (sourceConfig.isSearchAsSource()) {
-                        SearchAsSourceInterface<GHIssue> source = SourceProvider.getSearchAsSourceProvider(sourceConfig);
+                        SearchAsSourceInterface<GitHubIssue> source = SourceProvider.getSearchAsSourceProvider(sourceConfig);
                         try {
                             issues.addAll(source.get(repo, client));
                         } catch (IOException e) {
@@ -77,7 +78,7 @@ public class ChannelNotificationDataProvider implements NotificationDataProvider
             }
 
             for (SourceConfig sourceConfig : repoAsSource) {
-                RepositoryAsSourceInterface<GHIssue> source = SourceProvider.getRepositoryAsSourceProvider(sourceConfig);
+                RepositoryAsSourceInterface<GitHubIssue> source = SourceProvider.getRepositoryAsSourceProvider(sourceConfig);
                 try {
                     issues.addAll(source.get(repo));
                 } catch (IOException e) {
@@ -87,7 +88,7 @@ public class ChannelNotificationDataProvider implements NotificationDataProvider
         }
 
         HashSet<String> uniqueIssues = new HashSet<>();
-        issues = issues.stream().filter((GHIssue issue) -> {
+        issues = issues.stream().filter((GitHubIssue issue) -> {
             String id = issue.getRepository().getFullName() + "/" + issue.getNumber();
             if (!uniqueIssues.contains(id)) {
                 uniqueIssues.add(id);
@@ -98,7 +99,7 @@ public class ChannelNotificationDataProvider implements NotificationDataProvider
         }).collect(Collectors.toCollection(ArrayList::new));
         uniqueIssues.clear();
 
-        issues.sort((GHIssue issueA, GHIssue issueB) -> {
+        issues.sort((GitHubIssue issueA, GitHubIssue issueB) -> {
             try {
                 return issueA.getCreatedAt().compareTo(issueB.getCreatedAt());
             } catch (IOException e) {
@@ -113,9 +114,9 @@ public class ChannelNotificationDataProvider implements NotificationDataProvider
 
     public static class Data {
         private final Notification notification;
-        private final ArrayList<GHIssue> issues;
+        private final ArrayList<GitHubIssue> issues;
 
-        public Data(Notification notification, ArrayList<GHIssue> issues) {
+        public Data(Notification notification, ArrayList<GitHubIssue> issues) {
             this.notification = notification;
             this.issues = issues;
         }
@@ -124,7 +125,7 @@ public class ChannelNotificationDataProvider implements NotificationDataProvider
             return notification;
         }
 
-        public ArrayList<GHIssue> getIssues() {
+        public ArrayList<GitHubIssue> getIssues() {
             return issues;
         }
     }

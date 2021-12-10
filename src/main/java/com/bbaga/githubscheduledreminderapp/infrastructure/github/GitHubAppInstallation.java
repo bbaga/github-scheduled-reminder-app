@@ -3,9 +3,9 @@ package com.bbaga.githubscheduledreminderapp.infrastructure.github;
 import org.kohsuke.github.GHAppInstallation;
 import org.kohsuke.github.GHUser;
 
-public class AppInstallationContainer {
+public class GitHubAppInstallation {
     private final GHAppInstallation installation;
-    private AppInstallationContainer(GHAppInstallation installation) {
+    private GitHubAppInstallation(GHAppInstallation installation) {
         this.installation = installation;
     }
 
@@ -21,7 +21,7 @@ public class AppInstallationContainer {
         return installation;
     }
 
-    public static AppInstallationContainer create(GHAppInstallation installation) {
-        return new AppInstallationContainer(installation);
+    public static GitHubAppInstallation create(GHAppInstallation installation) {
+        return new GitHubAppInstallation(installation);
     }
 }

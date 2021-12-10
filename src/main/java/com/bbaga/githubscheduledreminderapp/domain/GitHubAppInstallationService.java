@@ -56,7 +56,7 @@ public class GitHubAppInstallationService {
                 }
 
                 installationClient = gitHubBuilderFactory.create()
-                        .withAuthorizationProvider(new AuthProv(installationRepository.get(installationId)))
+                        .withAuthorizationProvider(new AuthProv(installationRepository.get(installationId).unwrap()))
                         .build();
             } catch (IOException e) {
                 throw new RuntimeException(String.format("Could not crate client for installation %d", installationId));

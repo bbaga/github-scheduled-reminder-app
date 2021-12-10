@@ -2,9 +2,9 @@ package com.bbaga.githubscheduledreminderapp.domain.sources.github.filters;
 
 import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.filters.AbstractFilterConfig;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.filters.LabelFilterConfig;
-import org.kohsuke.github.GHIssue;
+import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubIssue;
+import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubPullRequest;
 import org.kohsuke.github.GHLabel;
-import org.kohsuke.github.GHPullRequest;
 
 import java.io.IOException;
 import java.time.Instant;
@@ -22,7 +22,7 @@ public class LabelFilter implements IssueFilterInterface {
     }
 
     @Override
-    public Boolean filter(GHIssue issue) {
+    public Boolean filter(GitHubIssue issue) {
         List<String> excludedLabels = config.getExcludeLabels();
         Instant now = Instant.now();
         long ageInDays = 0;
@@ -49,7 +49,7 @@ public class LabelFilter implements IssueFilterInterface {
     }
 
     @Override
-    public Boolean filter(GHPullRequest issue) {
+    public Boolean filter(GitHubPullRequest issue) {
         return false;
     }
 }

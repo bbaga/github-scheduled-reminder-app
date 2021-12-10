@@ -4,6 +4,8 @@ import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.SearchI
 import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.SourceConfig;
 import com.bbaga.githubscheduledreminderapp.domain.sources.github.filters.FilterChain;
 import com.bbaga.githubscheduledreminderapp.domain.sources.github.search.SearchIssueBuilder;
+import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubIssue;
+import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubPullRequest;
 import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
@@ -12,7 +14,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class SearchIssuesSource implements SearchAsSourceInterface <GHIssue> {
+public class SearchIssuesSource implements SearchAsSourceInterface <GitHubIssue> {
     private SearchIssuesSourceConfig source;
 
     @Override
@@ -21,8 +23,8 @@ public class SearchIssuesSource implements SearchAsSourceInterface <GHIssue> {
     }
 
     @Override
-    public ArrayList<GHIssue> get(GHRepository repo, GitHub client) throws IOException {
-        HashMap<Integer, GHIssue> issues = new HashMap<>();
+    public ArrayList<GitHubIssue> get(GHRepository repo, GitHub client) throws IOException {
+        HashMap<Integer, GitHubIssue> issues = new HashMap<>();
 
         SearchIssueBuilder builder = SearchIssueBuilder.from(client.searchIssues());
 
@@ -30,12 +32,12 @@ public class SearchIssuesSource implements SearchAsSourceInterface <GHIssue> {
             int issueNumber = issue.getNumber();
             if (!issues.containsKey(issueNumber)) {
                 try {
-                    GHIssue properIssue;
+                    GitHubIssue properIssue;
 
                     if (issue.isPullRequest()) {
-                        properIssue = repo.getPullRequest(issueNumber);
+                        properIssue = GitHubPullRequest.create(repo.getPullRequest(issueNumber));
                     } else {
-                        properIssue = repo.getIssue(issueNumber);
+                        properIssue = GitHubIssue.create(repo.getIssue(issueNumber));
                     }
 
                     if (FilterChain.filter(source.getFilters(), properIssue)) {
