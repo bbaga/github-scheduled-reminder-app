@@ -6,6 +6,8 @@ import com.bbaga.githubscheduledreminderapp.infrastructure.configuration.InRepoC
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubBuilderFactory;
 import org.kohsuke.github.*;
 import org.quartz.SchedulerException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,6 +24,7 @@ public class State {
     private final GitHub gitHubClient;
     private final GitHubBuilderFactory gitHubBuilderFactory;
     private final InRepoConfigParser inRepoConfigParser;
+    private final Logger logger = LoggerFactory.getLogger(State.class);
 
     State(
         GitHub gitHubClient,
@@ -74,7 +77,8 @@ public class State {
 
             configGraphUpdater.clearOutdated(installationId, repositoryFullName, timestamp);
         } catch (GHFileNotFoundException | SchedulerException e) {
-            return e.getMessage();
+            logger.error(e.getMessage());
+            return "Something wen wrong, please check the logs.";
         }
 
         return "OK";
