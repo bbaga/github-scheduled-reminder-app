@@ -2,6 +2,8 @@ package com.bbaga.githubscheduledreminderapp.domain.sources.github;
 
 import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.filters.DraftFilterConfig;
 import com.bbaga.githubscheduledreminderapp.domain.sources.github.filters.DraftFilter;
+import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubIssue;
+import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubPullRequest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.kohsuke.github.GHIssue;
@@ -19,7 +21,7 @@ class DraftFilterTest {
         DraftFilter filter = new DraftFilter();
         filter.configure(config);
 
-        GHPullRequest pr = Mockito.mock(GHPullRequest.class);
+        GitHubPullRequest pr = Mockito.mock(GitHubPullRequest.class);
         Mockito.when(pr.isDraft()).thenReturn(true);
         Mockito.when(pr.getUpdatedAt()).thenReturn(new Date());
         Assertions.assertTrue(filter.filter(pr));
@@ -38,7 +40,7 @@ class DraftFilterTest {
         DraftFilter filter = new DraftFilter();
         filter.configure(config);
 
-        GHPullRequest pr = Mockito.mock(GHPullRequest.class);
+        GitHubPullRequest pr = Mockito.mock(GitHubPullRequest.class);
         Mockito.when(pr.getUpdatedAt()).thenReturn(new Date());
         Mockito.when(pr.isDraft()).thenThrow(IOException.class);
         Assertions.assertFalse(filter.filter(pr));
@@ -47,7 +49,7 @@ class DraftFilterTest {
     @Test
     void testFilterIssue() throws IOException {
         DraftFilter filter = new DraftFilter();
-        GHIssue pr = Mockito.mock(GHIssue.class);
+        GitHubIssue pr = Mockito.mock(GitHubIssue.class);
         Mockito.when(pr.getUpdatedAt()).thenReturn(new Date());
         Assertions.assertFalse(filter.filter(pr));
     }

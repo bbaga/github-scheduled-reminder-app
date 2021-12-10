@@ -6,6 +6,7 @@ import com.bbaga.githubscheduledreminderapp.domain.configuration.Notification;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.NotificationInterface;
 import com.bbaga.githubscheduledreminderapp.infrastructure.configuration.InRepoConfig;
 import com.bbaga.githubscheduledreminderapp.infrastructure.configuration.InRepoConfigParser;
+import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubAppInstallation;
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubBuilderFactory;
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.repositories.GitHubInstallationRepository;
 import org.kohsuke.github.*;
@@ -56,16 +57,15 @@ public class GitHubInstallationRepositoryScan implements Job {
 
         logger.info("Starting Repository scanning for Installation {}", installationId);
 
-        GHAppInstallation installation = installationRepository.get(
+        GitHubAppInstallation installation = installationRepository.get(
             context.getJobDetail().getJobDataMap().getLong("installationId")
         );
 
         try {
-            GHAppInstallationToken token = installation.createToken().create();
+            GHAppInstallationToken token = installation.unwrap().createToken().create();
             GitHub githubAuthAsInst = gitHubBuilderFactory.create()
                     .withAppInstallationToken(token.getToken())
                     .build();
-
 
             for(GHRepository repo : GitHubClientUtil.listRepositories(githubAuthAsInst)) {
                 try {

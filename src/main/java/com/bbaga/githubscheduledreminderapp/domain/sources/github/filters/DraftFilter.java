@@ -2,8 +2,8 @@ package com.bbaga.githubscheduledreminderapp.domain.sources.github.filters;
 
 import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.filters.AbstractFilterConfig;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.filters.DraftFilterConfig;
-import org.kohsuke.github.GHIssue;
-import org.kohsuke.github.GHPullRequest;
+import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubIssue;
+import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubPullRequest;
 
 import java.io.IOException;
 import java.time.Instant;
@@ -19,12 +19,12 @@ public class DraftFilter implements IssueFilterInterface {
     }
 
     @Override
-    public Boolean filter(GHIssue issue) {
+    public Boolean filter(GitHubIssue issue) {
         return false;
     }
 
     @Override
-    public Boolean filter(GHPullRequest pr) {
+    public Boolean filter(GitHubPullRequest pr) {
         Instant now = Instant.now();
         long ageInDays = 2;
 

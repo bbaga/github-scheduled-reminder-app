@@ -4,6 +4,8 @@ import com.bbaga.githubscheduledreminderapp.domain.configuration.Notification;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.SlackNotification;
 import com.bbaga.githubscheduledreminderapp.domain.notifications.NotificationInterface;
 import com.bbaga.githubscheduledreminderapp.domain.statistics.UrlBuilderInterface;
+import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubIssue;
+import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubPullRequest;
 import com.hubspot.slack.client.SlackClient;
 import com.hubspot.slack.client.methods.params.chat.ChatPostMessageParams;
 import com.hubspot.slack.client.models.blocks.Block;
@@ -13,8 +15,6 @@ import com.hubspot.slack.client.models.blocks.Section;
 import com.hubspot.slack.client.models.blocks.elements.Button;
 import com.hubspot.slack.client.models.blocks.objects.Text;
 import com.hubspot.slack.client.models.blocks.objects.TextType;
-import org.kohsuke.github.GHIssue;
-import org.kohsuke.github.GHPullRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -40,7 +40,7 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
     @Override
     public void send(ChannelNotificationDataProvider.Data data) {
         Notification notification = data.getNotification();
-        ArrayList<GHIssue> issues = data.getIssues();
+        ArrayList<GitHubIssue> issues = data.getIssues();
 
         List<Block> sections = new ArrayList<>();
         List<Block> issueSections = new ArrayList<>();
@@ -48,10 +48,10 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
 
         sections.add(Header.of(Text.of(TextType.PLAIN_TEXT, "Reporting open issues and pull requests")));
 
-        for (GHIssue issue : issues) {
+        for (GitHubIssue issue : issues) {
             try {
-                if (issue instanceof GHPullRequest) {
-                    prSections.add(getSection((GHPullRequest) issue));
+                if (issue instanceof GitHubPullRequest) {
+                    prSections.add(getSection((GitHubPullRequest) issue));
                     continue;
                 }
 
@@ -72,7 +72,7 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
             sections.add(markdownSection("*There aren't any open issues or pull requests.*"));
         } else {
             if (issueSectionsSize > 0) {
-                String displayCount = String.format("%d", issueSectionsSize);;
+                String displayCount = String.format("%d", issueSectionsSize);
 
                 if (mustTruncate && issueSectionsSize > maxGroupSize) {
                     displayCount = String.format("showing last %d out of %d", maxGroupSize, issueSectionsSize);
@@ -86,7 +86,7 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
             }
 
             if (prSectionsSize > 0) {
-                String displayCount = String.format("%d", prSectionsSize);;
+                String displayCount = String.format("%d", prSectionsSize);
 
                 if (mustTruncate && prSectionsSize > maxGroupSize) {
                     displayCount = String.format("showing last %d out of %d", maxGroupSize, prSectionsSize);
@@ -114,7 +114,7 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
         return sections.subList(sectionsSize - maxGroupSize, sectionsSize);
     }
 
-    private Block getSection(GHPullRequest pullRequest) throws IOException {
+    private Block getSection(GitHubPullRequest pullRequest) throws IOException {
 
         String mergeableState = pullRequest.getMergeableState();
         String mergeableEmoji;
@@ -139,7 +139,7 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
         ).withAccessory(linkButton(pullRequest));
     }
 
-    private Block getSection(GHIssue issue) throws IOException {
+    private Block getSection(GitHubIssue issue) throws IOException {
 
         return markdownSection(
             "%s *%s*%nrepository: %s, age: %s",
@@ -150,7 +150,7 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
         ).withAccessory(linkButton(issue));
     }
 
-    private String getIssueAge(GHIssue issue) throws IOException {
+    private String getIssueAge(GitHubIssue issue) throws IOException {
         String ageTemplate = "%d day";
         Instant now = Instant.now();
         Date createdAt = issue.getCreatedAt();
@@ -172,8 +172,8 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
         return Section.of(Text.of(TextType.MARKDOWN, String.format(pattern, args)));
     }
 
-    private Button linkButton(GHIssue issue) {
-        String action = (issue instanceof GHPullRequest ? "pull-request" : "issue") + ".view";
+    private Button linkButton(GitHubIssue issue) {
+        String action = (issue instanceof GitHubPullRequest ? "pull-request" : "issue") + ".view";
         String targetUrl = issue.getHtmlUrl().toString();
         String url;
 

@@ -1,7 +1,6 @@
 package com.bbaga.githubscheduledreminderapp.infrastructure.github.repositories;
 
-import com.bbaga.githubscheduledreminderapp.infrastructure.github.AppInstallationContainer;
-import com.bbaga.githubscheduledreminderapp.infrastructure.github.repositories.GitHubInstallationRepository;
+import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubAppInstallation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,10 +29,10 @@ class GitHubInstallationRepositoryTest {
         long id = 123456L;
         GHAppInstallation installation = Mockito.mock(GHAppInstallation.class);
         GHUser account = Mockito.mock(GHUser.class);
-        AppInstallationContainer installationContainer = Mockito.mock(AppInstallationContainer.class);
+        GitHubAppInstallation installationContainer = Mockito.mock(GitHubAppInstallation.class);
 
-        MockedStatic<AppInstallationContainer> provider = Mockito.mockStatic(AppInstallationContainer.class);
-        provider.when(() -> AppInstallationContainer.create(installation))
+        MockedStatic<GitHubAppInstallation> provider = Mockito.mockStatic(GitHubAppInstallation.class);
+        provider.when(() -> GitHubAppInstallation.create(installation))
                 .thenReturn(installationContainer);
 
         Mockito.doReturn(id).when(installationContainer).getId();
@@ -43,7 +42,7 @@ class GitHubInstallationRepositoryTest {
         this.repository.put(installation);
         Mockito.verify(installationContainer, Mockito.times(2)).getId();
 
-        assertSame(installation, this.repository.get(id));
+        assertSame(installation, this.repository.get(id).unwrap());
         this.repository.remove(id);
         assertNull(this.repository.get(id));
     }
@@ -55,10 +54,10 @@ class GitHubInstallationRepositoryTest {
         for (long id : ids) {
             GHAppInstallation installation = Mockito.mock(GHAppInstallation.class);
             GHUser account = Mockito.mock(GHUser.class);
-            AppInstallationContainer installationContainer = Mockito.mock(AppInstallationContainer.class);
+            GitHubAppInstallation installationContainer = Mockito.mock(GitHubAppInstallation.class);
 
-            MockedStatic<AppInstallationContainer> provider = Mockito.mockStatic(AppInstallationContainer.class);
-            provider.when(() -> AppInstallationContainer.create(installation))
+            MockedStatic<GitHubAppInstallation> provider = Mockito.mockStatic(GitHubAppInstallation.class);
+            provider.when(() -> GitHubAppInstallation.create(installation))
                     .thenReturn(installationContainer);
 
             Mockito.doReturn(id).when(installationContainer).getId();
