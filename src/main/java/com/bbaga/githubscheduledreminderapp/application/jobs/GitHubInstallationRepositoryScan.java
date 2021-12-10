@@ -66,21 +66,12 @@ public class GitHubInstallationRepositoryScan implements Job {
                     .withAppInstallationToken(token.getToken())
                     .build();
 
-            // Hack to get around bug in the client
-            GitHub tempGH = GitHubClientUtil.getRoot(installation);
-            GitHubClientUtil.setRoot(installation, githubAuthAsInst);
 
-            for(GHRepository repo : installation.listRepositories()) {
-
-                // Hack to get around bug in the client
-                GitHubClientUtil.setRoot(installation, tempGH);
-
+            for(GHRepository repo : GitHubClientUtil.listRepositories(githubAuthAsInst)) {
                 try {
                     InRepoConfig inRepoConfig = inRepoConfigParser.getFrom(repo);
 
                     if (repo.isArchived() || !inRepoConfig.getEnabled()) {
-                        // Hack to get around bug in the client
-                        GitHubClientUtil.setRoot(installation, githubAuthAsInst);
                         continue;
                     }
 
@@ -90,12 +81,7 @@ public class GitHubInstallationRepositoryScan implements Job {
                 } catch (GHFileNotFoundException e) {
                     logger.debug("No config file in {}", repo.getFullName());
                 }
-
-                // Hack to get around bug in the client
-                GitHubClientUtil.setRoot(installation, githubAuthAsInst);
             }
-
-            GitHubClientUtil.setRoot(installation, tempGH);
 
             // Remove entries if they didn't appear in this round
             configGraphUpdater.clearOutdated(installationId, currentRunStamp);
