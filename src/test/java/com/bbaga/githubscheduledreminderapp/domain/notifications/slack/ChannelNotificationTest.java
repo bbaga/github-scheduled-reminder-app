@@ -125,7 +125,7 @@ class ChannelNotificationTest {
         Mockito.verify(pr, Mockito.times(1)).getTitle();
         Mockito.verify(pr, Mockito.times(1)).getUser();
         Mockito.verify(pr, Mockito.times(1)).getRepository();
-        Mockito.verify(pr, Mockito.times(1)).getCreatedAt();
+        Mockito.verify(pr, Mockito.times(2)).getCreatedAt();
 
         // Verify Issue methods
         Mockito.verify(issue, Mockito.times(1)).getTitle();

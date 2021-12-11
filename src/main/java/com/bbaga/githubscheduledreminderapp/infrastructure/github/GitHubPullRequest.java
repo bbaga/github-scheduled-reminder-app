@@ -15,6 +15,10 @@ public class GitHubPullRequest extends GitHubIssue {
         return pullRequest.getMergeableState();
     }
 
+    public Boolean getMergeable() throws IOException {
+        return pullRequest.getMergeable();
+    }
+
     public int getAdditions() throws IOException {
         return pullRequest.getAdditions();
     }
