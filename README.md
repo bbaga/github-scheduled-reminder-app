@@ -1,5 +1,5 @@
-![Java CI with Maven](https://github.com/bbaga/github-scheduled-reminder-app/actions/workflows/maven.yml/badge.svg)
-![CodeQL](https://github.com/bbaga/github-scheduled-reminder-app/actions/workflows/codeql-analysis.yml/badge.svg)
+[![Java CI with Maven](https://github.com/bbaga/github-scheduled-reminder-app/actions/workflows/maven.yml/badge.svg)](https://github.com/bbaga/github-scheduled-reminder-app/actions/workflows/maven.yml)
+[![CodeQL](https://github.com/bbaga/github-scheduled-reminder-app/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/bbaga/github-scheduled-reminder-app/actions/workflows/codeql-analysis.yml)
 
 # github-scheduled-reminder-app
 Scheduled reminders about PRs and Issues. This project may be useful for teams using GitHub Enterprise versions that doesn't have the reminder feature implemented yet. 
