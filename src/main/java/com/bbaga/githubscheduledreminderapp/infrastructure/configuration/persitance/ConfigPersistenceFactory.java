@@ -15,13 +15,17 @@ public class ConfigPersistenceFactory {
     }
 
     public ConfigPersistenceInterface create(PersistenceType type, HashMap<String, ?> map) {
+        ConfigPersistenceSettingsInterface settings;
+
         switch (type) {
             case LOCAL_FS:
-                ConfigPersistenceLocalFileSettings settings = new ConfigPersistenceLocalFileSettings();
+                settings = new ConfigPersistenceLocalFileSettings();
                 settings.load(map);
-                return new ConfigPersistenceLocalFile(settings.getFilePath());
+                return new ConfigPersistenceLocalFile((ConfigPersistenceLocalFileSettings) settings);
             case GCS_BUCKET:
-                throw new RuntimeException("Persistence type GCS_BUCKET is not implemented");
+                settings = new ConfigPersistenceGCSBucketSettings();
+                settings.load(map);
+                return new ConfigPersistenceGCSBucket((ConfigPersistenceGCSBucketSettings) settings);
             default:
                 throw new RuntimeException("Persistence type is not implemented");
         }

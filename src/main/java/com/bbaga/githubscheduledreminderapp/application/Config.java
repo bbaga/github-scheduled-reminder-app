@@ -3,10 +3,8 @@ package com.bbaga.githubscheduledreminderapp.application;
 import com.bbaga.githubscheduledreminderapp.domain.GitHubAppInstallationService;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.ConfigGraphNode;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.ConfigGraphUpdater;
-import com.bbaga.githubscheduledreminderapp.domain.statistics.AggregatedStatisticsStorage;
 import com.bbaga.githubscheduledreminderapp.infrastructure.configuration.InRepoConfigParser;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.RepositoryInstallationEventListener;
-import com.bbaga.githubscheduledreminderapp.infrastructure.configuration.persitance.ConfigPersistenceFactory;
 import com.bbaga.githubscheduledreminderapp.infrastructure.configuration.persitance.ConfigPersistenceInterface;
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubBuilderFactory;
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.webhook.EventPublisher;
@@ -39,9 +37,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.FileInputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Configuration
@@ -70,12 +65,6 @@ public class Config {
 
     @Value("${application.jobs.github.installationScan.interval}")
     private String installationScanIntervals;
-
-    @Value("${application.state.storage.fs.filepath}")
-    private String stateStorageFsFilePath;
-
-    @Value("${application.state.storage.type}")
-    private String stateStorageType;
 
     @Bean
     public GitHub getGitHubClient(GitHubBuilderFactory gitHubBuilderFactory) throws Exception {
@@ -168,26 +157,8 @@ public class Config {
 
     @Bean
     @Qualifier("ConfigGraph")
-    public ConcurrentHashMap<String, ConfigGraphNode> initializeConfigGraph() {
-        ConfigPersistenceFactory factory = new ConfigPersistenceFactory();
-        ConfigPersistenceInterface configPersistence;
-
-        if (Objects.equals(this.stateStorageType, ConfigPersistenceFactory.PersistenceType.LOCAL_FS.label)) {
-            configPersistence = factory.create(
-                ConfigPersistenceFactory.PersistenceType.LOCAL_FS,
-                new HashMap<>(Map.of("filePath", stateStorageFsFilePath))
-            );
-        } else {
-            throw new RuntimeException("Could not create state loader instance");
-        }
-
-        return configPersistence.load();
-    }
-
-    @Bean
-    @Qualifier("application.state.storage.fs.filepath")
-    public String getStateStorageFsFilePath() {
-        return this.stateStorageFsFilePath;
+    public ConcurrentHashMap<String, ConfigGraphNode> initializeConfigGraph(ConfigPersistenceInterface persistentConfigStorage) {
+        return persistentConfigStorage.load();
     }
 
     @Bean

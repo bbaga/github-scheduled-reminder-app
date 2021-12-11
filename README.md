@@ -10,6 +10,7 @@ Scheduled reminders about PRs and Issues. This project may be useful for teams u
 1. [Development](#development)
 2. [Configuration](#configuration)
    1. [Sources](docs/sources.md)
+   2. [Persistent State Storage](docs/persistent-state-storage.md)
 
 # Development
 ## Requirements
@@ -65,72 +66,50 @@ If the application doesn't work at this point, please open an issue.
 ### `GITHUB_ID`
 The GitHub application id as per the [App ID](#app-id) section.
 
-**Required**: true
+**Required**: Yes
 
 ### `GITHUB_APP_CERT`
 Mandatory when `GITHUB_APP_CERT_FILE` isn't set. Contents of the github application certificate in `pkcs8` format as per the [App certificate](#app-certificate) section.
 
-**Required**: true
+**Required**: Yes
 
 ### `GITHUB_APP_CERT_FILE`
 Mandatory when `GITHUB_APP_CERT` isn't set. Location of the file containing the github application certificate in `pkcs8` format as per the [App certificate](#app-certificate) section.
 
-**Required**: true
+**Required**: Yes
 
 ### `GITHUB_API_ENDPOINT`
 The GitHub API endpoint in case it is a custom installation.
 
-**Required**: false
+**Required**: No
 
 ### `SLACK_API_TOKEN`
 Mandatory when `SLACK_API_TOKEN_FILE` isn't set. Slack API token as per the [Slack](#slack) section.
 
-**Required**: true
+**Required**: Yes
 
 ### `SLACK_API_TOKEN_FILE`
 Mandatory when `SLACK_API_TOKEN` isn't set. Location of the file containing the Slack API token as per the [Slack](#slack) section.
 
-**Required**: true
+**Required**: Yes
 
 ### `JOBS_GITHUB_INSTALLATION_SCAN_INTERVAL`
 This is the interval in milliseconds between installation scans and consequently repository scans for configuration updates.
 
-**Required**: false
+**Required**: No
 **Default**: 43200000
-
-### `STATE_STORAGE_TYPE`
-Storage type, at this time it can be local file system, GCS Bucket implementation is coming soon.
-
-**Required**: false
-**Default**: `LOCAL_FS`
-**Options:**
-- `LOCAL_FS`: Local file system
-
-### `STATE_STORAGE_FS_FILEPATH`
-When `LOCAL_FS` is used in `STATE_STORAGE_TYPE`, the application's state will be stored at this location.
-
-**Required**: false
-**Default**: `/tmp/github-reminder-application.state.json`
 
 ### `ACTIVITY_TRACKING_ENABLED`
 Enables tracking clicks on the links/buttons posted with the notifications.
 
-**Required**: false
+**Required**: No
 **Default**: `false`
 
 ### `ACTIVITY_TRACKING_ENDPOINT_URL`
 The application has to know its own endpoint to build tracking urls that will forward users to the target urls.
 
-**Required**: false
+**Required**: No
 **Default**: `http://localhost:8080`
-
-## Coming soon...
-| Name | Is Required? | Default value | Description |
-|---|---|---|---|
-| `STATE_STORAGE_GCS_BUCKET_NAME` | No | - | GCS bucket name. |
-| `STATE_STORAGE_GCS_BUCKET_SECRET` | No | - | Mandatory when `STATE_STORAGE_GCS_BUCKET_SECRET_FILE` isn't set. Secret for the service account that can read and write to the bucket. |
-| `STATE_STORAGE_GCS_BUCKET_SECRET_FILE` | No | - | Mandatory when `STATE_STORAGE_GCS_BUCKET_SECRET` isn't set. Location of the file containing the secret for the service account that can read and write to the bucket. |
-| `STATE_STORAGE_GCS_BUCKET_FILEPATH` | No | application.state.json | File path to the state file in the GCS bucket. |
 
 ## Complete example
 ```yaml
