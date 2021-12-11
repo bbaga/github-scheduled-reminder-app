@@ -127,6 +127,16 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
             mergeableEmoji = ":large_yellow_circle:";
         }
 
+        logger.debug(
+            String.format(
+                "[PR] %s; mergeable-state: %s; created-at: %s; updated-at: %s",
+                pullRequest.getHtmlUrl(),
+                mergeableState,
+                pullRequest.getCreatedAt(),
+                pullRequest.getUpdatedAt()
+            )
+        );
+
         return markdownSection(
             "%s %s *%s*%nrepository: %s, age: %s, :heavy_minus_sign: %d :heavy_plus_sign: %d",
             mergeableEmoji,
@@ -140,6 +150,14 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
     }
 
     private Block getSection(GitHubIssue issue) throws IOException {
+        logger.debug(
+                String.format(
+                        "[Issue] %s; created-at: %s; updated-at: %s",
+                        issue.getHtmlUrl(),
+                        issue.getCreatedAt(),
+                        issue.getUpdatedAt()
+                )
+        );
 
         return markdownSection(
             "%s *%s*%nrepository: %s, age: %s",
@@ -173,15 +191,13 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
     }
 
     private Button linkButton(GitHubIssue issue) {
-        String action = (issue instanceof GitHubPullRequest ? "pull-request" : "issue") + ".view";
-        String targetUrl = issue.getHtmlUrl().toString();
         String url;
 
         try {
-            url = urlBuilder.from("slack.channel", action, targetUrl);
+            url = urlBuilder.from("slack.channel", issue);
         } catch (UnsupportedEncodingException e) {
             logger.error(e.getMessage(), e);
-            url = targetUrl;
+            url = issue.getHtmlUrl().toString();
         }
 
         return Button.of(Text.of(TextType.PLAIN_TEXT, "Open"), issue.getNodeId()).withUrl(url);
