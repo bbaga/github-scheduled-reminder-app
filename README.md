@@ -99,15 +99,6 @@ This is the interval in milliseconds between installation scans and consequently
 **Required**: No
 **Default**: 43200000
 
-### `STATE_STORAGE_TYPE`
-Storage type, at this time it can be local file system, GCS Bucket implementation is coming soon.
-
-**Required**: No
-**Default**: `LOCAL_FS`
-**Options:**
-- `LOCAL_FS`: Local file system
-- `GCS_BUCKET`: Google Cloud Storage (GCS) Bucket
-
 ### `ACTIVITY_TRACKING_ENABLED`
 Enables tracking clicks on the links/buttons posted with the notifications.
 
