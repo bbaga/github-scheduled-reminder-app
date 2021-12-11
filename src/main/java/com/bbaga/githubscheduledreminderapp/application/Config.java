@@ -3,7 +3,6 @@ package com.bbaga.githubscheduledreminderapp.application;
 import com.bbaga.githubscheduledreminderapp.domain.GitHubAppInstallationService;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.ConfigGraphNode;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.ConfigGraphUpdater;
-import com.bbaga.githubscheduledreminderapp.domain.statistics.AggregatedStatisticsStorage;
 import com.bbaga.githubscheduledreminderapp.infrastructure.configuration.InRepoConfigParser;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.RepositoryInstallationEventListener;
 import com.bbaga.githubscheduledreminderapp.infrastructure.configuration.persitance.ConfigPersistenceFactory;
@@ -76,6 +75,18 @@ public class Config {
 
     @Value("${application.state.storage.type}")
     private String stateStorageType;
+
+    @Value("${application.state.storage.gcs_bucket.name}")
+    private String stateStorageGCSBucketName;
+
+    @Value("${application.state.storage.gcs_bucket.secretFile}")
+    private String stateStorageGCSBucketSecretFile;
+
+    @Value("${application.state.storage.gcs_bucket.secret}")
+    private String stateStorageGCSBucketSecret;
+
+    @Value("${application.state.storage.gcs_bucket.filepath}")
+    private String stateStorageGCSBucketFilePath;
 
     @Bean
     public GitHub getGitHubClient(GitHubBuilderFactory gitHubBuilderFactory) throws Exception {
@@ -168,20 +179,32 @@ public class Config {
 
     @Bean
     @Qualifier("ConfigGraph")
-    public ConcurrentHashMap<String, ConfigGraphNode> initializeConfigGraph() {
+    public ConcurrentHashMap<String, ConfigGraphNode> initializeConfigGraph(ConfigPersistenceInterface persistentConfigStorage) {
+        return persistentConfigStorage.load();
+    }
+
+    @Bean
+    public ConfigPersistenceInterface getPersistentConfigStorage() {
         ConfigPersistenceFactory factory = new ConfigPersistenceFactory();
-        ConfigPersistenceInterface configPersistence;
+        HashMap<String, ?> config;
+        ConfigPersistenceFactory.PersistenceType type;
 
         if (Objects.equals(this.stateStorageType, ConfigPersistenceFactory.PersistenceType.LOCAL_FS.label)) {
-            configPersistence = factory.create(
-                ConfigPersistenceFactory.PersistenceType.LOCAL_FS,
-                new HashMap<>(Map.of("filePath", stateStorageFsFilePath))
-            );
+            type = ConfigPersistenceFactory.PersistenceType.LOCAL_FS;
+            config = new HashMap<>(Map.of("filePath", stateStorageFsFilePath));
+        } else if (Objects.equals(this.stateStorageType, ConfigPersistenceFactory.PersistenceType.GCS_BUCKET.label)) {
+            type = ConfigPersistenceFactory.PersistenceType.GCS_BUCKET;
+            config = new HashMap<>(Map.of(
+                "bucketName", stateStorageGCSBucketName,
+                "credentialsJson", stateStorageGCSBucketSecret,
+                "credentialsJsonPath", stateStorageGCSBucketSecretFile,
+                "filePath", stateStorageGCSBucketFilePath
+            ));
         } else {
             throw new RuntimeException("Could not create state loader instance");
         }
 
-        return configPersistence.load();
+        return factory.create(type, config);
     }
 
     @Bean

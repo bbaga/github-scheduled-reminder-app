@@ -11,16 +11,16 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ConfigPersistenceLocalFile implements ConfigPersistenceInterface {
 
-    private final String filePath;
+    private final ConfigPersistenceLocalFileSettings settings;
 
-    public ConfigPersistenceLocalFile(String filePath) {
-        this.filePath = filePath;
+    public ConfigPersistenceLocalFile(ConfigPersistenceLocalFileSettings settings) {
+        this.settings = settings;
     }
 
     @Override
     public ConcurrentHashMap<String, ConfigGraphNode> load() {
         ConcurrentHashMap<String, ConfigGraphNode> graph = new ConcurrentHashMap<String, ConfigGraphNode>();
-        File stateFile = new File(this.filePath);
+        File stateFile = new File(settings.getFilePath());
 
         if (stateFile.exists() && stateFile.isFile()) {
             try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(stateFile.getAbsolutePath())))) {
@@ -53,7 +53,7 @@ public class ConfigPersistenceLocalFile implements ConfigPersistenceInterface {
             return;
         }
 
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(this.filePath))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(settings.getFilePath()))) {
             writer.write(json);
         } catch (IOException e) {
             e.printStackTrace();
