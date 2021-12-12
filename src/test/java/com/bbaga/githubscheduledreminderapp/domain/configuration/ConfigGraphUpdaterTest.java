@@ -2,9 +2,7 @@ package com.bbaga.githubscheduledreminderapp.domain.configuration;
 
 import com.bbaga.githubscheduledreminderapp.domain.jobs.scheduling.NotificationJobScheduler;
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.repositories.GitHubInstallationRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.quartz.SchedulerException;
 
@@ -22,7 +20,7 @@ class ConfigGraphUpdaterTest {
         NotificationJobScheduler jobScheduler = Mockito.mock(NotificationJobScheduler.class);
         ConfigGraphUpdater configUpdater = new ConfigGraphUpdater(installationRepository, configGraph, jobScheduler);
 
-        Notification notification = new Notification("name", "* * * * * *", "type", new NotificationConfiguration());
+        Notification notification = new Notification("name", "type", new SlackNotificationConfiguration("* * * * * *"));
 
         assertEquals(0, configGraph.size());
 
@@ -41,7 +39,7 @@ class ConfigGraphUpdaterTest {
         NotificationJobScheduler jobScheduler = Mockito.mock(NotificationJobScheduler.class);
         ConfigGraphUpdater configUpdater = new ConfigGraphUpdater(installationRepository, configGraph, jobScheduler);
 
-        Notification notification = new Notification("name", "* * * * * *", "type", new NotificationConfiguration());
+        Notification notification = new Notification("name", "type", new SlackNotificationConfiguration("* * * * * *"));
         notification.setRepository("some/repo");
         Extending.MainConfig extendingConfig = new Extending.MainConfig();
         extendingConfig.setRepository("some/repo");

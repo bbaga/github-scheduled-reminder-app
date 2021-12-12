@@ -47,7 +47,7 @@ public class ChannelNotificationDataProvider implements NotificationDataProvider
         ArrayList<SourceConfig> repoAsSource = new ArrayList<>();
 
         for (SourceConfig sourceConfig : notification.getConfig().getSources()) {
-            if (sourceConfig.isRepositoryAsSource()) {
+            if (sourceConfig.hasRepositoryAsSource()) {
                 repoAsSource.add(sourceConfig);
             }
         }
@@ -64,7 +64,7 @@ public class ChannelNotificationDataProvider implements NotificationDataProvider
 
             if (repository.getConfig() != null && repository.getConfig().getSources().size() > 0) {
                 for (SourceConfig sourceConfig : repository.getConfig().getSources()) {
-                    if (sourceConfig.isSearchAsSource()) {
+                    if (sourceConfig.hasSearchAsSource()) {
                         SearchAsSourceInterface<GitHubIssue> source = SourceProvider.getSearchAsSourceProvider(sourceConfig);
                         try {
                             issues.addAll(source.get(repo, client));

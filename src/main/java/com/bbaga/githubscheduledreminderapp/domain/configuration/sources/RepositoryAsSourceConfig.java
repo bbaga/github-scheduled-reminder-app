@@ -18,7 +18,7 @@ public abstract class RepositoryAsSourceConfig extends SourceConfig {
     }
 
     @Override
-    public Boolean isRepositoryAsSource() {
+    public Boolean hasRepositoryAsSource() {
         return true;
     }
 }

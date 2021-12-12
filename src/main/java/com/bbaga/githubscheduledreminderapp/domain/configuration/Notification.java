@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import java.util.Map;
 import java.util.Optional;
@@ -14,12 +15,15 @@ public class Notification implements NotificationInterface {
     private String name = "";
     private String schedule;
     private String type = "";
-    private Map<String, NotificationConfiguration> repositories;
+
+    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = "type", defaultImpl = NotificationConfiguration.class)
+    private Map<String, NotificationConfigurationInterface> repositories;
 
     @JsonSubTypes({
-        @JsonSubTypes.Type(value = SlackNotification.class, name = "slack/channel"),
+        @JsonSubTypes.Type(value = SlackNotificationConfiguration.class, name = "slack/channel"),
+        @JsonSubTypes.Type(value = SlackRealtimeUserNotificationConfiguration.class, name = "slack/realtime-user"),
     })
-    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = "type", defaultImpl = NotificationConfiguration.class)
+    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = "type", defaultImpl = RepositoryAwareNotificationConfiguration.class)
     private NotificationConfigurationInterface config;
 
     @JsonProperty("timezone")
@@ -27,14 +31,16 @@ public class Notification implements NotificationInterface {
 
     public Notification() {}
 
+    public Notification(NotificationConfigurationInterface config) {
+        this.setConfig(config);
+    }
+
     public Notification(
             String name,
-            String schedule,
             String type,
             NotificationConfigurationInterface config
     ) {
         this.name = name;
-        this.schedule = schedule;
         this.type= type;
         this.config = config;
     }
@@ -59,14 +65,6 @@ public class Notification implements NotificationInterface {
         return getRepository() + "-" + getName();
     }
 
-    public Optional<String> getSchedule() {
-        return Optional.ofNullable(schedule);
-    }
-
-    public void setSchedule(String schedule) {
-        this.schedule = schedule;
-    }
-
     public String getType() {
         return type;
     }
@@ -75,29 +73,88 @@ public class Notification implements NotificationInterface {
         this.type = type;
     }
 
-//    @Override
     public NotificationConfigurationInterface getConfig() {
         return config;
     }
 
-//    @Override
     public void setConfig(NotificationConfigurationInterface config) {
+        if (this.config == null && config instanceof SlackNotificationConfiguration) {
+            SlackNotificationConfiguration scheduledConfig = (SlackNotificationConfiguration) config;
+            scheduledConfig.setRepositories(repositories);
+            repositories = null;
+
+            scheduledConfig.setSchedule(schedule);
+            schedule = null;
+
+            scheduledConfig.setTimeZone(timeZone);
+            timeZone = null;
+        }
+
         this.config = config;
     }
 
+    @Deprecated
     public String getTimeZone() {
+
+        NotificationConfigurationInterface config = this.getConfig();
+
+        if (config instanceof SlackNotificationConfiguration) {
+            return ((SlackNotificationConfiguration) config).getTimeZone();
+        }
+
         return timeZone;
     }
 
+    @Deprecated
     public void setTimeZone(String timeZone) {
-        this.timeZone = timeZone;
+        NotificationConfigurationInterface config = this.getConfig();
+
+        if (config instanceof SlackNotificationConfiguration) {
+            ((SlackNotificationConfiguration) config).setTimeZone(timeZone);
+        } else {
+            this.timeZone = timeZone;
+        }
     }
 
-    public Map<String, NotificationConfiguration> getRepositories() {
-        return repositories;
+    @Deprecated
+    public Map<String, NotificationConfigurationInterface> getRepositories() {
+        NotificationConfigurationInterface config = this.getConfig();
+
+        if (config instanceof SlackNotificationConfiguration) {
+            return ((SlackNotificationConfiguration) config).getRepositories();
+        }
+
+        return this.repositories;
     }
 
-    public void setRepositories(Map<String, NotificationConfiguration> repositories) {
-        this.repositories = repositories;
+    @Deprecated
+    public void setRepositories(Map<String, NotificationConfigurationInterface> repositories) {
+        NotificationConfigurationInterface config = this.getConfig();
+
+        if (config instanceof SlackNotificationConfiguration) {
+            ((SlackNotificationConfiguration) config).setRepositories(repositories);
+        }
+    }
+
+    @Deprecated
+    public Optional<String> getSchedule() {
+        NotificationConfigurationInterface config = this.getConfig();
+
+        if (config instanceof SlackNotificationConfiguration) {
+            return ((SlackNotificationConfiguration) config).getSchedule();
+        }
+
+        return Optional.ofNullable(schedule);
+    }
+
+    @Deprecated
+    public void setSchedule(String schedule) {
+        NotificationConfigurationInterface config = this.getConfig();
+
+        if (config instanceof SlackNotificationConfiguration) {
+            ((SlackNotificationConfiguration) config).setSchedule(schedule);
+        } else {
+            this.schedule = schedule;
+        }
     }
 }

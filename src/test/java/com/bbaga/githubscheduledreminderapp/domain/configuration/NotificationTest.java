@@ -13,7 +13,7 @@ class NotificationTest {
 
     @BeforeEach
     void setUp() {
-        notification = new Notification();
+        notification = new Notification(new SlackNotificationConfiguration());
     }
 
     @Test
@@ -43,11 +43,11 @@ class NotificationTest {
 
     @Test
     void setConfig() {
-        SlackNotification config = new SlackNotification();
+        SlackNotificationConfiguration config = new SlackNotificationConfiguration();
         config.setChannel("test-channel");
         notification.setConfig(config);
 
-        assertEquals("test-channel", ((SlackNotification) notification.getConfig()).getChannel());
+        assertEquals("test-channel", ((SlackNotificationConfiguration) notification.getConfig()).getChannel());
     }
 
     @Test

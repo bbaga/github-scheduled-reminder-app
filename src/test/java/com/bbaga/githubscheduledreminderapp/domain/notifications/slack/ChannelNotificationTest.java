@@ -1,7 +1,7 @@
 package com.bbaga.githubscheduledreminderapp.domain.notifications.slack;
 
 import com.bbaga.githubscheduledreminderapp.domain.configuration.Notification;
-import com.bbaga.githubscheduledreminderapp.domain.configuration.SlackNotification;
+import com.bbaga.githubscheduledreminderapp.domain.configuration.SlackNotificationConfiguration;
 import com.bbaga.githubscheduledreminderapp.domain.statistics.UrlBuilderInterface;
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubIssue;
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubPullRequest;
@@ -16,10 +16,7 @@ import com.hubspot.slack.client.models.blocks.Section;
 import com.hubspot.slack.client.models.response.SlackError;
 import com.hubspot.slack.client.models.response.chat.ChatPostMessageResponse;
 import org.junit.jupiter.api.Test;
-import org.kohsuke.github.GHIssue;
-import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHRepository;
-import org.kohsuke.github.GHUser;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
@@ -44,7 +41,7 @@ class ChannelNotificationTest {
         future.complete(result);
 
         ChannelNotification service = new ChannelNotification(client, urlBuilder);
-        SlackNotification config = new SlackNotification();
+        SlackNotificationConfiguration config = new SlackNotificationConfiguration();
         config.setChannel("test");
         Notification notification = new Notification();
         notification.setConfig(config);
@@ -89,7 +86,7 @@ class ChannelNotificationTest {
         future.complete(result);
 
         ChannelNotification service = new ChannelNotification(client, urlBuilder);
-        SlackNotification config = new SlackNotification();
+        SlackNotificationConfiguration config = new SlackNotificationConfiguration();
         config.setChannel("test");
         Notification notification = new Notification();
         notification.setConfig(config);

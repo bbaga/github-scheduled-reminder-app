@@ -1,0 +1,4 @@
+package com.bbaga.githubscheduledreminderapp.domain.configuration;
+
+public class SlackRealtimeUserNotificationConfiguration extends RepositoryAwareNotificationConfiguration {
+}

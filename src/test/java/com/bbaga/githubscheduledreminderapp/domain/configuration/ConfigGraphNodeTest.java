@@ -14,7 +14,7 @@ class ConfigGraphNodeTest {
     private static Stream<Arguments> testSubjectProvider() {
         final long installationId = 1;
         final String notificationName = "notification-name";
-        final Notification notification = new Notification(notificationName, "", "", new SlackNotification());
+        final Notification notification = new Notification(notificationName, "", new SlackNotificationConfiguration());
         final Instant instant = Instant.now();
 
         return Stream.of(

@@ -57,7 +57,7 @@ notifications:
         Assertions.assertEquals("UTC", notification.getTimeZone());
         Assertions.assertEquals("slack/channel", notification.getType());
 
-        SlackNotification notificationConfig = (SlackNotification) notification.getConfig();
+        SlackNotificationConfiguration notificationConfig = (SlackNotificationConfiguration) notification.getConfig();
         Assertions.assertEquals("test-channel", notificationConfig.getChannel());
     }
 
@@ -97,7 +97,7 @@ notifications:
         Assertions.assertEquals("EST", notification.getTimeZone());
         Assertions.assertEquals("slack/channel", notification.getType());
 
-        SlackNotification notificationConfig = ((SlackNotification) notification.getConfig());
+        SlackNotificationConfiguration notificationConfig = ((SlackNotificationConfiguration) notification.getConfig());
         Assertions.assertEquals("dev-channel", notificationConfig.getChannel());
     }
 
@@ -281,10 +281,10 @@ notifications:
         Notification notification = (Notification) parsedConfig.getNotifications().get(0);
         Assertions.assertNotNull(notification.getRepositories());
 
-        Map<String, NotificationConfiguration> repoConfigs = notification.getRepositories();
+        Map<String, NotificationConfigurationInterface> repoConfigs = notification.getRepositories();
         Assertions.assertEquals(1, repoConfigs.size());
 
-        NotificationConfiguration repoConfig = notification.getRepositories().get("some/other-repository");
+        NotificationConfigurationInterface repoConfig = notification.getRepositories().get("some/other-repository");
         Assertions.assertEquals(1, repoConfig.getSources().size());
     }
 }

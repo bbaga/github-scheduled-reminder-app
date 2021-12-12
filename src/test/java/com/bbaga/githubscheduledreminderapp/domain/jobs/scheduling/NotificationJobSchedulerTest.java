@@ -1,6 +1,7 @@
 package com.bbaga.githubscheduledreminderapp.domain.jobs.scheduling;
 
 import com.bbaga.githubscheduledreminderapp.domain.configuration.Notification;
+import com.bbaga.githubscheduledreminderapp.domain.configuration.SlackNotificationConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
@@ -21,7 +22,8 @@ class NotificationJobSchedulerTest {
 
     @Test
     void createSchedule() throws SchedulerException {
-        Notification notification = new Notification();
+        SlackNotificationConfiguration config = new SlackNotificationConfiguration();
+        Notification notification = new Notification(config);
         notification.setRepository("test");
         notification.setName("schedule");
         notification.setSchedule("* * * * * ?");
@@ -46,7 +48,8 @@ class NotificationJobSchedulerTest {
 
     @Test
     void updateSchedule() throws SchedulerException {
-        Notification notification = new Notification();
+        SlackNotificationConfiguration config = new SlackNotificationConfiguration();
+        Notification notification = new Notification(config);
         notification.setRepository("test");
         notification.setName("schedule");
         notification.setSchedule("* * * * * ?");

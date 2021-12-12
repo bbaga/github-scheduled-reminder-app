@@ -38,13 +38,13 @@ public class ConfigGraphUpdater {
             Notification main = (Notification) notification;
             if (main.getSchedule().isPresent()) {
                 updateSchedule(main, installationId, repositoryFullName, timestamp);
-                Map<String, NotificationConfiguration> repositoryConfigs = main.getRepositories();
+                Map<String, NotificationConfigurationInterface> repositoryConfigs = main.getRepositories();
 
                 if (repositoryConfigs != null) {
-                    for (Map.Entry<String, NotificationConfiguration> entry : repositoryConfigs.entrySet()) {
+                    for (Map.Entry<String, NotificationConfigurationInterface> entry : repositoryConfigs.entrySet()) {
                         String subRepositoryFullName = entry.getKey();
                         String org = subRepositoryFullName.replaceAll("^(.+)(/.+)", "$1");
-                        NotificationConfiguration config = entry.getValue();
+                        NotificationConfigurationInterface config = entry.getValue();
 
                         Long repoInstallationId = installationRepository.getIdByOrg(org);
 
