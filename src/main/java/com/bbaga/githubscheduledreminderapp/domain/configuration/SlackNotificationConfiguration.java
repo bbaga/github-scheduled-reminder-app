@@ -54,7 +54,7 @@ public class SlackNotificationConfiguration extends RepositoryAwareNotificationC
 
     @Override
     public ArrayList<SourceConfig> getSources() {
-        return sources.size() == 0 ? getDefaultSources() : sources;
+        return super.getSources().size() == 0 ? getDefaultSources() : super.getSources();
     }
 
     private ArrayList<SourceConfig> getDefaultSources() {
