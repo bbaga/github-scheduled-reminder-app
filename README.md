@@ -2,9 +2,12 @@
 [![CodeQL](https://github.com/bbaga/github-scheduled-reminder-app/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/bbaga/github-scheduled-reminder-app/actions/workflows/codeql-analysis.yml?query=branch%3Amain)
 
 # github-scheduled-reminder-app
-Scheduled reminders about PRs and Issues. This project may be useful for teams using GitHub Enterprise versions that doesn't have the reminder feature implemented yet. 
+Scheduled reminders about PRs and Issues. This project may be useful for teams using GitHub Enterprise versions that doesn't have [the built-in scheduled reminder](https://docs.github.com/en/organizations/organizing-members-into-teams/managing-scheduled-reminders-for-your-team) feature yet. 
 
 > ⚠ This tool comes with no guaranties, use it with a healthy dose of caution!
+
+## Example GitHub PR and Issue reminder on Slack:
+![image](./docs/images/slack-example.png "GitHub PR and Issue reminder on Slack")
 
 # ToC
 1. [Development](#development)
