@@ -1,10 +1,10 @@
 package com.bbaga.githubscheduledreminderapp.domain.configuration;
 
+import com.bbaga.githubscheduledreminderapp.domain.configuration.configGraphUpdater.NotificationVisitor;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import java.util.Map;
 import java.util.Optional;
@@ -27,7 +27,7 @@ public class Notification implements NotificationInterface {
     private NotificationConfigurationInterface config;
 
     @JsonProperty("timezone")
-    private String timeZone = "UTC";
+    private String timeZone;
 
     public Notification() {}
 
@@ -80,17 +80,29 @@ public class Notification implements NotificationInterface {
     public void setConfig(NotificationConfigurationInterface config) {
         if (this.config == null && config instanceof SlackNotificationConfiguration) {
             SlackNotificationConfiguration scheduledConfig = (SlackNotificationConfiguration) config;
-            scheduledConfig.setRepositories(repositories);
-            repositories = null;
 
-            scheduledConfig.setSchedule(schedule);
-            schedule = null;
+            if (repositories != null) {
+                scheduledConfig.setRepositories(repositories);
+                repositories = null;
+            }
 
-            scheduledConfig.setTimeZone(timeZone);
-            timeZone = null;
+            if (schedule != null) {
+                scheduledConfig.setSchedule(schedule);
+                schedule = null;
+            }
+
+            if (timeZone != null) {
+                scheduledConfig.setTimeZone(timeZone);
+                timeZone = null;
+            }
         }
 
         this.config = config;
+    }
+
+    @Override
+    public void accept(NotificationVisitor visitor) {
+        visitor.visit(this);
     }
 
     @Deprecated

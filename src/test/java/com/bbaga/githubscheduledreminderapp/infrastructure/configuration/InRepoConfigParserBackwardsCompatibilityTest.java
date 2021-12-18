@@ -1,9 +1,6 @@
 package com.bbaga.githubscheduledreminderapp.infrastructure.configuration;
 
-import com.bbaga.githubscheduledreminderapp.domain.configuration.Extending;
-import com.bbaga.githubscheduledreminderapp.domain.configuration.Notification;
-import com.bbaga.githubscheduledreminderapp.domain.configuration.NotificationConfigurationInterface;
-import com.bbaga.githubscheduledreminderapp.domain.configuration.SlackNotificationConfiguration;
+import com.bbaga.githubscheduledreminderapp.domain.configuration.*;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.*;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.filters.AbstractFilterConfig;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.filters.DraftFilterConfig;
@@ -23,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-class InRepoConfigParserTest {
+class InRepoConfigParserBackwardsCompatibilityTest {
 
     @Test
     void parseScheduleConfigTest() throws IOException {
@@ -33,9 +30,9 @@ class InRepoConfigParserTest {
 enabled: true
 notifications:
   - name: testing
+    schedule: "0 1 2 3 4 5 6"
     type: slack/channel
     config:
-      schedule: "0 1 2 3 4 5 6"
       channel: "test-channel"
 """;
 
@@ -55,11 +52,9 @@ notifications:
         Assertions.assertEquals(1, parsedConfig.getNotifications().size());
 
         Notification notification = (Notification) parsedConfig.getNotifications().get(0);
-        SlackNotificationConfiguration slackConfig = (SlackNotificationConfiguration)notification.getConfig();
-
         Assertions.assertEquals("testing", notification.getName());
-        Assertions.assertEquals("0 1 2 3 4 5 6", slackConfig.getSchedule().get());
-        Assertions.assertEquals("UTC", slackConfig.getTimeZone());
+        Assertions.assertEquals("0 1 2 3 4 5 6", notification.getSchedule().get());
+        Assertions.assertEquals("UTC", notification.getTimeZone());
         Assertions.assertEquals("slack/channel", notification.getType());
 
         SlackNotificationConfiguration notificationConfig = (SlackNotificationConfiguration) notification.getConfig();
@@ -74,10 +69,10 @@ notifications:
 enabled: true
 notifications:      
   - name: timezone
+    schedule: "* * * * * *"
     type: slack/channel
+    timezone: EST
     config:
-      schedule: "* * * * * *"
-      timezone: EST
       channel: "dev-channel"
 """;
 
@@ -97,11 +92,9 @@ notifications:
         Assertions.assertEquals(1, parsedConfig.getNotifications().size());
 
         Notification notification = (Notification) parsedConfig.getNotifications().get(0);
-        SlackNotificationConfiguration slackConfig = (SlackNotificationConfiguration)notification.getConfig();
-
         Assertions.assertEquals("timezone", notification.getName());
-        Assertions.assertEquals("* * * * * *", slackConfig.getSchedule().get());
-        Assertions.assertEquals("EST", slackConfig.getTimeZone());
+        Assertions.assertEquals("* * * * * *", notification.getSchedule().get());
+        Assertions.assertEquals("EST", notification.getTimeZone());
         Assertions.assertEquals("slack/channel", notification.getType());
 
         SlackNotificationConfiguration notificationConfig = ((SlackNotificationConfiguration) notification.getConfig());
@@ -214,9 +207,9 @@ notifications:
 enabled: true
 notifications:
   - name: testing
+    schedule: "0 1 2 3 4 5 6"
     type: slack/channel
     config:
-      schedule: "0 1 2 3 4 5 6"
       channel: "test-channel"
       sources:
         - type: search-issues
@@ -226,16 +219,16 @@ notifications:
           filters:
             - type: draft-filter
               include-drafts: true
-      repositories:
-        some/other-repository:
-          sources:
-            - type: search-prs-by-reviewers
-              users:
-                - foo
-                - bar
-              teams:
-                - team1
-                - team2
+    repositories:
+      some/other-repository:
+        sources:
+          - type: search-prs-by-reviewers
+            users:
+              - foo
+              - bar
+            teams:
+              - team1
+              - team2
 """;
 
         InputStream stream = new ByteArrayInputStream(config.getBytes(StandardCharsets.UTF_8));
@@ -254,14 +247,12 @@ notifications:
         Assertions.assertEquals(1, parsedConfig.getNotifications().size());
 
         Notification notification = (Notification) parsedConfig.getNotifications().get(0);
+        Assertions.assertNotNull(notification.getRepositories());
 
-        SlackNotificationConfiguration slackConfig = (SlackNotificationConfiguration)notification.getConfig();
-        Assertions.assertNotNull(slackConfig.getRepositories());
-
-        Map<String, NotificationConfigurationInterface> repoConfigs = slackConfig.getRepositories();
+        Map<String, NotificationConfigurationInterface> repoConfigs = notification.getRepositories();
         Assertions.assertEquals(1, repoConfigs.size());
 
-        NotificationConfigurationInterface repoConfig = repoConfigs.get("some/other-repository");
+        NotificationConfigurationInterface repoConfig = notification.getRepositories().get("some/other-repository");
         Assertions.assertEquals(1, repoConfig.getSources().size());
     }
 }

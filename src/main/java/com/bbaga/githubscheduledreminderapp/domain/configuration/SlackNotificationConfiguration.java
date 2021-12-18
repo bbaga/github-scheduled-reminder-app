@@ -1,5 +1,7 @@
 package com.bbaga.githubscheduledreminderapp.domain.configuration;
 
+import com.bbaga.githubscheduledreminderapp.domain.configuration.configGraphUpdater.ConfigGraphUpdater;
+import com.bbaga.githubscheduledreminderapp.domain.configuration.configGraphUpdater.NotificationConfigVisitor;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.RepositoryIssuesSourceConfig;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.RepositoryPRsSourceConfig;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.SourceConfig;
@@ -14,7 +16,7 @@ import java.util.Optional;
 import static com.bbaga.githubscheduledreminderapp.domain.configuration.sources.Sources.Constants.REPOSITORY_ISSUES;
 import static com.bbaga.githubscheduledreminderapp.domain.configuration.sources.Sources.Constants.REPOSITORY_PRS;
 
-public class SlackNotificationConfiguration extends RepositoryAwareNotificationConfiguration {
+public class SlackNotificationConfiguration extends RepositoryAwareNotificationConfiguration implements ScheduledNotificationConfigurationInterface {
     private String channel;
     private String schedule;
 
@@ -36,18 +38,22 @@ public class SlackNotificationConfiguration extends RepositoryAwareNotificationC
         this.channel = channel;
     }
 
+    @Override
     public Optional<String> getSchedule() {
         return Optional.ofNullable(schedule);
     }
 
+    @Override
     public void setSchedule(String schedule) {
         this.schedule = schedule;
     }
 
+    @Override
     public String getTimeZone() {
         return timeZone;
     }
 
+    @Override
     public void setTimeZone(String timeZone) {
         this.timeZone = timeZone;
     }
@@ -55,6 +61,12 @@ public class SlackNotificationConfiguration extends RepositoryAwareNotificationC
     @Override
     public ArrayList<SourceConfig> getSources() {
         return super.getSources().size() == 0 ? getDefaultSources() : super.getSources();
+    }
+
+    @Override
+    public void accept(NotificationConfigVisitor configVisitor) {
+        super.accept(configVisitor);
+        configVisitor.visit((ScheduledNotificationConfigurationInterface) this);
     }
 
     private ArrayList<SourceConfig> getDefaultSources() {

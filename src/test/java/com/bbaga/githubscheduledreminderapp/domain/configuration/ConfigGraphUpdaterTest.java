@@ -1,5 +1,6 @@
 package com.bbaga.githubscheduledreminderapp.domain.configuration;
 
+import com.bbaga.githubscheduledreminderapp.domain.configuration.configGraphUpdater.ConfigGraphUpdater;
 import com.bbaga.githubscheduledreminderapp.domain.jobs.scheduling.NotificationJobScheduler;
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.repositories.GitHubInstallationRepository;
 import org.junit.jupiter.api.Test;
@@ -20,12 +21,13 @@ class ConfigGraphUpdaterTest {
         NotificationJobScheduler jobScheduler = Mockito.mock(NotificationJobScheduler.class);
         ConfigGraphUpdater configUpdater = new ConfigGraphUpdater(installationRepository, configGraph, jobScheduler);
 
-        Notification notification = new Notification("name", "type", new SlackNotificationConfiguration("* * * * * *"));
+        SlackNotificationConfiguration config = new SlackNotificationConfiguration("* * * * * *");
+        Notification notification = new Notification("name", "type", config);
 
         assertEquals(0, configGraph.size());
 
         configUpdater.updateEntry(notification, 12, "some/repo", Instant.now());
-        Mockito.verify(jobScheduler, Mockito.times(1)).upsertSchedule(notification);
+        Mockito.verify(jobScheduler, Mockito.times(1)).upsertSchedule(notification.getFullName(), config);
 
         assertEquals(1, configGraph.size());
         assertSame(notification, configGraph.get("some/repo-name").getNotification());
@@ -39,7 +41,9 @@ class ConfigGraphUpdaterTest {
         NotificationJobScheduler jobScheduler = Mockito.mock(NotificationJobScheduler.class);
         ConfigGraphUpdater configUpdater = new ConfigGraphUpdater(installationRepository, configGraph, jobScheduler);
 
-        Notification notification = new Notification("name", "type", new SlackNotificationConfiguration("* * * * * *"));
+        SlackNotificationConfiguration config = new SlackNotificationConfiguration("* * * * * *");
+
+        Notification notification = new Notification("name", "type", config);
         notification.setRepository("some/repo");
         Extending.MainConfig extendingConfig = new Extending.MainConfig();
         extendingConfig.setRepository("some/repo");
@@ -56,7 +60,7 @@ class ConfigGraphUpdaterTest {
         assertEquals(1, configUpdater.getBuffer().size());
 
         configUpdater.updateEntry(notification, 12, "some/repo", Instant.now());
-        Mockito.verify(jobScheduler, Mockito.times(1)).upsertSchedule(notification);
+        Mockito.verify(jobScheduler, Mockito.times(1)).upsertSchedule(notification.getFullName(), config);
 
         assertSame(notification, configGraph.get("some/repo-name").getNotification());
         assertEquals(1, configGraph.get("some/repo-name").getRepositories().size());

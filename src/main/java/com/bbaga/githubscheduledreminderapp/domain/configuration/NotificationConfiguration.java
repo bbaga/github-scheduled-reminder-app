@@ -1,5 +1,7 @@
 package com.bbaga.githubscheduledreminderapp.domain.configuration;
 
+import com.bbaga.githubscheduledreminderapp.domain.configuration.configGraphUpdater.ConfigGraphUpdater;
+import com.bbaga.githubscheduledreminderapp.domain.configuration.configGraphUpdater.NotificationConfigVisitor;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.*;
 import java.util.ArrayList;
 
@@ -16,5 +18,10 @@ public class NotificationConfiguration implements NotificationConfigurationInter
     @Override
     public void setSources(ArrayList<SourceConfig> sourceConfigs) {
         this.sources = sourceConfigs;
+    }
+
+    @Override
+    public void accept(NotificationConfigVisitor configVisitor) {
+
     }
 }

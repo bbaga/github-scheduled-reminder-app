@@ -2,7 +2,7 @@ package com.bbaga.githubscheduledreminderapp.application;
 
 import com.bbaga.githubscheduledreminderapp.domain.GitHubAppInstallationService;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.ConfigGraphNode;
-import com.bbaga.githubscheduledreminderapp.domain.configuration.ConfigGraphUpdater;
+import com.bbaga.githubscheduledreminderapp.domain.configuration.configGraphUpdater.ConfigGraphUpdater;
 import com.bbaga.githubscheduledreminderapp.infrastructure.configuration.InRepoConfigParser;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.RepositoryInstallationEventListener;
 import com.bbaga.githubscheduledreminderapp.infrastructure.configuration.persitance.ConfigPersistenceInterface;
