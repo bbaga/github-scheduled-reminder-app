@@ -32,8 +32,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.context.event.ApplicationEventMulticaster;
-import org.springframework.context.event.SimpleApplicationEventMulticaster;
 import org.springframework.scheduling.quartz.JobDetailFactoryBean;
 import org.springframework.scheduling.quartz.SimpleTriggerFactoryBean;
 import org.springframework.web.client.RestTemplate;
@@ -247,10 +245,5 @@ public class Config {
             installationService,
             installationScanJobScheduler
         );
-    }
-
-    @Bean
-    public ApplicationEventMulticaster getEventMulticaster() {
-        return new SimpleApplicationEventMulticaster();
     }
 }
