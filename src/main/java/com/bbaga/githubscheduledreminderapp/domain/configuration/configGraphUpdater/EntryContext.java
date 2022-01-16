@@ -2,7 +2,7 @@ package com.bbaga.githubscheduledreminderapp.domain.configuration.configGraphUpd
 
 import java.time.Instant;
 
-class EntryContext {
+public class EntryContext {
     private final String repositoryFullName;
     private final Instant timestamp;
     private final long installationId;

@@ -11,8 +11,8 @@ public class NotificationVisitor {
 
     public NotificationVisitor(ConfigGraphUpdater configGraphUpdater, ConfigVisitorFactory configVisitorFactory, EntryContext context) {
         this.configGraphUpdater = configGraphUpdater;
-        this.context = context;
         this.configVisitorFactory = configVisitorFactory;
+        this.context = context;
     }
 
     public void visit(Notification notification) {

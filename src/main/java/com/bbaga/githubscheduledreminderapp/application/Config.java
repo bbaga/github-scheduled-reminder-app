@@ -180,10 +180,9 @@ public class Config {
     public ConfigGraphUpdater getConfigGraphUpdater(
         @Qualifier("ConfigGraph") ConcurrentHashMap<String, ConfigGraphNode> configGraph,
         NotificationJobScheduler notificationJobScheduler,
-        GitHubInstallationRepository installationRepository,
-        ApplicationEventMulticaster eventMulticaster
+        GitHubInstallationRepository installationRepository
     ) {
-        ConfigVisitorFactoryFactory visitorFactoryFactory = new ConfigVisitorFactoryFactory(installationRepository, eventMulticaster);
+        ConfigVisitorFactoryFactory visitorFactoryFactory = new ConfigVisitorFactoryFactory(installationRepository);
         return new ConfigGraphUpdater(visitorFactoryFactory, configGraph, notificationJobScheduler);
     }
 

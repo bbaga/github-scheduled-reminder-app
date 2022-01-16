@@ -1,13 +1,10 @@
 package com.bbaga.githubscheduledreminderapp.domain.configuration.configGraphUpdater;
 
 import com.bbaga.githubscheduledreminderapp.domain.configuration.*;
-import com.bbaga.githubscheduledreminderapp.domain.sources.github.webhooks.PrReviewRequestedListener;
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.repositories.GitHubInstallationRepository;
-import com.bbaga.githubscheduledreminderapp.infrastructure.github.webhook.EventPublisher;
 import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.event.ApplicationEventMulticaster;
 
 import java.util.Map;
 
@@ -15,7 +12,6 @@ public class NotificationConfigVisitor {
     private final ConfigGraphUpdater configGraphUpdater;
     private final Notification notification;
     private final GitHubInstallationRepository installationRepository;
-    private final ApplicationEventMulticaster eventMulticaster;
     private final EntryContext context;
 
     private final Logger logger = LoggerFactory.getLogger(NotificationConfigVisitor.class);
@@ -24,13 +20,11 @@ public class NotificationConfigVisitor {
         ConfigGraphUpdater configGraphUpdater,
         GitHubInstallationRepository installationRepository,
         Notification notification,
-        ApplicationEventMulticaster eventMulticaster,
         EntryContext context
     ) {
         this.configGraphUpdater = configGraphUpdater;
         this.notification = notification;
         this.installationRepository = installationRepository;
-        this.eventMulticaster = eventMulticaster;
         this.context = context;
     }
 
@@ -66,9 +60,5 @@ public class NotificationConfigVisitor {
                 logger.error(e.getLocalizedMessage());
             }
         }
-    }
-
-    public void visit(SlackRealTimeUserNotificationConfiguration config) {
-        eventMulticaster.addApplicationListener(new PrReviewRequestedListener());
     }
 }
