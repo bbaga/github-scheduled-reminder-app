@@ -1,5 +1,6 @@
 package com.bbaga.githubscheduledreminderapp.domain.configuration;
 
+import com.bbaga.githubscheduledreminderapp.domain.configuration.configGraphUpdater.NotificationVisitor;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
@@ -63,5 +64,10 @@ public class Extending implements NotificationInterface {
         public void setName(String name) {
             this.name = name;
         }
+    }
+
+    @Override
+    public void accept(NotificationVisitor visitor) {
+        visitor.visit(this);
     }
 }

@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-class InRepoConfigParserTest {
+class InRepoConfigParserBackwardsCompatibilityTest {
 
     @Test
     void parseScheduleConfigTest() throws IOException {
@@ -57,7 +57,7 @@ notifications:
         Assertions.assertEquals("UTC", notification.getTimeZone());
         Assertions.assertEquals("slack/channel", notification.getType());
 
-        SlackNotification notificationConfig = (SlackNotification) notification.getConfig();
+        SlackNotificationConfiguration notificationConfig = (SlackNotificationConfiguration) notification.getConfig();
         Assertions.assertEquals("test-channel", notificationConfig.getChannel());
     }
 
@@ -97,40 +97,8 @@ notifications:
         Assertions.assertEquals("EST", notification.getTimeZone());
         Assertions.assertEquals("slack/channel", notification.getType());
 
-        SlackNotification notificationConfig = ((SlackNotification) notification.getConfig());
+        SlackNotificationConfiguration notificationConfig = ((SlackNotificationConfiguration) notification.getConfig());
         Assertions.assertEquals("dev-channel", notificationConfig.getChannel());
-    }
-
-    @Test
-    void parseExtensionConfigTest() throws IOException {
-        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-        String configPath = "path/to/config.yaml";
-        String config = """
-enabled: true
-notifications:
-  - extending:
-      repository: some/repository
-      name: something
-""";
-
-        InputStream stream = new ByteArrayInputStream(config.getBytes(StandardCharsets.UTF_8));
-
-        GHContent content = Mockito.mock(GHContent.class);
-        Mockito.doReturn(stream).when(content).read();
-
-        GHRepository repository = Mockito.mock(GHRepository.class);
-        Mockito.doReturn(content).when(repository).getFileContent(configPath);
-
-        InRepoConfigParser parser = new InRepoConfigParser(mapper, configPath);
-
-        InRepoConfig parsedConfig = parser.getFrom(repository);
-
-        Assertions.assertEquals(true, parsedConfig.getEnabled());
-        Assertions.assertEquals(1, parsedConfig.getNotifications().size());
-
-        Extending notification = (Extending) parsedConfig.getNotifications().get(0);
-        Assertions.assertEquals("some/repository", notification.getExtending().getRepository());
-        Assertions.assertEquals("something", notification.getExtending().getName());
     }
 
     @Test
@@ -281,10 +249,10 @@ notifications:
         Notification notification = (Notification) parsedConfig.getNotifications().get(0);
         Assertions.assertNotNull(notification.getRepositories());
 
-        Map<String, NotificationConfiguration> repoConfigs = notification.getRepositories();
+        Map<String, NotificationConfigurationInterface> repoConfigs = notification.getRepositories();
         Assertions.assertEquals(1, repoConfigs.size());
 
-        NotificationConfiguration repoConfig = notification.getRepositories().get("some/other-repository");
+        NotificationConfigurationInterface repoConfig = notification.getRepositories().get("some/other-repository");
         Assertions.assertEquals(1, repoConfig.getSources().size());
     }
 }

@@ -1,6 +1,7 @@
 package com.bbaga.githubscheduledreminderapp.domain.configuration;
 
 import com.bbaga.githubscheduledreminderapp.domain.GitHubAppInstallationService;
+import com.bbaga.githubscheduledreminderapp.domain.configuration.configGraphUpdater.ConfigGraphUpdater;
 import com.bbaga.githubscheduledreminderapp.infrastructure.configuration.InRepoConfig;
 import com.bbaga.githubscheduledreminderapp.infrastructure.configuration.InRepoConfigParser;
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.webhook.events.RepositoryInstallationEvent;
@@ -57,7 +58,7 @@ class RepositoryInstallationEventListenerTest {
             """;
 
         ArrayList<NotificationInterface> notificationList = new ArrayList<>();
-        notificationList.add(new Notification("testing", "* * * * * ?", "slack/channel", new SlackNotification()));
+        notificationList.add(new Notification("testing", "slack/channel", new SlackNotificationConfiguration()));
 
         InRepoConfig inRepoConfig = new InRepoConfig();
         inRepoConfig.setEnabled(true);
@@ -106,7 +107,6 @@ class RepositoryInstallationEventListenerTest {
 
         Notification notification = notificationCaptor.getValue();
         assertEquals("testing", notification.getName());
-        assertEquals("* * * * * ?", notification.getSchedule().get());
 
         Long installationId = installationIdCaptor.getValue();
         assertEquals(987654321L, installationId);

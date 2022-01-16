@@ -1,7 +1,7 @@
-package com.bbaga.githubscheduledreminderapp.domain.configuration;
+package com.bbaga.githubscheduledreminderapp.domain.configuration.configGraphUpdater;
 
+import com.bbaga.githubscheduledreminderapp.domain.configuration.*;
 import com.bbaga.githubscheduledreminderapp.domain.jobs.scheduling.NotificationJobScheduler;
-import com.bbaga.githubscheduledreminderapp.infrastructure.github.repositories.GitHubInstallationRepository;
 import org.quartz.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,14 +15,14 @@ public class ConfigGraphUpdater {
     private final ConcurrentHashMap<String, ConcurrentHashMap<Integer, RepositoryRecord>> buffer;
     private final NotificationJobScheduler notificationJobScheduler;
     private final Logger logger = LoggerFactory.getLogger(ConfigGraphUpdater.class);
-    private final GitHubInstallationRepository installationRepository;
+    private final ConfigVisitorFactoryFactory configVisitorFactoryFactory;
 
     public ConfigGraphUpdater(
-            GitHubInstallationRepository installationRepository,
-            ConcurrentHashMap<String, ConfigGraphNode> configGraph,
-            NotificationJobScheduler notificationJobScheduler
+        ConfigVisitorFactoryFactory configVisitorFactoryFactory,
+        ConcurrentHashMap<String, ConfigGraphNode> configGraph,
+        NotificationJobScheduler notificationJobScheduler
     ) {
-        this.installationRepository = installationRepository;
+        this.configVisitorFactoryFactory = configVisitorFactoryFactory;
         this.configGraph = configGraph;
         this.notificationJobScheduler = notificationJobScheduler;
         this.buffer = new ConcurrentHashMap<>();
@@ -34,48 +34,25 @@ public class ConfigGraphUpdater {
         String repositoryFullName,
         Instant timestamp
     ) throws SchedulerException {
-        if (notification instanceof Notification) {
-            Notification main = (Notification) notification;
-            if (main.getSchedule().isPresent()) {
-                updateSchedule(main, installationId, repositoryFullName, timestamp);
-                Map<String, NotificationConfiguration> repositoryConfigs = main.getRepositories();
+        EntryContext context = new EntryContext(installationId, repositoryFullName, timestamp);
 
-                if (repositoryConfigs != null) {
-                    for (Map.Entry<String, NotificationConfiguration> entry : repositoryConfigs.entrySet()) {
-                        String subRepositoryFullName = entry.getKey();
-                        String org = subRepositoryFullName.replaceAll("^(.+)(/.+)", "$1");
-                        NotificationConfiguration config = entry.getValue();
+        NotificationVisitor notificationVisitor = new NotificationVisitor(
+            this,
+            configVisitorFactoryFactory.create(this),
+            context
+        );
 
-                        Long repoInstallationId = installationRepository.getIdByOrg(org);
-
-                        if (repoInstallationId != null) {
-                            Extending.MainConfig mainConfig = new Extending.MainConfig(repositoryFullName, main.getName());
-                            Extending extending = new Extending(mainConfig, config);
-                            updateEntry(extending, repoInstallationId, subRepositoryFullName, timestamp);
-                        }
-                    }
-                }
-
-                return;
-            }
-        }
-
-        updateRepoEntry(notification, installationId, repositoryFullName, timestamp);
+        notification.accept(notificationVisitor);
     }
 
-    private void updateRepoEntry(NotificationInterface notification, long installationId, String repositoryFullName, Instant timestamp) {
+    void updateRepoEntry(Extending notification, long installationId, String repositoryFullName, Instant timestamp) {
         logger.info("Updating repository entry: installation id {}, in {}", installationId, repositoryFullName);
-        Extending extending = null;
 
-        if (notification instanceof Extending) {
-            extending = (Extending) notification;
-        }
-
-        if (extending == null || extending.getExtending().getRepository().isBlank() || extending.getExtending().getName().isBlank()) {
+        if (notification == null || notification.getExtending().getRepository().isBlank() || notification.getExtending().getName().isBlank()) {
             return;
         }
 
-        String notificationKey = getNotificationKey(extending);
+        String notificationKey = getNotificationKey(notification);
         RepositoryRecord record = new RepositoryRecord(repositoryFullName, installationId, timestamp, notification.getConfig());
 
         if (configGraph.containsKey(notificationKey)) {
@@ -85,7 +62,7 @@ public class ConfigGraphUpdater {
         }
     }
 
-    private void updateSchedule(Notification notification, long installationId, String repositoryFullName, Instant timestamp) throws SchedulerException {
+    void upsertSchedule(Notification notification, long installationId, String repositoryFullName, Instant timestamp) throws SchedulerException {
         logger.info("Updating schedule: installation id {}, {}/{}", installationId, repositoryFullName, notification.getName());
         notification.setRepository(repositoryFullName);
         String notificationKey = notification.getFullName();
@@ -98,7 +75,13 @@ public class ConfigGraphUpdater {
             node.setSeenAt(timestamp);
         }
 
-        notificationJobScheduler.upsertSchedule(notification);
+        if (notification.getConfig() instanceof ScheduledNotificationConfigurationInterface) {
+            notificationJobScheduler.upsertSchedule(
+                notification.getFullName(),
+                (ScheduledNotificationConfigurationInterface) notification.getConfig()
+            );
+        }
+
         addBuffered(notification);
     }
 
@@ -182,10 +165,7 @@ public class ConfigGraphUpdater {
             ConfigGraphNode configGraphNode = configGraph.get(key);
 
             synchronized (bufferedMap) {
-                bufferedMap.forEach((Integer index, RepositoryRecord record) -> {
-                    configGraphNode.putRepository(record);
-                });
-
+                bufferedMap.forEach((Integer index, RepositoryRecord record) -> configGraphNode.putRepository(record));
                 buffer.remove(key);
             }
         }

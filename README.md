@@ -121,14 +121,14 @@ The application has to know its own endpoint to build tracking urls that will fo
 enabled: true
 notifications:
   - name: slack-notification
-    schedule: "*/30 * * * * ?"
-    timezone: "EST"
     type: slack/channel
     config:
+      schedule: "*/30 * * * * ?"
+      timezone: "EST"
       channel: "test-channel"
-    repositories:
-       bbaga/app-testing:
-         sources: ... # Sources config is optional. See more at docs/sources.md 
+      repositories:
+        bbaga/app-testing:
+          sources: ... # Sources config is optional. See more at docs/sources.md 
 ```
 
 | Field | Is Required? | Description |
@@ -137,18 +137,20 @@ notifications:
 | `notifications` | No | This field should contain a list of [`Notification`](#notification-objects) objects, these objects can be just pointers to other objects. In the example above, the first entry represents a schedule configuration, the second entry tell the application to set up notifications for this repository based on the Notification object called `slack-notification` in the `bbaga/app-testing`. Notification objects can reference schedules in other repositories. |
 
 ## Notification objects
-
-### Schedules
 | Field | Is Required? | Description |
 |---|---|---|
 | `name` | Yes | This name can be used to reference the object from other repositories as well. |
-| `schedule` | Yes | Cron schedule pattern that supports seconds as well, first position is the seconds. More on the format [here](http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/crontrigger.html#format). |
-| `timezone` | No | Timezone to adjust the schedule to. Defaults to `UTC`. |
 | `type` | Yes | The only supported `type` is `slack/channel`. |
 | `config` | No | Depends on the `type` field's value, each notification type may have different configuration. |
+
+### Config
+| Field | Is Required? | Description |
+|---|---|---|
+| `schedule` | Yes | Cron schedule pattern that supports seconds as well, first position is the seconds. More on the format [here](http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/crontrigger.html#format). |
+| `timezone` | No | Timezone to adjust the schedule to. Defaults to `UTC`. |
 | `repositories` | No | Map of repositories to configuration values. |
 
-### References
+## References
 | Field | Is Required? | Description |
 |---|---|---|
 | `extending` | Yes | With this field we can tell the application that we want to use an already existing schedule. |

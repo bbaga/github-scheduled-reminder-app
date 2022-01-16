@@ -23,81 +23,38 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 @Service
-public class ChannelNotification implements NotificationInterface<ChannelNotificationDataProvider.Data> {
+public class DirectMessageRealTimeNotification implements NotificationInterface<DirectMessageRealTimeNotificationDataProvider.Data> {
 
     private final SlackClient slackClient;
-    private final Logger logger = LoggerFactory.getLogger(ChannelNotification.class);
+    private final Logger logger = LoggerFactory.getLogger(DirectMessageRealTimeNotification.class);
     private final UrlBuilderInterface urlBuilder;
 
-    public ChannelNotification(SlackClient slackClient, UrlBuilderInterface urlBuilder) {
+    public DirectMessageRealTimeNotification(SlackClient slackClient, UrlBuilderInterface urlBuilder) {
         this.slackClient = slackClient;
         this.urlBuilder = urlBuilder;
     }
 
     @Override
-    public void send(ChannelNotificationDataProvider.Data data) {
+    public void send(DirectMessageRealTimeNotificationDataProvider.Data data) {
         Notification notification = data.getNotification();
-        ArrayList<GitHubIssue> issues = data.getIssues();
+        GitHubIssue issue = data.getIssue();
 
         List<Block> sections = new ArrayList<>();
-        List<Block> issueSections = new ArrayList<>();
-        List<Block> prSections = new ArrayList<>();
 
-        sections.add(Header.of(Text.of(TextType.PLAIN_TEXT, "Reporting open issues and pull requests")));
-
-        for (GitHubIssue issue : issues) {
-            try {
-                if (issue instanceof GitHubPullRequest) {
-                    prSections.add(getSection((GitHubPullRequest) issue));
-                    continue;
-                }
-
-                issueSections.add(getSection(issue));
-            } catch (IOException e) {
-                logger.error(e.getLocalizedMessage());
-                return;
+        try {
+            if (issue instanceof GitHubPullRequest) {
+                sections.add(getSection((GitHubPullRequest) issue));
+            } else {
+                sections.add(getSection(issue));
             }
-        }
-
-        int maxNumberOfIssues = 40; // There are 7 static sections and the max allowed is 50 sections
-        int maxGroupSize = maxNumberOfIssues / 2;
-        boolean mustTruncate = issues.size() > maxNumberOfIssues;
-        int issueSectionsSize = issueSections.size();
-        int prSectionsSize = prSections.size();
-
-        if ((issueSectionsSize + prSectionsSize) == 0) {
-            sections.add(markdownSection("*There aren't any open issues or pull requests.*"));
-        } else {
-            if (issueSectionsSize > 0) {
-                String displayCount = String.format("%d", issueSectionsSize);
-
-                if (mustTruncate && issueSectionsSize > maxGroupSize) {
-                    displayCount = String.format("showing last %d out of %d", maxGroupSize, issueSectionsSize);
-                    issueSections = getTruncatedGroup(issueSections, issueSectionsSize, maxGroupSize);
-                }
-
-                sections.add(markdownSection(String.format("*Open Issues (%s):*", displayCount)));
-                sections.add(Divider.builder().build());
-
-                sections.addAll(issueSections);
-            }
-
-            if (prSectionsSize > 0) {
-                String displayCount = String.format("%d", prSectionsSize);
-
-                if (mustTruncate && prSectionsSize > maxGroupSize) {
-                    displayCount = String.format("showing last %d out of %d", maxGroupSize, prSectionsSize);
-                    prSections = getTruncatedGroup(prSections, prSectionsSize, maxGroupSize);
-                }
-
-                sections.add(markdownSection(String.format("*Open Pull Requests (%s):*", displayCount)));
-                sections.add(Divider.builder().build());
-
-                sections.addAll(prSections);
-            }
+        } catch (IOException e) {
+            logger.error(e.getLocalizedMessage());
+            return;
         }
 
         sections.add(markdownSection("config id: _%s_", notification.getFullName()));

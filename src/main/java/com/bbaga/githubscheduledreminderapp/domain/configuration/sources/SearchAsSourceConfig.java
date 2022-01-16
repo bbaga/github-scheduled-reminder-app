@@ -18,7 +18,7 @@ public abstract class SearchAsSourceConfig extends SourceConfig {
     }
 
     @Override
-    public Boolean isSearchAsSource() {
+    public Boolean hasSearchAsSource() {
         return true;
     }
 }

@@ -13,10 +13,10 @@ For example, by default, draft PRs will be filtered out as work in progress is r
 enabled: true
 notifications:
   - name: something
-    schedule: "0 0 12 * * ?"
     type: slack/channel
-    timezone: "My/TimeZone"
     config:
+      schedule: "0 0 12 * * ?"
+      timezone: "My/TimeZone"
       channel: "some-slack-channel"
       sources:
         - type: repository-issues

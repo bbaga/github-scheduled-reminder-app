@@ -1,6 +1,7 @@
 package com.bbaga.githubscheduledreminderapp.domain.jobs.scheduling;
 
 import com.bbaga.githubscheduledreminderapp.domain.configuration.Notification;
+import com.bbaga.githubscheduledreminderapp.domain.configuration.SlackNotificationConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
@@ -21,14 +22,15 @@ class NotificationJobSchedulerTest {
 
     @Test
     void createSchedule() throws SchedulerException {
-        Notification notification = new Notification();
+        SlackNotificationConfiguration config = new SlackNotificationConfiguration();
+        Notification notification = new Notification(config);
         notification.setRepository("test");
         notification.setName("schedule");
         notification.setSchedule("* * * * * ?");
         notification.setTimeZone("Europe/Berlin");
 
         NotificationJobScheduler jobScheduler = new NotificationJobScheduler(this.scheduler);
-        jobScheduler.createSchedule(notification);
+        jobScheduler.createSchedule(notification.getFullName(), config);
 
         ArgumentCaptor<JobDetail> jobDetailCaptor = ArgumentCaptor.forClass(JobDetail.class);
         ArgumentCaptor<CronTrigger> triggerCaptor = ArgumentCaptor.forClass(CronTrigger.class);
@@ -46,14 +48,15 @@ class NotificationJobSchedulerTest {
 
     @Test
     void updateSchedule() throws SchedulerException {
-        Notification notification = new Notification();
+        SlackNotificationConfiguration config = new SlackNotificationConfiguration();
+        Notification notification = new Notification(config);
         notification.setRepository("test");
         notification.setName("schedule");
         notification.setSchedule("* * * * * ?");
         notification.setTimeZone("Europe/Berlin");
 
         NotificationJobScheduler jobScheduler = new NotificationJobScheduler(this.scheduler);
-        jobScheduler.updateSchedule(notification);
+        jobScheduler.updateSchedule(notification.getFullName(), config);
 
         ArgumentCaptor<TriggerKey> triggerKeyCaptor = ArgumentCaptor.forClass(TriggerKey.class);
         ArgumentCaptor<CronTrigger> triggerCaptor = ArgumentCaptor.forClass(CronTrigger.class);

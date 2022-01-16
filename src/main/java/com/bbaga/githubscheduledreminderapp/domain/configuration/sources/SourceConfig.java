@@ -9,8 +9,24 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import java.util.ArrayList;
 
+import static com.bbaga.githubscheduledreminderapp.domain.configuration.sources.Sources.Constants.*;
+import static com.bbaga.githubscheduledreminderapp.domain.configuration.sources.Sources.Constants.SEARCH_PRS_BY_REVIEWERS;
 import static com.bbaga.githubscheduledreminderapp.domain.configuration.sources.filters.Filters.Constants.*;
 
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = RepositoryIssuesSourceConfig.class, name = REPOSITORY_ISSUES),
+        @JsonSubTypes.Type(value = RepositoryPRsSourceConfig.class, name = REPOSITORY_PRS),
+        @JsonSubTypes.Type(value = SearchIssuesSourceConfig.class, name = SEARCH_ISSUES),
+        @JsonSubTypes.Type(value = SearchPRsByReviewersSourceConfig.class, name = SEARCH_PRS_BY_REVIEWERS),
+        @JsonSubTypes.Type(value = EventPrReviewRequestedAsSourceConfig.class, name = EVENT_PR_REVIEW_REQUESTED),
+})
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.EXISTING_PROPERTY,
+        property = "type",
+        visible = true,
+        defaultImpl = RepositoryPRsSourceConfig.class
+)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class SourceConfig {
     protected String type;
@@ -45,11 +61,15 @@ public abstract class SourceConfig {
         this.filters = filters;
     }
 
-    public Boolean isRepositoryAsSource() {
+    public Boolean hasRepositoryAsSource() {
         return false;
     }
 
-    public Boolean isSearchAsSource() {
+    public Boolean hasSearchAsSource() {
+        return false;
+    }
+
+    public Boolean hasEventAsSource() {
         return false;
     }
 }
