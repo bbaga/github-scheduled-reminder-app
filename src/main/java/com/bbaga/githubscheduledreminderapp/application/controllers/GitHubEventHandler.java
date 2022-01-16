@@ -1,7 +1,6 @@
 package com.bbaga.githubscheduledreminderapp.application.controllers;
 
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.webhook.EventPublisher;
-import org.kohsuke.github.GitHub;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;

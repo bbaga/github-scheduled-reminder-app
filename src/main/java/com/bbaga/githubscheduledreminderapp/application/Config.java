@@ -3,6 +3,7 @@ package com.bbaga.githubscheduledreminderapp.application;
 import com.bbaga.githubscheduledreminderapp.domain.GitHubAppInstallationService;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.ConfigGraphNode;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.configGraphUpdater.ConfigGraphUpdater;
+import com.bbaga.githubscheduledreminderapp.domain.configuration.configGraphUpdater.ConfigVisitorFactoryFactory;
 import com.bbaga.githubscheduledreminderapp.infrastructure.configuration.InRepoConfigParser;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.RepositoryInstallationEventListener;
 import com.bbaga.githubscheduledreminderapp.infrastructure.configuration.persitance.ConfigPersistenceInterface;
@@ -31,6 +32,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.context.event.ApplicationEventMulticaster;
+import org.springframework.context.event.SimpleApplicationEventMulticaster;
 import org.springframework.scheduling.quartz.JobDetailFactoryBean;
 import org.springframework.scheduling.quartz.SimpleTriggerFactoryBean;
 import org.springframework.web.client.RestTemplate;
@@ -177,9 +180,11 @@ public class Config {
     public ConfigGraphUpdater getConfigGraphUpdater(
         @Qualifier("ConfigGraph") ConcurrentHashMap<String, ConfigGraphNode> configGraph,
         NotificationJobScheduler notificationJobScheduler,
-        GitHubInstallationRepository installationRepository
+        GitHubInstallationRepository installationRepository,
+        ApplicationEventMulticaster eventMulticaster
     ) {
-        return new ConfigGraphUpdater(installationRepository, configGraph, notificationJobScheduler);
+        ConfigVisitorFactoryFactory visitorFactoryFactory = new ConfigVisitorFactoryFactory(installationRepository, eventMulticaster);
+        return new ConfigGraphUpdater(visitorFactoryFactory, configGraph, notificationJobScheduler);
     }
 
     @Bean
@@ -243,5 +248,10 @@ public class Config {
             installationService,
             installationScanJobScheduler
         );
+    }
+
+    @Bean
+    public ApplicationEventMulticaster getEventMulticaster() {
+        return new SimpleApplicationEventMulticaster();
     }
 }

@@ -21,7 +21,8 @@ public class Notification implements NotificationInterface {
 
     @JsonSubTypes({
         @JsonSubTypes.Type(value = SlackNotificationConfiguration.class, name = "slack/channel"),
-        @JsonSubTypes.Type(value = SlackRealtimeUserNotificationConfiguration.class, name = "slack/realtime-user"),
+        @JsonSubTypes.Type(value = SlackNotificationConfiguration.class, name = "slack/scheduled/channel"),
+        @JsonSubTypes.Type(value = SlackRealTimeUserNotificationConfiguration.class, name = "slack/real-time/user"),
     })
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = "type", defaultImpl = RepositoryAwareNotificationConfiguration.class)
     private NotificationConfigurationInterface config;

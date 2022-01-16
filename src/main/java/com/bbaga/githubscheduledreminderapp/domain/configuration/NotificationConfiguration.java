@@ -1,6 +1,5 @@
 package com.bbaga.githubscheduledreminderapp.domain.configuration;
 
-import com.bbaga.githubscheduledreminderapp.domain.configuration.configGraphUpdater.ConfigGraphUpdater;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.configGraphUpdater.NotificationConfigVisitor;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.*;
 import java.util.ArrayList;

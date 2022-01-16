@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-class InRepoConfigParserTest {
+class InRepoSlackScheduledConfigParserTest {
 
     @Test
     void parseScheduleConfigTest() throws IOException {

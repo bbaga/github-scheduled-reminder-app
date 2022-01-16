@@ -2,7 +2,6 @@ package com.bbaga.githubscheduledreminderapp.domain.configuration.configGraphUpd
 
 import com.bbaga.githubscheduledreminderapp.domain.configuration.*;
 import com.bbaga.githubscheduledreminderapp.domain.jobs.scheduling.NotificationJobScheduler;
-import com.bbaga.githubscheduledreminderapp.infrastructure.github.repositories.GitHubInstallationRepository;
 import org.quartz.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,14 +15,14 @@ public class ConfigGraphUpdater {
     private final ConcurrentHashMap<String, ConcurrentHashMap<Integer, RepositoryRecord>> buffer;
     private final NotificationJobScheduler notificationJobScheduler;
     private final Logger logger = LoggerFactory.getLogger(ConfigGraphUpdater.class);
-    private final GitHubInstallationRepository installationRepository;
+    private final ConfigVisitorFactoryFactory configVisitorFactoryFactory;
 
     public ConfigGraphUpdater(
-        GitHubInstallationRepository installationRepository,
+        ConfigVisitorFactoryFactory configVisitorFactoryFactory,
         ConcurrentHashMap<String, ConfigGraphNode> configGraph,
         NotificationJobScheduler notificationJobScheduler
     ) {
-        this.installationRepository = installationRepository;
+        this.configVisitorFactoryFactory = configVisitorFactoryFactory;
         this.configGraph = configGraph;
         this.notificationJobScheduler = notificationJobScheduler;
         this.buffer = new ConcurrentHashMap<>();
@@ -39,7 +38,7 @@ public class ConfigGraphUpdater {
 
         NotificationVisitor notificationVisitor = new NotificationVisitor(
             this,
-            new ConfigVisitorFactory(this, installationRepository),
+            configVisitorFactoryFactory.create(this),
             context
         );
 
