@@ -1,6 +1,5 @@
 package com.bbaga.githubscheduledreminderapp.domain.configuration;
 
-import com.bbaga.githubscheduledreminderapp.domain.configuration.configGraphUpdater.ConfigGraphUpdater;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.configGraphUpdater.NotificationConfigVisitor;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.RepositoryIssuesSourceConfig;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.RepositoryPRsSourceConfig;
@@ -8,6 +7,7 @@ import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.SourceC
 import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.filters.AbstractFilterConfig;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.filters.DraftFilterConfig;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.filters.LabelFilterConfig;
+import com.bbaga.githubscheduledreminderapp.domain.configuration.template.TemplateConfig;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.ArrayList;
@@ -19,6 +19,9 @@ import static com.bbaga.githubscheduledreminderapp.domain.configuration.sources.
 public class SlackNotificationConfiguration extends RepositoryAwareNotificationConfiguration implements ScheduledNotificationConfigurationInterface {
     private String channel;
     private String schedule;
+
+    @JsonProperty("template-config")
+    private TemplateConfig templateConfig;
 
     @JsonProperty("timezone")
     private String timeZone = "UTC";
@@ -61,6 +64,14 @@ public class SlackNotificationConfiguration extends RepositoryAwareNotificationC
     @Override
     public ArrayList<SourceConfig> getSources() {
         return super.getSources().size() == 0 ? getDefaultSources() : super.getSources();
+    }
+
+    public TemplateConfig getTemplateConfig() {
+        return templateConfig;
+    }
+
+    public void setTemplateConfig(TemplateConfig templateConfig) {
+        this.templateConfig = templateConfig;
     }
 
     @Override

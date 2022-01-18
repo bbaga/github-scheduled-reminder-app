@@ -13,6 +13,8 @@ import com.hubspot.slack.client.models.blocks.Block;
 import com.hubspot.slack.client.models.blocks.Divider;
 import com.hubspot.slack.client.models.blocks.Header;
 import com.hubspot.slack.client.models.blocks.Section;
+import com.hubspot.slack.client.models.blocks.objects.Text;
+import com.hubspot.slack.client.models.blocks.objects.TextType;
 import com.hubspot.slack.client.models.response.SlackError;
 import com.hubspot.slack.client.models.response.chat.ChatPostMessageResponse;
 import org.junit.jupiter.api.Test;
@@ -34,13 +36,15 @@ class ChannelNotificationTest {
     @Test
     void sendCalledWithEmptySets() {
         SlackClient client = Mockito.mock(SlackClient.class);
-        UrlBuilderInterface urlBuilder = Mockito.mock(UrlBuilderInterface.class);
+        ChannelMessageBuilderInterface mockMessageBuilder = Mockito.mock(ChannelMessageBuilderInterface.class);
+        Mockito.when(mockMessageBuilder.createNoResultsMessage(Mockito.anyString())).thenReturn(Section.of(Text.of(TextType.PLAIN_TEXT, "text")));
+
         //noinspection unchecked
         Result<ChatPostMessageResponse, SlackError> result = (Result<ChatPostMessageResponse, SlackError>) Mockito.mock(Result.class);
         CompletableFuture<Result<ChatPostMessageResponse, SlackError>> future = new CompletableFuture<>();
         future.complete(result);
 
-        ChannelNotification service = new ChannelNotification(client, urlBuilder);
+        ChannelNotification service = new ChannelNotification(client, mockMessageBuilder);
         SlackNotificationConfiguration config = new SlackNotificationConfiguration();
         config.setChannel("test");
         Notification notification = new Notification();
@@ -50,13 +54,14 @@ class ChannelNotificationTest {
         Mockito.when(client.postMessage(Mockito.any())).thenReturn(future);
         service.send(new ChannelNotificationDataProvider.Data(notification, issues));
         Mockito.verify(client, Mockito.times(1)).postMessage(Mockito.any());
-
     }
 
     @Test
     void sendCalled() throws IOException {
         SlackClient client = Mockito.mock(SlackClient.class);
         UrlBuilderInterface urlBuilder = Mockito.mock(UrlBuilderInterface.class);
+        ChannelMessageBuilderInterface messageBuilder = new ChannelMessageBuilder(urlBuilder);
+
         GitHubIssue issue = Mockito.mock(GitHubIssue.class);
         GitHubUser user = Mockito.mock(GitHubUser.class);
         GHRepository repository = Mockito.mock(GHRepository.class);
@@ -85,7 +90,7 @@ class ChannelNotificationTest {
         CompletableFuture<Result<ChatPostMessageResponse, SlackError>> future = new CompletableFuture<>();
         future.complete(result);
 
-        ChannelNotification service = new ChannelNotification(client, urlBuilder);
+        ChannelNotification service = new ChannelNotification(client, messageBuilder);
         SlackNotificationConfiguration config = new SlackNotificationConfiguration();
         config.setChannel("test");
         Notification notification = new Notification();
@@ -122,13 +127,12 @@ class ChannelNotificationTest {
         Mockito.verify(pr, Mockito.times(1)).getTitle();
         Mockito.verify(pr, Mockito.times(1)).getUser();
         Mockito.verify(pr, Mockito.times(1)).getRepository();
-        Mockito.verify(pr, Mockito.times(2)).getCreatedAt();
+        Mockito.verify(pr, Mockito.times(1)).getCreatedAt();
 
         // Verify Issue methods
         Mockito.verify(issue, Mockito.times(1)).getTitle();
         Mockito.verify(issue, Mockito.times(1)).getUser();
         Mockito.verify(issue, Mockito.times(1)).getRepository();
-        Mockito.verify(issue, Mockito.times(2)).getCreatedAt();
-
+        Mockito.verify(issue, Mockito.times(1)).getCreatedAt();
     }
 }
