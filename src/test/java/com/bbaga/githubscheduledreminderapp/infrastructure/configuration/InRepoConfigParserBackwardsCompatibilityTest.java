@@ -34,6 +34,8 @@ notifications:
     type: slack/channel
     config:
       channel: "test-channel"
+      template-config:
+        header-prs: "dsdfs"
 """;
 
         InputStream stream = new ByteArrayInputStream(config.getBytes(StandardCharsets.UTF_8));

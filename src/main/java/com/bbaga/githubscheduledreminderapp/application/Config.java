@@ -4,6 +4,8 @@ import com.bbaga.githubscheduledreminderapp.domain.GitHubAppInstallationService;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.ConfigGraphNode;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.configGraphUpdater.ConfigGraphUpdater;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.configGraphUpdater.ConfigVisitorFactoryFactory;
+import com.bbaga.githubscheduledreminderapp.domain.notifications.slack.ChannelMessageBuilder;
+import com.bbaga.githubscheduledreminderapp.domain.statistics.UrlBuilderInterface;
 import com.bbaga.githubscheduledreminderapp.infrastructure.configuration.InRepoConfigParser;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.RepositoryInstallationEventListener;
 import com.bbaga.githubscheduledreminderapp.infrastructure.configuration.persitance.ConfigPersistenceInterface;
@@ -245,5 +247,10 @@ public class Config {
             installationService,
             installationScanJobScheduler
         );
+    }
+
+    @Bean
+    public ChannelMessageBuilder getChannelMessageBuilder(UrlBuilderInterface urlBuilder) {
+        return new ChannelMessageBuilder(urlBuilder);
     }
 }
