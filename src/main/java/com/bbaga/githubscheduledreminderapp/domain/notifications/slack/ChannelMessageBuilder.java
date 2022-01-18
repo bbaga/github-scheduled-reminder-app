@@ -38,7 +38,7 @@ public class ChannelMessageBuilder implements ChannelMessageBuilderInterface {
 
         if (showing < from) {
             counter = overflowFormat.replaceAll("\\$showing", String.valueOf(showing))
-                                .replaceAll("\\$from", String.valueOf(showing));
+                                .replaceAll("\\$from", String.valueOf(from));
         } else {
             counter = String.valueOf(showing);
         }
