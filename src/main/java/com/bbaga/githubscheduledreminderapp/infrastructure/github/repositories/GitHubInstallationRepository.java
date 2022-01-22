@@ -50,4 +50,10 @@ public class GitHubInstallationRepository {
             return installations.keySet();
         }
     }
+
+    public Set<String> getOrgs() {
+        synchronized (this.installations) {
+            return mapOrgToInstallation.keySet();
+        }
+    }
 }
