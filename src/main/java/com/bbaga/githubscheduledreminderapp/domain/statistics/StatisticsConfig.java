@@ -19,6 +19,11 @@ public class StatisticsConfig {
     }
 
     @Bean
+    public StatisticsEventListener getStatisticsEventListener(AggregatedStatisticsStorage statisticsStorage) {
+        return new StatisticsEventListener(statisticsStorage);
+    }
+
+    @Bean
     public UrlBuilderInterface getTrackingUrlBuilder() {
         if (activityTrackingEnabled) {
             return new TrackingUrlBuilder(this.activityTrackingEndpointUrl);

@@ -5,6 +5,8 @@ import com.bbaga.githubscheduledreminderapp.domain.configuration.ConfigGraphNode
 import com.bbaga.githubscheduledreminderapp.domain.configuration.configGraphUpdater.ConfigGraphUpdater;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.configGraphUpdater.ConfigVisitorFactoryFactory;
 import com.bbaga.githubscheduledreminderapp.domain.notifications.slack.ChannelMessageBuilder;
+import com.bbaga.githubscheduledreminderapp.domain.statistics.AggregatedStatisticsStorage;
+import com.bbaga.githubscheduledreminderapp.domain.statistics.StatisticsEventListener;
 import com.bbaga.githubscheduledreminderapp.domain.statistics.UrlBuilderInterface;
 import com.bbaga.githubscheduledreminderapp.infrastructure.configuration.InRepoConfigParser;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.RepositoryInstallationEventListener;
@@ -210,7 +212,7 @@ public class Config {
     }
 
     @Bean
-    public EventPublisher getGitHubEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
+    public EventPublisher getEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
         EventPublisher eventPublisher = new EventPublisher();
         eventPublisher.setApplicationEventPublisher(applicationEventPublisher);
 
