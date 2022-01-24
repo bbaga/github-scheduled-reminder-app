@@ -5,6 +5,7 @@ import com.bbaga.githubscheduledreminderapp.domain.configuration.NotificationCon
 import com.bbaga.githubscheduledreminderapp.domain.configuration.SlackNotificationConfiguration;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.template.TemplateConfig;
 import com.bbaga.githubscheduledreminderapp.domain.notifications.NotificationInterface;
+import com.bbaga.githubscheduledreminderapp.domain.statistics.StatisticsEvent;
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubIssue;
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubPullRequest;
 import com.hubspot.slack.client.SlackClient;
@@ -12,6 +13,7 @@ import com.hubspot.slack.client.methods.params.chat.ChatPostMessageParams;
 import com.hubspot.slack.client.models.blocks.*;
 import com.hubspot.slack.client.models.blocks.objects.Text;
 import com.hubspot.slack.client.models.blocks.objects.TextType;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -22,10 +24,16 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
 
     private final SlackClient slackClient;
     private final ChannelMessageBuilderInterface messageBuilder;
+    private final ApplicationEventPublisher eventPublisher;
 
-    public ChannelNotification(SlackClient slackClient, ChannelMessageBuilderInterface messageBuilder) {
+    public ChannelNotification(
+        SlackClient slackClient,
+        ChannelMessageBuilderInterface messageBuilder,
+        ApplicationEventPublisher eventPublisher
+    ) {
         this.slackClient = slackClient;
         this.messageBuilder = messageBuilder;
+        this.eventPublisher = eventPublisher;
     }
 
     @Override
@@ -85,10 +93,12 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
         for (GitHubIssue issue : issues) {
             if (issue instanceof GitHubPullRequest) {
                 prSections.add(messageBuilder.createLine((GitHubPullRequest) issue, templateConfig.getLinePRs()));
+                eventPublisher.publishEvent(StatisticsEvent.create(this, "notification."+notification.getFullName()+".slack.channel.pull-request.found"));
                 continue;
             }
 
             issueSections.add(messageBuilder.createLine(issue, templateConfig.getLineIssues()));
+            eventPublisher.publishEvent(StatisticsEvent.create(this, "notification."+notification.getFullName()+".slack.channel.issue.found"));
         }
 
         int maxNumberOfIssues = 40; // There are 7 static sections and the max allowed is 50 sections
@@ -107,6 +117,10 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
                     displayCount = maxGroupSize;
                     issueSections = getTruncatedGroup(issueSections, issueSectionsSize, maxGroupSize);
                 }
+
+                eventPublisher.publishEvent(StatisticsEvent.create(
+                    this, "notification."+notification.getFullName()+".slack.channel.pull-request.displayed")
+                );
 
                 sections.add(
                     messageBuilder.createHeaderIssues(
@@ -128,6 +142,10 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
                     displayCount = maxGroupSize;
                     prSections = getTruncatedGroup(prSections, prSectionsSize, maxGroupSize);
                 }
+
+                eventPublisher.publishEvent(StatisticsEvent.create(
+                    this, "notification."+notification.getFullName()+".slack.channel.issue.displayed")
+                );
 
                 sections.add(
                         messageBuilder.createHeaderIssues(
@@ -171,6 +189,8 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
         } else {
             paramBuilder = paramBuilder.setBlocks(sections);
         }
+
+        eventPublisher.publishEvent(StatisticsEvent.create(this, "notification."+notification.getFullName()+".slack.channel.posted"));
 
         slackClient.postMessage(
             paramBuilder

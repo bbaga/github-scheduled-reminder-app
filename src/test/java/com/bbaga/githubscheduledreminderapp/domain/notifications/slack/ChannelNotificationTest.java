@@ -27,6 +27,7 @@ import java.net.URL;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import org.springframework.context.ApplicationEventPublisher;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -39,12 +40,14 @@ class ChannelNotificationTest {
         ChannelMessageBuilderInterface mockMessageBuilder = Mockito.mock(ChannelMessageBuilderInterface.class);
         Mockito.when(mockMessageBuilder.createNoResultsMessage(Mockito.anyString())).thenReturn(Section.of(Text.of(TextType.PLAIN_TEXT, "text")));
 
+        ApplicationEventPublisher mockEventPublisher = Mockito.mock(ApplicationEventPublisher.class);
+
         //noinspection unchecked
         Result<ChatPostMessageResponse, SlackError> result = (Result<ChatPostMessageResponse, SlackError>) Mockito.mock(Result.class);
         CompletableFuture<Result<ChatPostMessageResponse, SlackError>> future = new CompletableFuture<>();
         future.complete(result);
 
-        ChannelNotification service = new ChannelNotification(client, mockMessageBuilder);
+        ChannelNotification service = new ChannelNotification(client, mockMessageBuilder, mockEventPublisher);
         SlackNotificationConfiguration config = new SlackNotificationConfiguration();
         config.setChannel("test");
         Notification notification = new Notification();
@@ -58,6 +61,8 @@ class ChannelNotificationTest {
 
     @Test
     void sendCalled() throws IOException {
+        ApplicationEventPublisher mockEventPublisher = Mockito.mock(ApplicationEventPublisher.class);
+
         SlackClient client = Mockito.mock(SlackClient.class);
         UrlBuilderInterface urlBuilder = Mockito.mock(UrlBuilderInterface.class);
         ChannelMessageBuilderInterface messageBuilder = new ChannelMessageBuilder(urlBuilder);
@@ -90,7 +95,7 @@ class ChannelNotificationTest {
         CompletableFuture<Result<ChatPostMessageResponse, SlackError>> future = new CompletableFuture<>();
         future.complete(result);
 
-        ChannelNotification service = new ChannelNotification(client, messageBuilder);
+        ChannelNotification service = new ChannelNotification(client, messageBuilder, mockEventPublisher);
         SlackNotificationConfiguration config = new SlackNotificationConfiguration();
         config.setChannel("test");
         Notification notification = new Notification();

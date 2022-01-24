@@ -210,7 +210,7 @@ public class Config {
     }
 
     @Bean
-    public EventPublisher getGitHubEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
+    public EventPublisher getEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
         EventPublisher eventPublisher = new EventPublisher();
         eventPublisher.setApplicationEventPublisher(applicationEventPublisher);
 
