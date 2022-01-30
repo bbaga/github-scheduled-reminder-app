@@ -13,7 +13,8 @@ Scheduled reminders about PRs and Issues. This project may be useful for teams u
 1. [Development](#development)
 2. [Configuration](#configuration)
    1. [Sources](docs/sources.md)
-   2. [Persistent State Storage](docs/persistent-state-storage.md)
+   2. [Template configuration options](docs/template-config.md)
+   3. [Persistent State Storage](docs/persistent-state-storage.md)
 
 # Development
 ## Requirements
@@ -121,7 +122,7 @@ The application has to know its own endpoint to build tracking urls that will fo
 enabled: true
 notifications:
   - name: slack-notification
-    type: slack/channel
+    type: slack/scheduled/channel
     config:
       schedule: "*/30 * * * * ?"
       timezone: "EST"
@@ -140,7 +141,7 @@ notifications:
 | Field | Is Required? | Description |
 |---|---|---|
 | `name` | Yes | This name can be used to reference the object from other repositories as well. |
-| `type` | Yes | The only supported `type` is `slack/channel`. |
+| `type` | Yes | The only supported `type` is `slack/scheduled/channel`. |
 | `config` | No | Depends on the `type` field's value, each notification type may have different configuration. |
 
 ### Config

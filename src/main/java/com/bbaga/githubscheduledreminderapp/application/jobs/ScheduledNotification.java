@@ -33,7 +33,7 @@ public class ScheduledNotification implements Job, ApplicationContextAware {
     private ConcurrentHashMap<String, ConfigGraphNode> configGraph;
 
     private final Logger logger = LoggerFactory.getLogger(ScheduledNotification.class);
-    private final Map<String, Class<?>> strategyNameToClassMap = Map.of("slack/channel", NotificationStrategy.class);
+    private final Map<String, Class<?>> strategyNameToClassMap = Map.of("slack/scheduled/channel", NotificationStrategy.class);
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
