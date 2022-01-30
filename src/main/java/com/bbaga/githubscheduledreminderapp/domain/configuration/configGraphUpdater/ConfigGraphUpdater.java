@@ -85,7 +85,7 @@ public class ConfigGraphUpdater {
         addBuffered(notification);
     }
 
-    public void clearOutdated(Long installationId, Instant timestamp) {
+    public void  clearOutdated(Long installationId, Instant timestamp) {
         configGraph.entrySet().removeIf(entry -> {
             ConfigGraphNode node = entry.getValue();
             if (node.getInstallationId().equals(installationId) && node.getLastSeenAt() != timestamp) {
@@ -94,8 +94,17 @@ public class ConfigGraphUpdater {
 
             node.getRepositories().entrySet().removeIf(repoEntry -> {
                 RepositoryRecord repositoryRecord = repoEntry.getValue();
-                return repositoryRecord.getInstallationId().equals(installationId)
-                        && repositoryRecord.getSeenAt() != timestamp;
+
+                NotificationConfigurationInterface notificationConfig = node.getNotification().getConfig();
+
+                if (repositoryRecord.getSeenAt() != timestamp) {
+                    boolean isLocalConfig = notificationConfig instanceof RepositoryAwareNotificationConfiguration
+                        && ((RepositoryAwareNotificationConfiguration) notificationConfig).getRepositories().containsKey(repositoryRecord.getRepository());
+
+                    return repositoryRecord.getInstallationId().equals(installationId) && !isLocalConfig;
+                }
+
+                return false;
             });
 
             return false;
