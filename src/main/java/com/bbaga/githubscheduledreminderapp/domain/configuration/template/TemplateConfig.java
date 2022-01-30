@@ -27,6 +27,9 @@ public class TemplateConfig {
     @JsonProperty("no-results")
     private String noResults = null;
 
+    @JsonProperty("skip-no-results")
+    private Boolean skipNoResults = null;
+
     @JsonProperty("overflow-format")
     private String overflowFormat = null;
 
@@ -78,6 +81,14 @@ public class TemplateConfig {
 
     public void setNoResults(String noResults) {
         this.noResults = noResults;
+    }
+
+    public Boolean getSkipNoResults() {
+        return skipNoResults;
+    }
+
+    public void setSkipNoResults(Boolean skipNoResults) {
+        this.skipNoResults = skipNoResults;
     }
 
     public String getOverflowFormat() {

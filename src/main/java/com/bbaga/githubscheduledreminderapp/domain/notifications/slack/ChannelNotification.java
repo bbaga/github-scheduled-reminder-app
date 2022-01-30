@@ -72,6 +72,10 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
             templateConfig.setNoResults("*There aren't any open issues or pull requests.*");
         }
 
+        if (templateConfig.getSkipNoResults() == null) {
+            templateConfig.setSkipNoResults(false);
+        }
+
         if (templateConfig.getLineIssues() == null) {
             templateConfig.setLineIssues("$login *$title*\nrepository: $repository, age: $age$button");
         }
@@ -108,6 +112,10 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
         int prSectionsSize = prSections.size();
 
         if ((issueSectionsSize + prSectionsSize) == 0) {
+            if (templateConfig.getSkipNoResults().equals(true)) {
+                return;
+            }
+
             sections.add(messageBuilder.createNoResultsMessage(templateConfig.getNoResults()));
         } else {
             if (issueSectionsSize > 0) {
