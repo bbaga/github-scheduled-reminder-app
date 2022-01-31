@@ -33,7 +33,7 @@ class InRepoSlackScheduledConfigParserTest {
 enabled: true
 notifications:
   - name: testing
-    type: slack/channel
+    type: slack/scheduled/channel
     config:
       schedule: "0 1 2 3 4 5 6"
       channel: "test-channel"
@@ -60,7 +60,7 @@ notifications:
         Assertions.assertEquals("testing", notification.getName());
         Assertions.assertEquals("0 1 2 3 4 5 6", slackConfig.getSchedule().get());
         Assertions.assertEquals("UTC", slackConfig.getTimeZone());
-        Assertions.assertEquals("slack/channel", notification.getType());
+        Assertions.assertEquals("slack/scheduled/channel", notification.getType());
 
         SlackNotificationConfiguration notificationConfig = (SlackNotificationConfiguration) notification.getConfig();
         Assertions.assertEquals("test-channel", notificationConfig.getChannel());
@@ -74,7 +74,7 @@ notifications:
 enabled: true
 notifications:      
   - name: timezone
-    type: slack/channel
+    type: slack/scheduled/channel
     config:
       schedule: "* * * * * *"
       timezone: EST
@@ -102,7 +102,7 @@ notifications:
         Assertions.assertEquals("timezone", notification.getName());
         Assertions.assertEquals("* * * * * *", slackConfig.getSchedule().get());
         Assertions.assertEquals("EST", slackConfig.getTimeZone());
-        Assertions.assertEquals("slack/channel", notification.getType());
+        Assertions.assertEquals("slack/scheduled/channel", notification.getType());
 
         SlackNotificationConfiguration notificationConfig = ((SlackNotificationConfiguration) notification.getConfig());
         Assertions.assertEquals("dev-channel", notificationConfig.getChannel());
@@ -214,7 +214,7 @@ notifications:
 enabled: true
 notifications:
   - name: testing
-    type: slack/channel
+    type: slack/scheduled/channel
     config:
       schedule: "0 1 2 3 4 5 6"
       channel: "test-channel"

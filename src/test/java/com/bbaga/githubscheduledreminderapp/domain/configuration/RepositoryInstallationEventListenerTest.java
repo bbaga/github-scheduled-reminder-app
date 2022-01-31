@@ -58,7 +58,7 @@ class RepositoryInstallationEventListenerTest {
             """;
 
         ArrayList<NotificationInterface> notificationList = new ArrayList<>();
-        notificationList.add(new Notification("testing", "slack/channel", new SlackNotificationConfiguration()));
+        notificationList.add(new Notification("testing", "slack/scheduled/channel", new SlackNotificationConfiguration()));
 
         InRepoConfig inRepoConfig = new InRepoConfig();
         inRepoConfig.setEnabled(true);
