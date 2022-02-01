@@ -101,7 +101,7 @@ Possible values: Any `string`
 - `$deletions`: will be replaced with the number of lines removed.
 - `$additions`: will be replaced with the number of lines added.
 - `$link`: will be replaced with an HTTP url leading to the PR.
-- `$button`: will be replaced with a button leading to the PR, this option is available on when the `mode` option is set to `block`.
+- `$button`: will be replaced with a button leading to the PR, this option is available only when the `mode` option is set to `block`.
 
 #### `line-issues`
 Format to use for each issue found.
