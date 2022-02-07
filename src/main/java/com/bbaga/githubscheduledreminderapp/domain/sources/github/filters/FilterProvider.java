@@ -12,6 +12,8 @@ public class FilterProvider {
             filter = new DraftFilter();
         } else if (type.equals(Filters.LABEL_FILTER.label)) {
             filter = new LabelFilter();
+        } else if (type.equals(Filters.AUTHOR_FILTER.label)) {
+            filter = new AuthorFilter();
         } else {
             throw new RuntimeException(String.format("Unknown filter type: \"%s\"", type));
         }

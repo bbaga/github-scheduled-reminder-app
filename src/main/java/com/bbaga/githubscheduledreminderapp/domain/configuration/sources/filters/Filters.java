@@ -2,7 +2,8 @@ package com.bbaga.githubscheduledreminderapp.domain.configuration.sources.filter
 
 public enum Filters {
     DRAFT_FILTER(Constants.DRAFT_FILTER),
-    LABEL_FILTER(Constants.LABEL_FILTER);
+    LABEL_FILTER(Constants.LABEL_FILTER),
+    AUTHOR_FILTER(Constants.AUTHOR_FILTER);
 
     public final String label;
 
@@ -13,5 +14,6 @@ public enum Filters {
     public static class Constants {
         public static final String DRAFT_FILTER = "draft-filter";
         public static final String LABEL_FILTER = "label-filter";
+        public static final String AUTHOR_FILTER = "author-filter";
     }
 }

@@ -133,3 +133,14 @@ filters:
       - acknowledged
     expiry-days: 90
 ```
+
+### Author-filter
+This filter will remove the PRs and Issues based on the author's login name.
+
+```yaml
+filters:
+  - type: athor-filter
+    include:
+      - usernameA
+      - usernameB
+```

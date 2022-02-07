@@ -50,6 +50,6 @@ public class LabelFilter implements IssueFilterInterface {
 
     @Override
     public Boolean filter(GitHubPullRequest issue) {
-        return false;
+        return this.filter((GitHubIssue) issue);
     }
 }

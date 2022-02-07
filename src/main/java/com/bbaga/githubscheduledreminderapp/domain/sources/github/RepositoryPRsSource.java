@@ -4,8 +4,10 @@ import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.SourceC
 import com.bbaga.githubscheduledreminderapp.domain.sources.github.filters.FilterChain;
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubIssue;
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubPullRequest;
+import org.kohsuke.github.GHDirection;
 import org.kohsuke.github.GHIssueState;
 import org.kohsuke.github.GHPullRequest;
+import org.kohsuke.github.GHPullRequestQueryBuilder;
 import org.kohsuke.github.GHRepository;
 
 import java.io.IOException;
@@ -22,15 +24,21 @@ public class RepositoryPRsSource implements RepositoryAsSourceInterface <GitHubI
     public ArrayList<GitHubIssue> get(GHRepository repository) throws IOException {
         ArrayList<GitHubIssue> pullRequests = new ArrayList<>();
 
-        repository.getPullRequests(GHIssueState.OPEN).forEach((GHPullRequest pr) -> {
-            GitHubPullRequest wrappedPr = GitHubPullRequest.create(pr);
+        repository.queryPullRequests()
+            .state(GHIssueState.OPEN)
+            .sort(GHPullRequestQueryBuilder.Sort.CREATED)
+            .direction(GHDirection.DESC)
+            .list()
+            .withPageSize(100)
+            .forEach((GHPullRequest pr) -> {
+                GitHubPullRequest wrappedPr = GitHubPullRequest.create(pr);
 
-            if (FilterChain.filter(sourceConfig.getFilters(), wrappedPr)) {
-                return;
-            }
+                if (FilterChain.filter(sourceConfig.getFilters(), wrappedPr)) {
+                    return;
+                }
 
-            pullRequests.add(wrappedPr);
-        });
+                pullRequests.add(wrappedPr);
+          });
 
         return pullRequests;
     }
