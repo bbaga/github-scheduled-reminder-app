@@ -3,8 +3,11 @@ package com.bbaga.githubscheduledreminderapp.domain.sources.github;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.SourceConfig;
 import com.bbaga.githubscheduledreminderapp.domain.sources.github.filters.FilterChain;
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubIssue;
+import org.kohsuke.github.GHDirection;
 import org.kohsuke.github.GHIssue;
+import org.kohsuke.github.GHIssueQueryBuilder;
 import org.kohsuke.github.GHIssueState;
+import org.kohsuke.github.GHPullRequestQueryBuilder;
 import org.kohsuke.github.GHRepository;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -24,19 +27,25 @@ public class RepositoryIssuesSource implements RepositoryAsSourceInterface<GitHu
 
     public ArrayList<GitHubIssue> get(GHRepository repository, GHIssueState state) throws IOException {
         ArrayList<GitHubIssue> issues = new ArrayList<>();
-        repository.getIssues(state).forEach((GHIssue issue) -> {
-            if (issue.isPullRequest()) {
-                return;
-            }
+        repository.queryIssues()
+            .state(state)
+            .sort(GHIssueQueryBuilder.Sort.CREATED)
+            .direction(GHDirection.DESC)
+            .list()
+            .withPageSize(100)
+            .forEach((GHIssue issue) -> {
+                if (issue.isPullRequest()) {
+                    return;
+                }
 
-            GitHubIssue wrappedIssue = GitHubIssue.create(issue);
+                GitHubIssue wrappedIssue = GitHubIssue.create(issue);
 
-            if (FilterChain.filter(sourceConfig.getFilters(), wrappedIssue)) {
-                return;
-            }
+                if (FilterChain.filter(sourceConfig.getFilters(), wrappedIssue)) {
+                    return;
+                }
 
-            issues.add(wrappedIssue);
-        });
+                issues.add(wrappedIssue);
+            });
 
         return issues;
     }
