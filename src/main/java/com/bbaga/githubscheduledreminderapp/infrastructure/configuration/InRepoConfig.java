@@ -1,12 +1,14 @@
 package com.bbaga.githubscheduledreminderapp.infrastructure.configuration;
 
 import com.bbaga.githubscheduledreminderapp.domain.configuration.*;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class InRepoConfig {
     private Boolean enabled;
     private List<NotificationInterface> notifications = new ArrayList<>();

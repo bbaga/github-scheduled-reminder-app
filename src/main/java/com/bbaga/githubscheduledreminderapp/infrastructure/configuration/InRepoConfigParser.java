@@ -6,6 +6,7 @@ import org.kohsuke.github.GHRepository;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import org.yaml.snakeyaml.Yaml;
 
 public class InRepoConfigParser {
     private final ObjectMapper mapper;
@@ -18,6 +19,11 @@ public class InRepoConfigParser {
 
     public InRepoConfig getFrom(GHRepository repository) throws IOException {
         GHContent content = repository.getFileContent(configFilePath);
-        return mapper.readValue(new String(content.read().readAllBytes(), StandardCharsets.UTF_8), InRepoConfig.class);
+
+        // Trickery because Jackson doesn't handle YAML anchors
+        Object tmpYaml = new Yaml().loadAs(content.read(), Object.class);
+        String prettyYaml = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(tmpYaml);
+
+        return mapper.readValue(prettyYaml, InRepoConfig.class);
     }
 }
