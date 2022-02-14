@@ -1,6 +1,8 @@
 package com.bbaga.githubscheduledreminderapp.infrastructure.configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.jsontype.NamedType;
+import com.fasterxml.jackson.databind.jsontype.SubtypeResolver;
 import org.kohsuke.github.GHContent;
 import org.kohsuke.github.GHRepository;
 

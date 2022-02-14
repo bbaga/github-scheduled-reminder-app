@@ -17,7 +17,7 @@ import static com.bbaga.githubscheduledreminderapp.domain.configuration.sources.
 @JsonSubTypes({
         @JsonSubTypes.Type(value = RepositoryIssuesSourceConfig.class, name = REPOSITORY_ISSUES),
         @JsonSubTypes.Type(value = RepositoryPRsSourceConfig.class, name = REPOSITORY_PRS),
-        @JsonSubTypes.Type(value = SearchIssuesSourceConfig.class, name = SEARCH_ISSUES),
+//        @JsonSubTypes.Type(value = SearchIssuesSourceConfig.class, name = SEARCH_ISSUES),
         @JsonSubTypes.Type(value = SearchPRsByReviewersSourceConfig.class, name = SEARCH_PRS_BY_REVIEWERS),
         @JsonSubTypes.Type(value = EventPrReviewRequestedAsSourceConfig.class, name = EVENT_PR_REVIEW_REQUESTED),
 })

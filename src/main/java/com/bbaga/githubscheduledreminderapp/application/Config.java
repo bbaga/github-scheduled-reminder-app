@@ -4,6 +4,8 @@ import com.bbaga.githubscheduledreminderapp.domain.GitHubAppInstallationService;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.ConfigGraphNode;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.configGraphUpdater.ConfigGraphUpdater;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.configGraphUpdater.ConfigVisitorFactoryFactory;
+import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.SourceConfig;
+import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.SourceConfigMix;
 import com.bbaga.githubscheduledreminderapp.domain.notifications.slack.ChannelMessageBuilder;
 import com.bbaga.githubscheduledreminderapp.domain.statistics.UrlBuilderInterface;
 import com.bbaga.githubscheduledreminderapp.infrastructure.configuration.InRepoConfigParser;
@@ -221,6 +223,7 @@ public class Config {
     @Qualifier("YamlObjectMapper")
     public ObjectMapper getYamlObjectMapper() {
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+        mapper.addMixIn(SourceConfig.class, SourceConfigMix.class);
         mapper.findAndRegisterModules();
         return mapper;
     }

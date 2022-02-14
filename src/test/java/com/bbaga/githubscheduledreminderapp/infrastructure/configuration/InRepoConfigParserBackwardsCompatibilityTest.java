@@ -5,6 +5,7 @@ import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.*;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.filters.AbstractFilterConfig;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.filters.DraftFilterConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.jsontype.NamedType;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -106,6 +107,8 @@ notifications:
     @Test
     void parseExtensionConfigOverwriteTest() throws IOException {
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+//        mapper.addMixIn(SourceConfig.class, SourceConfigMix.class);
+        mapper.registerSubtypes(new NamedType(SearchIssuesSourceConfig.class, "search-issues"));
         String configPath = "path/to/config.yaml";
         String config = """
 enabled: true
