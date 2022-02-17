@@ -139,7 +139,7 @@ This filter will remove the PRs and Issues based on the author's login name.
 
 ```yaml
 filters:
-  - type: athor-filter
+  - type: author-filter
     include:
       - usernameA
       - usernameB
