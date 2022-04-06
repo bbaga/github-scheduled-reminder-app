@@ -13,6 +13,10 @@ public class GitHubUser {
         return user.getLogin();
     }
 
+    public String getHtmlUrl() {
+        return user.getHtmlUrl().toString();
+    }
+
     public GHUser unwrap() {
         return user;
     }

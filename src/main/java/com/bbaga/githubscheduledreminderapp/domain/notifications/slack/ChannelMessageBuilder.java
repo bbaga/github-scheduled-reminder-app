@@ -3,12 +3,14 @@ package com.bbaga.githubscheduledreminderapp.domain.notifications.slack;
 import com.bbaga.githubscheduledreminderapp.domain.statistics.UrlBuilderInterface;
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubIssue;
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubPullRequest;
+import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubUser;
 import com.hubspot.slack.client.models.blocks.Block;
 import com.hubspot.slack.client.models.blocks.Header;
 import com.hubspot.slack.client.models.blocks.Section;
 import com.hubspot.slack.client.models.blocks.elements.Button;
 import com.hubspot.slack.client.models.blocks.objects.Text;
 import com.hubspot.slack.client.models.blocks.objects.TextType;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -110,7 +112,9 @@ public class ChannelMessageBuilder implements ChannelMessageBuilderInterface {
                 .replaceAll("\\$age", getIssueAge(pullRequest))
                 .replaceAll("\\$deletions", String.valueOf(deletions))
                 .replaceAll("\\$additions", String.valueOf(additions))
-                .replaceAll("\\$link", getUrl(pullRequest));
+                .replaceAll("\\$link", getUrl(pullRequest))
+                .replaceAll("\\$assignee-logins", getAssigneeLogins(pullRequest))
+                .replaceAll("\\$assignee-login-links", getAssigneeLoginLinks(pullRequest));
 
         if (text.contains("$button")) {
             text = text.replaceAll("\\$button", "");
@@ -134,6 +138,8 @@ public class ChannelMessageBuilder implements ChannelMessageBuilderInterface {
                 .replaceAll("\\$title", issue.getTitle())
                 .replaceAll("\\$repository", issue.getRepository().getFullName())
                 .replaceAll("\\$age", getIssueAge(issue))
+                .replaceAll("\\$assignee-logins", getAssigneeLogins(issue))
+                .replaceAll("\\$assignee-login-links", getAssigneeLoginLinks(issue))
                 .replaceAll("\\$link", getUrl(issue));
 
         if (text.contains("$button")) {
@@ -164,6 +170,14 @@ public class ChannelMessageBuilder implements ChannelMessageBuilderInterface {
             url = issue.getHtmlUrl().toString();
         }
         return url;
+    }
+
+    private String getAssigneeLogins(GitHubIssue issue) {
+        return issue.getAssignees().stream().map(GitHubUser::getLogin).collect(Collectors.joining(", "));
+    }
+
+    private String getAssigneeLoginLinks(GitHubIssue issue) {
+        return issue.getAssignees().stream().map(user -> "<"+user.getHtmlUrl()+"|"+user.getLogin()+">").collect(Collectors.joining(", "));
     }
 
     private String getIssueAge(GitHubIssue issue) {

@@ -37,6 +37,7 @@ class ChannelNotificationTest {
     @Test
     void sendCalledWithEmptySets() {
         SlackClient client = Mockito.mock(SlackClient.class);
+        Optional<SlackClient> userClient = Optional.empty();
         ChannelMessageBuilderInterface mockMessageBuilder = Mockito.mock(ChannelMessageBuilderInterface.class);
         Mockito.when(mockMessageBuilder.createNoResultsMessage(Mockito.anyString())).thenReturn(Section.of(Text.of(TextType.PLAIN_TEXT, "text")));
 
@@ -47,7 +48,7 @@ class ChannelNotificationTest {
         CompletableFuture<Result<ChatPostMessageResponse, SlackError>> future = new CompletableFuture<>();
         future.complete(result);
 
-        ChannelNotification service = new ChannelNotification(client, mockMessageBuilder, mockEventPublisher);
+        ChannelNotification service = new ChannelNotification(client, userClient, mockMessageBuilder, mockEventPublisher);
         SlackNotificationConfiguration config = new SlackNotificationConfiguration();
         config.setChannel("test");
         Notification notification = new Notification();
@@ -64,6 +65,7 @@ class ChannelNotificationTest {
         ApplicationEventPublisher mockEventPublisher = Mockito.mock(ApplicationEventPublisher.class);
 
         SlackClient client = Mockito.mock(SlackClient.class);
+        Optional<SlackClient> userClient = Optional.empty();
         UrlBuilderInterface urlBuilder = Mockito.mock(UrlBuilderInterface.class);
         ChannelMessageBuilderInterface messageBuilder = new ChannelMessageBuilder(urlBuilder);
 
@@ -95,7 +97,7 @@ class ChannelNotificationTest {
         CompletableFuture<Result<ChatPostMessageResponse, SlackError>> future = new CompletableFuture<>();
         future.complete(result);
 
-        ChannelNotification service = new ChannelNotification(client, messageBuilder, mockEventPublisher);
+        ChannelNotification service = new ChannelNotification(client, userClient, messageBuilder, mockEventPublisher);
         SlackNotificationConfiguration config = new SlackNotificationConfiguration();
         config.setChannel("test");
         Notification notification = new Notification();
