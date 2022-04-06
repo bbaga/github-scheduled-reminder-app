@@ -1,0 +1,32 @@
+application:
+  github:
+    endpoint: ${GITHUB_API_ENDPOINT:}
+    app:
+      id: ${GITHUB_ID}
+      cert: ${GITHUB_APP_CERT:}
+      certFile: ${GITHUB_APP_CERT_FILE:}
+    configFilePath: ${CONFIG_FILE_PATH:.demo-bot.yaml}
+  slack:
+    apiToken: ${SLACK_API_TOKEN:}
+    apiTokenFile: ${SLACK_API_TOKEN_FILE:}
+    apiUserTokenFile: ${SLACK_API_USER_TOKEN_FILE:}
+    apiUserToken: ${SLACK_API_USER_TOKEN:}
+  jobs:
+    github:
+      installationScan:
+        interval: ${JOBS_GITHUB_INSTALLATION_SCAN_INTERVAL:43200000}
+  state:
+    storage:
+      type: ${STATE_STORAGE_TYPE:LOCAL_FS}
+      gcs_bucket:
+        name: ${STATE_STORAGE_GCS_BUCKET_NAME:}
+        secret: ${STATE_STORAGE_GCS_BUCKET_SECRET:}
+        secretFile: ${STATE_STORAGE_GCS_BUCKET_SECRET_FILE:}
+        filepath: ${STATE_STORAGE_GCS_BUCKET_FILEPATH:state.json}
+      fs:
+        filepath: ${STATE_STORAGE_FS_FILEPATH:/tmp/github-reminder-state.json}
+  activityTracking:
+    enabled: ${ACTIVITY_TRACKING_ENABLED:false}
+    endpoint:
+      url: ${ACTIVITY_TRACKING_ENDPOINT_URL:http://localhost:8080}
+

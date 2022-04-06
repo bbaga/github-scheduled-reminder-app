@@ -1,5 +1,7 @@
 package com.bbaga.githubscheduledreminderapp.infrastructure.github;
 
+import java.util.List;
+import java.util.stream.Collectors;
 import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GHLabel;
 import org.kohsuke.github.GHRepository;
@@ -62,6 +64,14 @@ public class GitHubIssue {
 
     public Boolean isPullRequest() {
         return issue.isPullRequest();
+    }
+
+    public List<GitHubUser> getAssignees() {
+        return issue.getAssignees().stream().map(GitHubUser::create).collect(Collectors.toList());
+    }
+
+    public Boolean hasAssignee() {
+        return issue.getAssignees().size() > 0;
     }
 
     public static GitHubIssue create(GHIssue issue) {

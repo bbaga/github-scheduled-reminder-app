@@ -99,6 +99,7 @@ public class ConfigGraphUpdater {
 
                 if (repositoryRecord.getSeenAt() != timestamp) {
                     boolean isLocalConfig = notificationConfig instanceof RepositoryAwareNotificationConfiguration
+                        && ((RepositoryAwareNotificationConfiguration) notificationConfig).getRepositories() != null
                         && ((RepositoryAwareNotificationConfiguration) notificationConfig).getRepositories().containsKey(repositoryRecord.getRepository());
 
                     return repositoryRecord.getInstallationId().equals(installationId) && !isLocalConfig;

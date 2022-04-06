@@ -4,10 +4,12 @@ services:
     image: openjdk:17
     volumes:
       - ./:/sources
+      - ~/.m2/repository:/root/.m2/repository
     working_dir: /sources
-    command: "./mvnw spring-boot:run"
+    command: "./mvnw spring-boot:run -Dspring-boot.run.jvmArguments=\"-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=${SUSPEND:-n},address=0.0.0.0:5005\""
     ports:
       - "8080:8080"
+      - "5005:5005"
     environment:
       - GITHUB_APP_CERT
       - GITHUB_APP_CERT_FILE
