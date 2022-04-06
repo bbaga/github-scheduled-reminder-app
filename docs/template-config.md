@@ -101,6 +101,8 @@ Possible values: Any `string`
 - `$deletions`: will be replaced with the number of lines removed.
 - `$additions`: will be replaced with the number of lines added.
 - `$link`: will be replaced with an HTTP url leading to the PR.
+- `$assignee-logins`: will be replaced with a comma separated list of GitHub login names.
+- `$assignee-login-links`: will be replaced with a comma separated list of GitHub login names linking to the GitHub profile pages.
 - `$button`: will be replaced with a button leading to the PR, this option is available only when the `mode` option is set to `block`.
 
 #### `line-issues`
@@ -114,6 +116,8 @@ Possible values: Any `string`
 - `$repository`: will be replaced with the repository's name in which the issue was found.
 - `$age`: will be replaced with the time passed since the creation of the issue.
 - `$link`: will be replaced with an HTTP url leading to the issue.
+- `$assignee-logins`: will be replaced with a comma separated list of GitHub login names.
+- `$assignee-login-links`: will be replaced with a comma separated list of GitHub login names linking to the GitHub profile pages.
 - `$button`: will be replaced with a button leading to the issue, this option is available on when the `mode` option is set to `block`.
 
 #### `no-results`
