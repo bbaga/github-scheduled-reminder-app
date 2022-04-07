@@ -108,7 +108,7 @@ Finds PRs (and Issues) based on the custom query.
 config:
   sources:
     - type: search-issues
-       query: "label:\"help wanted\""
+      query: "label:\"help wanted\""
 ```
 
 ## Filters
