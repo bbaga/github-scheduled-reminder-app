@@ -69,6 +69,8 @@ class ChannelNotificationTest {
         UrlBuilderInterface urlBuilder = Mockito.mock(UrlBuilderInterface.class);
         ChannelMessageBuilderInterface messageBuilder = new ChannelMessageBuilder(urlBuilder);
 
+        Mockito.when(urlBuilder.copy()).thenReturn(urlBuilder);
+
         GitHubIssue issue = Mockito.mock(GitHubIssue.class);
         GitHubUser user = Mockito.mock(GitHubUser.class);
         GHRepository repository = Mockito.mock(GHRepository.class);
