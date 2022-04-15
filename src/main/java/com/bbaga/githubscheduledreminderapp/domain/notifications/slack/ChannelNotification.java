@@ -10,7 +10,6 @@ import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubIssue;
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubPullRequest;
 import com.hubspot.slack.client.SlackClient;
 import com.hubspot.slack.client.methods.params.chat.ChatPostMessageParams;
-import com.hubspot.slack.client.methods.params.search.SearchMessagesParams;
 import com.hubspot.slack.client.models.blocks.*;
 import com.hubspot.slack.client.models.blocks.objects.Text;
 import com.hubspot.slack.client.models.blocks.objects.TextType;
@@ -45,13 +44,15 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
     public void send(ChannelNotificationDataProvider.Data data) {
         Notification notification = data.getNotification();
         List<GitHubIssue> issues = data.getIssues();
-        TemplateConfig templateConfig = null;
 
         NotificationConfigurationInterface config = notification.getConfig();
 
-        if (config instanceof SlackNotificationConfiguration) {
-            templateConfig = ((SlackNotificationConfiguration) config).getTemplateConfig();
+        if (!(config instanceof SlackNotificationConfiguration)) {
+            throw new RuntimeException("Invalid configuration type passed to Slack Channel Notification");
         }
+
+        var slackConfig = ((SlackNotificationConfiguration) config);
+        var templateConfig = slackConfig.getTemplateConfig();
 
         if (templateConfig == null) {
             templateConfig = new TemplateConfig();
@@ -99,15 +100,30 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
 
         sections.add(Header.of(Text.of(TextType.PLAIN_TEXT, templateConfig.getHeaderMain())));
 
+        var slackChannel = slackConfig.getChannel();
+
+        var trackingParams = new HashMap<String, String>();
+        trackingParams.put("channel", slackChannel);
+
         for (GitHubIssue issue : issues) {
             if (issue instanceof GitHubPullRequest) {
-                prSections.add(messageBuilder.createLine((GitHubPullRequest) issue, templateConfig.getLinePRs()));
-                eventPublisher.publishEvent(StatisticsEvent.create(this, "notification."+notification.getFullName()+".slack.channel.pull-request.found"));
+                prSections.add(
+                    messageBuilder.createLine((GitHubPullRequest) issue, templateConfig.getLinePRs(), trackingParams)
+                );
+
+                eventPublisher.publishEvent(StatisticsEvent.create(
+                    this,
+                    "notification."+notification.getFullName()+".slack.channel.pull-request.found")
+                );
+
                 continue;
             }
 
-            issueSections.add(messageBuilder.createLine(issue, templateConfig.getLineIssues()));
-            eventPublisher.publishEvent(StatisticsEvent.create(this, "notification."+notification.getFullName()+".slack.channel.issue.found"));
+            issueSections.add(messageBuilder.createLine(issue, templateConfig.getLineIssues(), trackingParams));
+            eventPublisher.publishEvent(StatisticsEvent.create(
+                this,
+                "notification."+notification.getFullName()+".slack.channel.issue.found")
+            );
         }
 
         int maxNumberOfIssues = 40; // There are 7 static sections and the max allowed is 50 sections
@@ -132,8 +148,10 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
                 }
 
                 eventPublisher.publishEvent(StatisticsEvent.create(
-                    this, "notification."+notification.getFullName()+".slack.channel.pull-request.displayed")
-                );
+                    this,
+                    "notification."+notification.getFullName()+".slack.channel.issue.displayed",
+                    displayCount
+                ));
 
                 sections.add(
                     messageBuilder.createHeaderIssues(
@@ -157,8 +175,10 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
                 }
 
                 eventPublisher.publishEvent(StatisticsEvent.create(
-                    this, "notification."+notification.getFullName()+".slack.channel.issue.displayed")
-                );
+                    this,
+                    "notification."+notification.getFullName()+".slack.channel.pull-request.displayed",
+                    displayCount
+                ));
 
                 sections.add(
                         messageBuilder.createHeaderIssues(
@@ -203,12 +223,15 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
             paramBuilder = paramBuilder.setBlocks(sections);
         }
 
-        eventPublisher.publishEvent(StatisticsEvent.create(this, "notification."+notification.getFullName()+".slack.channel.posted"));
+        eventPublisher.publishEvent(
+            StatisticsEvent.create(
+                this,
+                "notification."+notification.getFullName()+".slack.channel.posted"
+            )
+        );
 
         slackClient.postMessage(
-            paramBuilder
-            .setChannelId(((SlackNotificationConfiguration) notification.getConfig()).getChannel())
-            .build()
+            paramBuilder.setChannelId(slackChannel).build()
         ).join();
     }
 

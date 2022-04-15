@@ -4,7 +4,7 @@ import org.springframework.context.ApplicationListener;
 
 public class StatisticsEventListener implements ApplicationListener<StatisticsEvent> {
 
-    private AggregatedStatisticsStorage statisticsStorage;
+    private final AggregatedStatisticsStorage statisticsStorage;
 
     public StatisticsEventListener(AggregatedStatisticsStorage statisticsStorage) {
         this.statisticsStorage = statisticsStorage;
@@ -12,6 +12,6 @@ public class StatisticsEventListener implements ApplicationListener<StatisticsEv
 
     @Override
     public void onApplicationEvent(StatisticsEvent event) {
-        statisticsStorage.increase(event.getEventName());
+        statisticsStorage.increaseBy(event.getEventName(), event.getCounter());
     }
 }

@@ -10,6 +10,7 @@ import com.hubspot.slack.client.models.blocks.Section;
 import com.hubspot.slack.client.models.blocks.elements.Button;
 import com.hubspot.slack.client.models.blocks.objects.Text;
 import com.hubspot.slack.client.models.blocks.objects.TextType;
+import java.util.Map;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +69,7 @@ public class ChannelMessageBuilder implements ChannelMessageBuilderInterface {
     }
 
     @Override
-    public Block createLine(GitHubPullRequest pullRequest, String text) {
+    public Block createLine(GitHubPullRequest pullRequest, String text, Map<String, String> trackingParams) {
         String login;
         String mergeableState = "";
         String mergeableEmoji;
@@ -112,20 +113,20 @@ public class ChannelMessageBuilder implements ChannelMessageBuilderInterface {
                 .replaceAll("\\$age", getIssueAge(pullRequest))
                 .replaceAll("\\$deletions", String.valueOf(deletions))
                 .replaceAll("\\$additions", String.valueOf(additions))
-                .replaceAll("\\$link", getUrl(pullRequest))
+                .replaceAll("\\$link", getUrl(pullRequest, trackingParams))
                 .replaceAll("\\$assignee-logins", getAssigneeLogins(pullRequest))
                 .replaceAll("\\$assignee-login-links", getAssigneeLoginLinks(pullRequest));
 
         if (text.contains("$button")) {
             text = text.replaceAll("\\$button", "");
-            return markdownSection(text).withAccessory(linkButton(pullRequest));
+            return markdownSection(text).withAccessory(linkButton(pullRequest, trackingParams));
         }
 
         return markdownSection(text);
     }
 
     @Override
-    public Block createLine(GitHubIssue issue, String text) {
+    public Block createLine(GitHubIssue issue, String text, Map<String, String> trackingParams) {
         String login;
 
         try {
@@ -140,11 +141,11 @@ public class ChannelMessageBuilder implements ChannelMessageBuilderInterface {
                 .replaceAll("\\$age", getIssueAge(issue))
                 .replaceAll("\\$assignee-logins", getAssigneeLogins(issue))
                 .replaceAll("\\$assignee-login-links", getAssigneeLoginLinks(issue))
-                .replaceAll("\\$link", getUrl(issue));
+                .replaceAll("\\$link", getUrl(issue, trackingParams));
 
         if (text.contains("$button")) {
             text = text.replaceAll("\\$button", "");
-            return markdownSection(text).withAccessory(linkButton(issue));
+            return markdownSection(text).withAccessory(linkButton(issue, trackingParams));
         }
 
         return markdownSection(text);
@@ -154,22 +155,24 @@ public class ChannelMessageBuilder implements ChannelMessageBuilderInterface {
         return Section.of(Text.of(TextType.MARKDOWN, markdown));
     }
 
-    private Button linkButton(GitHubIssue issue) {
-        String url = getUrl(issue);
+    private Button linkButton(GitHubIssue issue, Map<String, String> trackingParams) {
+        String url = getUrl(issue, trackingParams);
 
         return Button.of(Text.of(TextType.PLAIN_TEXT, "Open"), issue.getNodeId()).withUrl(url);
     }
 
-    private String getUrl(GitHubIssue issue) {
-        String url;
+    private String getUrl(GitHubIssue issue, Map<String, String> trackingParams) {
+        String urlString;
 
         try {
-            url = urlBuilder.from("slack.channel", issue);
+            var urlBuilderCopy = urlBuilder.copy();
+            trackingParams.forEach(urlBuilderCopy::setExtraParameter);
+            urlString = urlBuilderCopy.from("slack.channel", issue);
         } catch (UnsupportedEncodingException e) {
             logger.error(e.getMessage(), e);
-            url = issue.getHtmlUrl().toString();
+            urlString = issue.getHtmlUrl().toString();
         }
-        return url;
+        return urlString;
     }
 
     private String getAssigneeLogins(GitHubIssue issue) {
