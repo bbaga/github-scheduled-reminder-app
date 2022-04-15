@@ -36,7 +36,7 @@ public class GitHubInstallationScan implements Job {
         this.jobScheduler = jobScheduler;
     }
 
-    public void execute(JobExecutionContext context) throws JobExecutionException {
+    public void execute(JobExecutionContext context) {
 
         logger.info("Starting Installation Scan");
         PagedIterable<GHAppInstallation> list = null;

@@ -9,6 +9,7 @@ import com.bbaga.githubscheduledreminderapp.domain.sources.github.RepositoryAsSo
 import com.bbaga.githubscheduledreminderapp.domain.sources.github.SearchAsSourceInterface;
 import com.bbaga.githubscheduledreminderapp.domain.sources.github.SourceProvider;
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubIssue;
+import java.util.List;
 import org.kohsuke.github.*;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -43,14 +44,7 @@ public class ChannelNotificationDataProvider implements NotificationDataProvider
     public Data getData() {
 
         GitHub client;
-        ArrayList<GitHubIssue> issues = new ArrayList<>();
-        ArrayList<SourceConfig> repoAsSource = new ArrayList<>();
-
-        for (SourceConfig sourceConfig : notification.getConfig().getSources()) {
-            if (sourceConfig.hasRepositoryAsSource()) {
-                repoAsSource.add(sourceConfig);
-            }
-        }
+        List<GitHubIssue> issues = new ArrayList<>();
 
         for (RepositoryRecord repository : repositories.values()) {
             client = appInstallationService.getClientByInstallationId(repository.getInstallationId());
@@ -62,27 +56,20 @@ public class ChannelNotificationDataProvider implements NotificationDataProvider
                 continue;
             }
 
-            if (repository.getConfig() != null && repository.getConfig().getSources().size() > 0) {
+            if (repository.getConfig() != null
+                && repository.getConfig().getSources() != null
+                && repository.getConfig().getSources().size() > 0
+            ) {
                 for (SourceConfig sourceConfig : repository.getConfig().getSources()) {
-                    if (sourceConfig.hasSearchAsSource()) {
-                        SearchAsSourceInterface<GitHubIssue> source = SourceProvider.getSearchAsSourceProvider(sourceConfig);
-                        try {
-                            issues.addAll(source.get(repo, client));
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
+                    issues.addAll(fetchDataFromSource(sourceConfig, repo, client));
                 }
-
+                // When the repository has its own config, skip the global config
                 continue;
             }
 
-            for (SourceConfig sourceConfig : repoAsSource) {
-                RepositoryAsSourceInterface<GitHubIssue> source = SourceProvider.getRepositoryAsSourceProvider(sourceConfig);
-                try {
-                    issues.addAll(source.get(repo));
-                } catch (IOException e) {
-                    e.printStackTrace();
+            if (notification.getConfig() != null) {
+                for (SourceConfig sourceConfig : notification.getConfig().getSources()) {
+                    issues.addAll(fetchDataFromSource(sourceConfig, repo, client));
                 }
             }
         }
@@ -112,11 +99,34 @@ public class ChannelNotificationDataProvider implements NotificationDataProvider
         return new Data(notification, issues);
     }
 
+    private List<GitHubIssue> fetchDataFromSource(SourceConfig sourceConfig, GHRepository repo, GitHub client) {
+
+        if (sourceConfig.hasSearchAsSource()) {
+            SearchAsSourceInterface<GitHubIssue> source = SourceProvider.getSearchAsSourceProvider(sourceConfig);
+            try {
+                return source.get(repo, client);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (sourceConfig.hasSearchAsSource()) {
+            RepositoryAsSourceInterface<GitHubIssue> source = SourceProvider.getRepositoryAsSourceProvider(sourceConfig);
+            try {
+                return source.get(repo);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        throw new RuntimeException("Source config has unknown source type");
+    }
+
     public static class Data {
         private final Notification notification;
-        private final ArrayList<GitHubIssue> issues;
+        private final List<GitHubIssue> issues;
 
-        public Data(Notification notification, ArrayList<GitHubIssue> issues) {
+        public Data(Notification notification, List<GitHubIssue> issues) {
             this.notification = notification;
             this.issues = issues;
         }
@@ -125,7 +135,7 @@ public class ChannelNotificationDataProvider implements NotificationDataProvider
             return notification;
         }
 
-        public ArrayList<GitHubIssue> getIssues() {
+        public List<GitHubIssue> getIssues() {
             return issues;
         }
     }
