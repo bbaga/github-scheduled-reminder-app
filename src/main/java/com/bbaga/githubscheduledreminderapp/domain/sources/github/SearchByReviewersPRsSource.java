@@ -22,7 +22,7 @@ public class SearchByReviewersPRsSource implements SearchAsSourceInterface <GitH
     }
 
     @Override
-    public ArrayList<GitHubIssue> get(GHRepository repo, GitHub client) throws IOException {
+    public List<GitHubIssue> get(GHRepository repo, GitHub client) throws IOException {
         HashMap<Integer, GitHubIssue> issues = new HashMap<>();
 
         findIssues(client, repo, issues, source.getUsers(), "is:pr is:open repo:%s review-requested:%s");

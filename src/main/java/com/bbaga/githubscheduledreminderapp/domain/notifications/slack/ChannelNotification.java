@@ -44,7 +44,7 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
     @Override
     public void send(ChannelNotificationDataProvider.Data data) {
         Notification notification = data.getNotification();
-        ArrayList<GitHubIssue> issues = data.getIssues();
+        List<GitHubIssue> issues = data.getIssues();
         TemplateConfig templateConfig = null;
 
         NotificationConfigurationInterface config = notification.getConfig();

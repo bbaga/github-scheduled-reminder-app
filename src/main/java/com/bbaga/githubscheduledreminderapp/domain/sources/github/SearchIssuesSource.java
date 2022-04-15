@@ -6,6 +6,7 @@ import com.bbaga.githubscheduledreminderapp.domain.sources.github.filters.Filter
 import com.bbaga.githubscheduledreminderapp.domain.sources.github.search.SearchIssueBuilder;
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubIssue;
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubPullRequest;
+import java.util.List;
 import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
@@ -23,7 +24,7 @@ public class SearchIssuesSource implements SearchAsSourceInterface <GitHubIssue>
     }
 
     @Override
-    public ArrayList<GitHubIssue> get(GHRepository repo, GitHub client) throws IOException {
+    public List<GitHubIssue> get(GHRepository repo, GitHub client) throws IOException {
         HashMap<Integer, GitHubIssue> issues = new HashMap<>();
 
         SearchIssueBuilder builder = SearchIssueBuilder.from(client.searchIssues());
