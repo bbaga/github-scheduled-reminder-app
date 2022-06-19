@@ -1,5 +1,9 @@
 package com.bbaga.githubscheduledreminderapp.application.config;
 
+import com.bbaga.githubscheduledreminderapp.domain.notifications.slack.ChannelMessageDeleteQueue;
+import com.bbaga.githubscheduledreminderapp.domain.notifications.slack.SearchAndDeleteEventListener;
+import com.bbaga.githubscheduledreminderapp.domain.statistics.AggregatedStatisticsStorage;
+import com.bbaga.githubscheduledreminderapp.domain.statistics.StatisticsEventListener;
 import com.hubspot.slack.client.SlackClient;
 import com.hubspot.slack.client.SlackClientFactory;
 import com.hubspot.slack.client.SlackClientRuntimeConfig;
@@ -52,7 +56,7 @@ public class SlackClientConfig {
 
   @Bean
   @Qualifier("slack.user")
-  public Optional<SlackClient> slackUser() throws Exception {
+  public SlackClient slackUser() throws Exception {
     if (!slackApiUserTokenFile.isEmpty() && slackApiUserToken.isEmpty()) {
       try(FileInputStream inputStream = new FileInputStream(slackApiUserTokenFile)) {
         slackApiUserToken = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
@@ -61,13 +65,22 @@ public class SlackClientConfig {
 
     if (slackApiUserToken.isEmpty()) {
       log.info("Slack User API Client is disabled. To enable it, provide a User token through the SLACK_API_USER_TOKEN or SLACK_API_USER_TOKEN_FILE environment variables.");
-      return Optional.empty();
+      return null;
     }
 
     SlackClientRuntimeConfig runtimeConfig = SlackClientRuntimeConfig.builder()
         .setTokenSupplier(() -> slackApiUserToken)
         .build();
 
-    return Optional.of(SlackClientFactory.defaultFactory().build(runtimeConfig));
+    return SlackClientFactory.defaultFactory().build(runtimeConfig);
+  }
+
+
+  @Bean
+  public SearchAndDeleteEventListener getSearchAndDeleteEventListener(
+      @Qualifier("slack.user") SlackClient slackClient,
+      ChannelMessageDeleteQueue channelMessageDeleteQueue
+  ) {
+    return new SearchAndDeleteEventListener(slackClient, channelMessageDeleteQueue);
   }
 }

@@ -9,11 +9,15 @@ import com.bbaga.githubscheduledreminderapp.domain.statistics.StatisticsEvent;
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubIssue;
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubPullRequest;
 import com.hubspot.slack.client.SlackClient;
+import com.hubspot.slack.client.methods.ResultSort;
 import com.hubspot.slack.client.methods.params.chat.ChatPostMessageParams;
+import com.hubspot.slack.client.methods.params.search.SearchMessagesParams;
+import com.hubspot.slack.client.methods.params.users.UsersInfoParams;
 import com.hubspot.slack.client.models.blocks.*;
 import com.hubspot.slack.client.models.blocks.objects.Text;
 import com.hubspot.slack.client.models.blocks.objects.TextType;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
@@ -23,19 +27,19 @@ import java.util.stream.Collectors;
 @Service
 public class ChannelNotification implements NotificationInterface<ChannelNotificationDataProvider.Data> {
 
+    @Value("${application.slack.botUsername}")
+    private String slackBotUsername;
+
     private final SlackClient slackClient;
-    private final Optional<SlackClient> slackUserClient;
     private final ChannelMessageBuilderInterface messageBuilder;
     private final ApplicationEventPublisher eventPublisher;
 
     public ChannelNotification(
         @Qualifier("slack.app")SlackClient slackClient,
-        @Qualifier("slack.user")Optional<SlackClient> slackUserClient,
         ChannelMessageBuilderInterface messageBuilder,
         ApplicationEventPublisher eventPublisher
     ) {
         this.slackClient = slackClient;
-        this.slackUserClient = slackUserClient;
         this.messageBuilder = messageBuilder;
         this.eventPublisher = eventPublisher;
     }
@@ -92,6 +96,10 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
 
         if (templateConfig.getOverflowFormat() == null) {
             templateConfig.setOverflowFormat("$showing of $from");
+        }
+
+        if (templateConfig.getDeleteOldMessages() == null) {
+            templateConfig.setDeleteOldMessages(false);
         }
 
         List<Block> sections = new ArrayList<>();
@@ -221,6 +229,16 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
             paramBuilder = paramBuilder.setText(String.join("\n", textPieces));
         } else {
             paramBuilder = paramBuilder.setBlocks(sections);
+        }
+
+        if (templateConfig.getDeleteOldMessages()) {
+            var params = SearchMessagesParams.builder()
+                .setCount(10)
+                .setQuery("in:" + slackChannel + " from:"+slackBotUsername)
+                .setSort(ResultSort.TIMESTAMP)
+                .build();
+
+            eventPublisher.publishEvent(SearchAndDeleteEvent.create(this, params));
         }
 
         eventPublisher.publishEvent(

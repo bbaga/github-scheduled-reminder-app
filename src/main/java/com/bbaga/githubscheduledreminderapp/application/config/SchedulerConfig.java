@@ -1,6 +1,7 @@
 package com.bbaga.githubscheduledreminderapp.application.config;
 
 import com.bbaga.githubscheduledreminderapp.application.jobs.ScheduledStateDump;
+import com.bbaga.githubscheduledreminderapp.application.jobs.SlackChannelMessageDelete;
 import com.bbaga.githubscheduledreminderapp.domain.jobs.scheduling.InstallationScanJobScheduler;
 import com.bbaga.githubscheduledreminderapp.domain.jobs.scheduling.NotificationJobScheduler;
 import org.quartz.JobBuilder;
@@ -25,12 +26,24 @@ public class SchedulerConfig {
         .storeDurably(true)
         .build();
 
-    Trigger trigger = TriggerBuilder.newTrigger()
+    Trigger scheduleDump = TriggerBuilder.newTrigger()
         .withIdentity(ScheduledStateDump.class.getName())
         .withSchedule(SimpleScheduleBuilder.simpleSchedule().withIntervalInHours(1).repeatForever())
         .build();
 
-    scheduler.scheduleJob(job, trigger);
+    scheduler.scheduleJob(job, scheduleDump);
+
+    JobDetail SlackChannelMessageDeleteJob = JobBuilder.newJob(SlackChannelMessageDelete.class)
+        .withIdentity(SlackChannelMessageDelete.class.getName())
+        .storeDurably(true)
+        .build();
+
+    Trigger SlackChannelMessageDeleteTrigger = TriggerBuilder.newTrigger()
+        .withIdentity(SlackChannelMessageDelete.class.getName())
+        .withSchedule(SimpleScheduleBuilder.simpleSchedule().withIntervalInMinutes(1).repeatForever())
+        .build();
+
+    scheduler.scheduleJob(SlackChannelMessageDeleteJob, SlackChannelMessageDeleteTrigger);
 
     return scheduler;
   }
