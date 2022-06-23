@@ -2,14 +2,12 @@ package com.bbaga.githubscheduledreminderapp.application.config;
 
 import com.bbaga.githubscheduledreminderapp.domain.notifications.slack.ChannelMessageDeleteQueue;
 import com.bbaga.githubscheduledreminderapp.domain.notifications.slack.SearchAndDeleteEventListener;
-import com.bbaga.githubscheduledreminderapp.domain.statistics.AggregatedStatisticsStorage;
-import com.bbaga.githubscheduledreminderapp.domain.statistics.StatisticsEventListener;
+import com.bbaga.githubscheduledreminderapp.domain.notifications.slack.SearchMessageQueue;
 import com.hubspot.slack.client.SlackClient;
 import com.hubspot.slack.client.SlackClientFactory;
 import com.hubspot.slack.client.SlackClientRuntimeConfig;
 import java.io.FileInputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Optional;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,12 +73,12 @@ public class SlackClientConfig {
     return SlackClientFactory.defaultFactory().build(runtimeConfig);
   }
 
-
   @Bean
   public SearchAndDeleteEventListener getSearchAndDeleteEventListener(
-      @Qualifier("slack.user") SlackClient slackClient,
+//      @Qualifier("slack.user") SlackClient slackClient,
+      SearchMessageQueue searchMessageQueue,
       ChannelMessageDeleteQueue channelMessageDeleteQueue
   ) {
-    return new SearchAndDeleteEventListener(slackClient, channelMessageDeleteQueue);
+    return new SearchAndDeleteEventListener(searchMessageQueue, channelMessageDeleteQueue);
   }
 }

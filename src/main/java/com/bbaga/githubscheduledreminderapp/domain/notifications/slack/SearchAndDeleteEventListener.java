@@ -1,42 +1,47 @@
 package com.bbaga.githubscheduledreminderapp.domain.notifications.slack;
 
-import com.bbaga.githubscheduledreminderapp.application.jobs.SlackChannelMessageDelete;
-import com.hubspot.slack.client.SlackClient;
+import com.hubspot.slack.client.models.Message;
+import java.time.Instant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationListener;
 
 public class SearchAndDeleteEventListener implements ApplicationListener<SearchAndDeleteEvent> {
 
-    private final SlackClient slackClient;
     private final ChannelMessageDeleteQueue channelMessageDeleteQueue;
+
+    private final SearchMessageQueue searchMessageQueue;
 
     private final Logger logger = LoggerFactory.getLogger(SearchAndDeleteEventListener.class);
 
-    public SearchAndDeleteEventListener(SlackClient slackClient, ChannelMessageDeleteQueue channelMessageDeleteQueue) {
-        this.slackClient = slackClient;
+    public SearchAndDeleteEventListener(
+        SearchMessageQueue searchMessageQueue,
+        ChannelMessageDeleteQueue channelMessageDeleteQueue
+    ) {
+        this.searchMessageQueue = searchMessageQueue;
         this.channelMessageDeleteQueue = channelMessageDeleteQueue;
     }
     @Override
     public void onApplicationEvent(SearchAndDeleteEvent event) {
-        if (slackClient == null) {
-            return;
-        }
+        var item = new SearchMessageQueue.Item(event.getSearchMessagesParams(), (Message m) -> {
+            var timestampParts = m.getTimestamp().split("\\.");
+            long seconds, nanoAdjustment;
+            Instant messageTimestamp;
 
-        var results = slackClient.searchMessages(event.getSearchMessagesParams()).join();
+            if (timestampParts.length > 0) {
+                seconds = Long.parseLong(timestampParts[0]);
+                nanoAdjustment = timestampParts.length > 1 ? Long.parseLong(timestampParts[1]) : 0;
 
-        if (results.isOk()) {
-            var message = results.unwrapOrElseThrow().getMessages();
-            message.getMatches().forEach(
-                m -> {
-                    var item = new ChannelMessageDeleteQueue.Item(m.getTimestamp(), m.getChannel().getId());
-                    try {
-                        channelMessageDeleteQueue.put(item);
-                    } catch (Exception exception) {
-                        logger.error(exception.getLocalizedMessage());
-                    }
-                }
-            );
-        }
+                messageTimestamp = Instant.ofEpochSecond(seconds, nanoAdjustment);
+            } else {
+                // how come there is nothing?
+                return;
+            }
+
+            if (messageTimestamp.isBefore(event.getDeleteMessagesBefore())) {
+                channelMessageDeleteQueue.put(new ChannelMessageDeleteQueue.Item(m.getTimestamp(), m.getChannel().getId()));
+            }
+        });
+        searchMessageQueue.put(item);
     }
 }
