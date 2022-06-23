@@ -2,8 +2,6 @@ package com.bbaga.githubscheduledreminderapp.domain.notifications.slack;
 
 import com.hubspot.slack.client.models.Message;
 import java.time.Instant;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationListener;
 
 public class SearchAndDeleteEventListener implements ApplicationListener<SearchAndDeleteEvent> {
@@ -11,8 +9,6 @@ public class SearchAndDeleteEventListener implements ApplicationListener<SearchA
     private final ChannelMessageDeleteQueue channelMessageDeleteQueue;
 
     private final SearchMessageQueue searchMessageQueue;
-
-    private final Logger logger = LoggerFactory.getLogger(SearchAndDeleteEventListener.class);
 
     public SearchAndDeleteEventListener(
         SearchMessageQueue searchMessageQueue,
