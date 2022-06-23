@@ -28,10 +28,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class ChannelNotification implements NotificationInterface<ChannelNotificationDataProvider.Data> {
-
-    @Value("${application.slack.botUsername}")
-    private String slackBotUsername;
-
     private final SlackClient slackClient;
     private final ChannelMessageBuilderInterface messageBuilder;
     private final ApplicationEventPublisher eventPublisher;
