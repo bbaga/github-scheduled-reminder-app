@@ -283,8 +283,6 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
                     eventPublisher.publishEvent(SearchAndDeleteEvent.create(this, params, finalDeleteMessagesBefore));
                 });
             });
-
-
         });
     }
 

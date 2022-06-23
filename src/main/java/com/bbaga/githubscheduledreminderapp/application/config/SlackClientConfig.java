@@ -75,7 +75,6 @@ public class SlackClientConfig {
 
   @Bean
   public SearchAndDeleteEventListener getSearchAndDeleteEventListener(
-//      @Qualifier("slack.user") SlackClient slackClient,
       SearchMessageQueue searchMessageQueue,
       ChannelMessageDeleteQueue channelMessageDeleteQueue
   ) {
