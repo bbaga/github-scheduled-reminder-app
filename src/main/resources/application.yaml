@@ -11,7 +11,6 @@ application:
     apiTokenFile: ${SLACK_API_TOKEN_FILE:}
     apiUserTokenFile: ${SLACK_API_USER_TOKEN_FILE:}
     apiUserToken: ${SLACK_API_USER_TOKEN:}
-    botUsername: ${SLACK_BOT_USERNAME:}
   jobs:
     github:
       installationScan:
