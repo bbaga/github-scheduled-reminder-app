@@ -260,7 +260,7 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
                 deleteMessagesBefore = Instant.now();
             }
 
-            // Setting offset
+            // Setting offset to 5 minutes
             deleteMessagesBefore = deleteMessagesBefore.minusSeconds(300);
 
             var userInfoResults = slackClient.findUser(UsersInfoParams.builder().setUserId(userId).build()).join();
