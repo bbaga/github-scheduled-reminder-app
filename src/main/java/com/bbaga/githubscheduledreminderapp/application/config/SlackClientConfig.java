@@ -1,8 +1,9 @@
 package com.bbaga.githubscheduledreminderapp.application.config;
 
-import com.bbaga.githubscheduledreminderapp.domain.notifications.slack.ChannelMessageDeleteQueue;
+import com.bbaga.githubscheduledreminderapp.domain.notifications.slack.BoundedUniqueQueue;
+import com.bbaga.githubscheduledreminderapp.domain.notifications.slack.ChannelMessageDeleteQueueItem;
 import com.bbaga.githubscheduledreminderapp.domain.notifications.slack.SearchAndDeleteEventListener;
-import com.bbaga.githubscheduledreminderapp.domain.notifications.slack.SearchMessageQueue;
+import com.bbaga.githubscheduledreminderapp.domain.notifications.slack.SearchMessageQueueItem;
 import com.hubspot.slack.client.SlackClient;
 import com.hubspot.slack.client.SlackClientFactory;
 import com.hubspot.slack.client.SlackClientRuntimeConfig;
@@ -75,9 +76,19 @@ public class SlackClientConfig {
 
   @Bean
   public SearchAndDeleteEventListener getSearchAndDeleteEventListener(
-      SearchMessageQueue searchMessageQueue,
-      ChannelMessageDeleteQueue channelMessageDeleteQueue
+      BoundedUniqueQueue<SearchMessageQueueItem> searchMessageQueue,
+      BoundedUniqueQueue<ChannelMessageDeleteQueueItem> channelMessageDeleteQueue
   ) {
     return new SearchAndDeleteEventListener(searchMessageQueue, channelMessageDeleteQueue);
+  }
+
+  @Bean
+  public BoundedUniqueQueue<SearchMessageQueueItem> getSearchMessageQueue() {
+    return new BoundedUniqueQueue<>();
+  }
+
+  @Bean
+  public BoundedUniqueQueue<ChannelMessageDeleteQueueItem> getChannelMessageDeleteQueue() {
+    return new BoundedUniqueQueue<>();
   }
 }

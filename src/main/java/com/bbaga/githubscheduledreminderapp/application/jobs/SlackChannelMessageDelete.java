@@ -1,7 +1,8 @@
 package com.bbaga.githubscheduledreminderapp.application.jobs;
 
-import com.bbaga.githubscheduledreminderapp.domain.notifications.slack.ChannelMessageDeleteQueue;
-import com.bbaga.githubscheduledreminderapp.domain.notifications.slack.SearchMessageQueue;
+import com.bbaga.githubscheduledreminderapp.domain.notifications.slack.BoundedUniqueQueue;
+import com.bbaga.githubscheduledreminderapp.domain.notifications.slack.ChannelMessageDeleteQueueItem;
+import com.bbaga.githubscheduledreminderapp.domain.notifications.slack.SearchMessageQueueItem;
 import com.hubspot.slack.client.SlackClient;
 import com.hubspot.slack.client.methods.params.chat.ChatDeleteParams;
 import org.quartz.DisallowConcurrentExecution;
@@ -17,13 +18,13 @@ import org.springframework.stereotype.Component;
 public class SlackChannelMessageDelete implements Job {
 
     private final Logger logger = LoggerFactory.getLogger(SlackChannelMessageDelete.class);
-    private final SearchMessageQueue searchMessageQueue;
-    private final ChannelMessageDeleteQueue channelMessageDeleteQueue;
+    private final BoundedUniqueQueue<SearchMessageQueueItem> searchMessageQueue;
+    private final BoundedUniqueQueue<ChannelMessageDeleteQueueItem> channelMessageDeleteQueue;
     private final SlackClient slackClient;
 
     public SlackChannelMessageDelete(
-        SearchMessageQueue searchMessageQueue,
-        ChannelMessageDeleteQueue channelMessageDeleteQueue,
+        BoundedUniqueQueue<SearchMessageQueueItem> searchMessageQueue,
+        BoundedUniqueQueue<ChannelMessageDeleteQueueItem> channelMessageDeleteQueue,
         @Qualifier("slack.user") SlackClient slackClient
     ) {
         this.searchMessageQueue = searchMessageQueue;

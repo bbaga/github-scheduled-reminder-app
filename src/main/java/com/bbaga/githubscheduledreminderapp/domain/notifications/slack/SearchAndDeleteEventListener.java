@@ -6,20 +6,20 @@ import org.springframework.context.ApplicationListener;
 
 public class SearchAndDeleteEventListener implements ApplicationListener<SearchAndDeleteEvent> {
 
-    private final ChannelMessageDeleteQueue channelMessageDeleteQueue;
+    private final BoundedUniqueQueue<ChannelMessageDeleteQueueItem> channelMessageDeleteQueue;
 
-    private final SearchMessageQueue searchMessageQueue;
+    private final BoundedUniqueQueue<SearchMessageQueueItem> searchMessageQueue;
 
     public SearchAndDeleteEventListener(
-        SearchMessageQueue searchMessageQueue,
-        ChannelMessageDeleteQueue channelMessageDeleteQueue
+        BoundedUniqueQueue<SearchMessageQueueItem> searchMessageQueue,
+        BoundedUniqueQueue<ChannelMessageDeleteQueueItem> channelMessageDeleteQueue
     ) {
         this.searchMessageQueue = searchMessageQueue;
         this.channelMessageDeleteQueue = channelMessageDeleteQueue;
     }
     @Override
     public void onApplicationEvent(SearchAndDeleteEvent event) {
-        var item = new SearchMessageQueue.Item(event.getSearchMessagesParams(), (Message m) -> {
+        var item = new SearchMessageQueueItem(event.getSearchMessagesParams(), (Message m) -> {
             var timestampParts = m.getTimestamp().split("\\.");
             long seconds, nanoAdjustment;
             Instant messageTimestamp;
@@ -35,7 +35,9 @@ public class SearchAndDeleteEventListener implements ApplicationListener<SearchA
             }
 
             if (messageTimestamp.isBefore(event.getDeleteMessagesBefore())) {
-                channelMessageDeleteQueue.put(new ChannelMessageDeleteQueue.Item(m.getTimestamp(), m.getChannel().getId()));
+                channelMessageDeleteQueue.put(
+                    new ChannelMessageDeleteQueueItem(m.getTimestamp(), m.getChannel().getId())
+                );
             }
         });
         searchMessageQueue.put(item);
