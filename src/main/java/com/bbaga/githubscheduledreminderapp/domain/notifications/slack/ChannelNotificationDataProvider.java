@@ -110,7 +110,7 @@ public class ChannelNotificationDataProvider implements NotificationDataProvider
             }
         }
 
-        if (sourceConfig.hasSearchAsSource()) {
+        if (sourceConfig.hasRepositoryAsSource()) {
             RepositoryAsSourceInterface<GitHubIssue> source = SourceProvider.getRepositoryAsSourceProvider(sourceConfig);
             try {
                 return source.get(repo);
