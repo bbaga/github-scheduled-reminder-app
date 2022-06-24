@@ -131,3 +131,15 @@ Controls whether the `no-results` text is shown or not. With the default setting
 Possible values: `true`, `false`
 
 Default: `false`
+
+#### `delete-old-messages`
+When `delete-old-messages` is `true`, previous notifications will be found based on the Slack channel and the Slack Bot's username and then deleted.
+To fully enable this feature, the [`SLACK_API_USER_TOKEN`](https://github.com/bbaga/github-scheduled-reminder-app#slack_api_user_token) has to be provided as well. 
+
+##### Required scopes
+`SLACK_API_TOKEN`: `users:read` 
+`SLACK_API_USER_TOKEN`: `chat:write`, `search:read` 
+
+Possible values: `true`, `false`
+
+Default: `false`

@@ -33,6 +33,9 @@ public class TemplateConfig {
     @JsonProperty("overflow-format")
     private String overflowFormat = null;
 
+    @JsonProperty("delete-old-messages")
+    private Boolean deleteOldMessages = null;
+
     private String mode = null;
 
     public String getHeaderMain() {
@@ -97,6 +100,14 @@ public class TemplateConfig {
 
     public void setOverflowFormat(String overflowFormat) {
         this.overflowFormat = overflowFormat;
+    }
+
+    public Boolean getDeleteOldMessages() {
+        return deleteOldMessages;
+    }
+
+    public void setDeleteOldMessages(Boolean deleteOldMessages) {
+        this.deleteOldMessages = deleteOldMessages;
     }
 
     public String getMode() {

@@ -1,14 +1,18 @@
 package com.bbaga.githubscheduledreminderapp.application.config;
 
 import com.bbaga.githubscheduledreminderapp.application.jobs.ScheduledStateDump;
+import com.bbaga.githubscheduledreminderapp.application.jobs.SlackChannelMessageDelete;
 import com.bbaga.githubscheduledreminderapp.domain.jobs.scheduling.InstallationScanJobScheduler;
 import com.bbaga.githubscheduledreminderapp.domain.jobs.scheduling.NotificationJobScheduler;
+import com.hubspot.slack.client.SlackClient;
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
 import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,19 +22,41 @@ public class SchedulerConfig {
 
   @Bean
   @Qualifier("Scheduler")
-  public Scheduler schedulerBootstrap(Scheduler scheduler) throws Exception {
+  public Scheduler schedulerBootstrap(
+      Scheduler scheduler,
+      @Qualifier("slack.user") ObjectProvider<SlackClient> slackUserClient
+  ) throws Exception {
 
     JobDetail job = JobBuilder.newJob(ScheduledStateDump.class)
         .withIdentity(ScheduledStateDump.class.getName())
         .storeDurably(true)
         .build();
 
-    Trigger trigger = TriggerBuilder.newTrigger()
+    Trigger scheduleDump = TriggerBuilder.newTrigger()
         .withIdentity(ScheduledStateDump.class.getName())
         .withSchedule(SimpleScheduleBuilder.simpleSchedule().withIntervalInHours(1).repeatForever())
         .build();
 
-    scheduler.scheduleJob(job, trigger);
+    scheduler.scheduleJob(job, scheduleDump);
+
+    // Enable clean up job when there is a Slack user client
+    slackUserClient.ifAvailable(client -> {
+      JobDetail SlackChannelMessageDeleteJob = JobBuilder.newJob(SlackChannelMessageDelete.class)
+          .withIdentity(SlackChannelMessageDelete.class.getName())
+          .storeDurably(true)
+          .build();
+
+      Trigger SlackChannelMessageDeleteTrigger = TriggerBuilder.newTrigger()
+          .withIdentity(SlackChannelMessageDelete.class.getName())
+          .withSchedule(SimpleScheduleBuilder.simpleSchedule().withIntervalInMinutes(1).repeatForever())
+          .build();
+
+      try {
+        scheduler.scheduleJob(SlackChannelMessageDeleteJob, SlackChannelMessageDeleteTrigger);
+      } catch (SchedulerException e) {
+        throw new RuntimeException(e);
+      }
+    });
 
     return scheduler;
   }

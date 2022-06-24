@@ -9,10 +9,15 @@ import com.bbaga.githubscheduledreminderapp.domain.statistics.StatisticsEvent;
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubIssue;
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubPullRequest;
 import com.hubspot.slack.client.SlackClient;
+import com.hubspot.slack.client.methods.ResultSort;
+import com.hubspot.slack.client.methods.ResultSortOrder;
 import com.hubspot.slack.client.methods.params.chat.ChatPostMessageParams;
+import com.hubspot.slack.client.methods.params.search.SearchMessagesParams;
+import com.hubspot.slack.client.methods.params.users.UsersInfoParams;
 import com.hubspot.slack.client.models.blocks.*;
 import com.hubspot.slack.client.models.blocks.objects.Text;
 import com.hubspot.slack.client.models.blocks.objects.TextType;
+import java.time.Instant;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -22,20 +27,16 @@ import java.util.stream.Collectors;
 
 @Service
 public class ChannelNotification implements NotificationInterface<ChannelNotificationDataProvider.Data> {
-
     private final SlackClient slackClient;
-    private final Optional<SlackClient> slackUserClient;
     private final ChannelMessageBuilderInterface messageBuilder;
     private final ApplicationEventPublisher eventPublisher;
 
     public ChannelNotification(
         @Qualifier("slack.app")SlackClient slackClient,
-        @Qualifier("slack.user")Optional<SlackClient> slackUserClient,
         ChannelMessageBuilderInterface messageBuilder,
         ApplicationEventPublisher eventPublisher
     ) {
         this.slackClient = slackClient;
-        this.slackUserClient = slackUserClient;
         this.messageBuilder = messageBuilder;
         this.eventPublisher = eventPublisher;
     }
@@ -92,6 +93,10 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
 
         if (templateConfig.getOverflowFormat() == null) {
             templateConfig.setOverflowFormat("$showing of $from");
+        }
+
+        if (templateConfig.getDeleteOldMessages() == null) {
+            templateConfig.setDeleteOldMessages(false);
         }
 
         List<Block> sections = new ArrayList<>();
@@ -230,9 +235,50 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
             )
         );
 
-        slackClient.postMessage(
+        var result = slackClient.postMessage(
             paramBuilder.setChannelId(slackChannel).build()
         ).join();
+
+        if (!templateConfig.getDeleteOldMessages()) {
+            return;
+        }
+
+        result.ifOk(m -> {
+            String userId = m.getMessage().get("user").toString();
+
+            var timestampParts = m.getTs().split("\\.");
+            long seconds, nanoAdjustment;
+            Instant deleteMessagesBefore;
+
+            if (timestampParts.length > 0) {
+                seconds = Long.parseLong(timestampParts[0]);
+                nanoAdjustment = timestampParts.length > 1 ? Long.parseLong(timestampParts[1]) : 0;
+
+                deleteMessagesBefore = Instant.ofEpochSecond(seconds, nanoAdjustment);
+            } else {
+                // how come there is nothing?
+                deleteMessagesBefore = Instant.now();
+            }
+
+            // Setting offset to 5 minutes
+            deleteMessagesBefore = deleteMessagesBefore.minusSeconds(300);
+
+            var userInfoResults = slackClient.findUser(UsersInfoParams.builder().setUserId(userId).build()).join();
+            Instant finalDeleteMessagesBefore = deleteMessagesBefore;
+            userInfoResults.ifOk(user -> {
+                user.getUser().getUsername().ifPresent(username -> {
+
+                    var params = SearchMessagesParams.builder()
+                        .setCount(100)
+                        .setQuery("in:" + slackChannel + " from:"+username)
+                        .setSort(ResultSort.TIMESTAMP)
+                        .setSortOrder(ResultSortOrder.DESC)
+                        .build();
+
+                    eventPublisher.publishEvent(SearchAndDeleteEvent.create(this, params, finalDeleteMessagesBefore));
+                });
+            });
+        });
     }
 
     private List<Block> getTruncatedGroup(List<Block> sections, int sectionsSize, int maxGroupSize) {
