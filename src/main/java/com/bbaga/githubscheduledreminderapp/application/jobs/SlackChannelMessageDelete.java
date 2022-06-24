@@ -20,16 +20,19 @@ public class SlackChannelMessageDelete implements Job {
     private final Logger logger = LoggerFactory.getLogger(SlackChannelMessageDelete.class);
     private final BoundedUniqueQueue<SearchMessageQueueItem> searchMessageQueue;
     private final BoundedUniqueQueue<ChannelMessageDeleteQueueItem> channelMessageDeleteQueue;
-    private final SlackClient slackClient;
+    private final SlackClient slackAppClient;
+    private final SlackClient slackUserClient;
 
     public SlackChannelMessageDelete(
         BoundedUniqueQueue<SearchMessageQueueItem> searchMessageQueue,
         BoundedUniqueQueue<ChannelMessageDeleteQueueItem> channelMessageDeleteQueue,
-        @Qualifier("slack.user") SlackClient slackClient
+        @Qualifier("slack.app") SlackClient slackAppClient,
+        @Qualifier("slack.user") SlackClient slackUserClient
     ) {
         this.searchMessageQueue = searchMessageQueue;
         this.channelMessageDeleteQueue = channelMessageDeleteQueue;
-        this.slackClient = slackClient;
+        this.slackAppClient = slackAppClient;
+        this.slackUserClient = slackUserClient;
     }
 
     public void execute(JobExecutionContext context) {
@@ -62,7 +65,7 @@ public class SlackChannelMessageDelete implements Job {
                     "Deleting: [Channel: " + item.getChannelId() + ", Message ID: " + item.getMessageId() + "]"
                 );
 
-                slackClient.deleteMessage(params);
+                slackAppClient.deleteMessage(params);
             } catch (Exception exception) {
                 logger.error(exception.getLocalizedMessage());
             }
@@ -77,7 +80,7 @@ public class SlackChannelMessageDelete implements Job {
             try {
                 var item = searchMessageQueue.take();
                 logger.info("Searching messages with: \"" + item.getParams().getQuery()+ "\"");
-                var results = slackClient.searchMessages(item.getParams()).join();
+                var results = slackUserClient.searchMessages(item.getParams()).join();
 
                 results.ifOk(messages -> {
                     try {
