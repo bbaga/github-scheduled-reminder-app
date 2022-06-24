@@ -25,11 +25,11 @@ public class ChannelMessageDeleteQueueItem {
       return true;
     }
 
-    if (!(o instanceof BoundedUniqueQueue.Item)) {
+    if (!(o instanceof ChannelMessageDeleteQueueItem)) {
       return false;
     }
 
-    BoundedUniqueQueue.Item item = (BoundedUniqueQueue.Item) o;
+    ChannelMessageDeleteQueueItem item = (ChannelMessageDeleteQueueItem) o;
     return getMessageId().equals(item.getMessageId()) && getChannelId().equals(item.getChannelId());
   }
 

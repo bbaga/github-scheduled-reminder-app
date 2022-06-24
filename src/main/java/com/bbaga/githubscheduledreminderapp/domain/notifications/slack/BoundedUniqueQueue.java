@@ -41,12 +41,4 @@ public class BoundedUniqueQueue<T> {
 
     queue.add(item);
   }
-
-  public static class Item extends ChannelMessageDeleteQueueItem {
-
-    public Item(String messageId, String channelId) {
-      super(messageId, channelId);
-    }
-
-  }
 }
