@@ -1,12 +1,8 @@
 package com.bbaga.githubscheduledreminderapp.domain.sources.github;
 
 import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.SearchIssuesSourceConfig;
-import com.bbaga.githubscheduledreminderapp.domain.notifications.slack.ChannelNotificationDataProvider;
 import com.bbaga.githubscheduledreminderapp.domain.sources.github.search.SearchIssueBuilder;
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubIssue;
-import com.hubspot.algebra.Result;
-import com.hubspot.slack.client.models.response.SlackError;
-import com.hubspot.slack.client.models.response.chat.ChatPostMessageResponse;
 import org.junit.jupiter.api.Test;
 import org.kohsuke.github.*;
 import org.mockito.MockedStatic;
@@ -15,7 +11,6 @@ import org.mockito.Mockito;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 import static org.junit.jupiter.api.Assertions.assertSame;
 

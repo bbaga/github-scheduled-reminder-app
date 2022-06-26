@@ -4,12 +4,14 @@ import com.bbaga.githubscheduledreminderapp.domain.statistics.UrlBuilderInterfac
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubIssue;
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubPullRequest;
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubUser;
-import com.hubspot.slack.client.models.blocks.Block;
-import com.hubspot.slack.client.models.blocks.Header;
-import com.hubspot.slack.client.models.blocks.Section;
-import com.hubspot.slack.client.models.blocks.elements.Button;
-import com.hubspot.slack.client.models.blocks.objects.Text;
-import com.hubspot.slack.client.models.blocks.objects.TextType;
+import static com.slack.api.model.block.Blocks.*;
+import static com.slack.api.model.block.composition.BlockCompositions.*;
+import static com.slack.api.model.block.element.BlockElements.*;
+
+import com.slack.api.model.block.HeaderBlock;
+import com.slack.api.model.block.LayoutBlock;
+import com.slack.api.model.block.SectionBlock;
+import com.slack.api.model.block.element.ButtonElement;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -31,12 +33,12 @@ public class ChannelMessageBuilder implements ChannelMessageBuilderInterface {
     }
 
     @Override
-    public Block createHeader(String text) {
-        return Header.of(Text.of(TextType.PLAIN_TEXT, text));
+    public HeaderBlock createHeader(String text) {
+        return header(h -> h.text(plainText(text)));
     }
 
     @Override
-    public Block createHeaderIssues(String text, String overflowFormat, int showing, int from) {
+    public SectionBlock createHeaderIssues(String text, String overflowFormat, int showing, int from) {
         String counter;
 
         if (showing < from) {
@@ -50,7 +52,7 @@ public class ChannelMessageBuilder implements ChannelMessageBuilderInterface {
     }
 
     @Override
-    public Block createHeaderPRs(String text, String overflowFormat, int showing, int from) {
+    public SectionBlock createHeaderPRs(String text, String overflowFormat, int showing, int from) {
         String counter;
 
         if (showing < from) {
@@ -64,12 +66,12 @@ public class ChannelMessageBuilder implements ChannelMessageBuilderInterface {
     }
 
     @Override
-    public Block createNoResultsMessage(String text) {
+    public SectionBlock createNoResultsMessage(String text) {
         return markdownSection(text);
     }
 
     @Override
-    public Block createLine(GitHubPullRequest pullRequest, String text, Map<String, String> trackingParams) {
+    public SectionBlock createLine(GitHubPullRequest pullRequest, String text, Map<String, String> trackingParams) {
         String login;
         String mergeableState = "";
         String mergeableEmoji;
@@ -78,7 +80,8 @@ public class ChannelMessageBuilder implements ChannelMessageBuilderInterface {
 
         try {
             mergeableState = pullRequest.getMergeableState();
-        } catch (IOException ignored) {}
+        } catch (IOException ignored) {
+        }
 
         if (List.of("clean", "has_hooks").contains(mergeableState)) {
             mergeableEmoji = ":large_green_circle:";
@@ -106,27 +109,30 @@ public class ChannelMessageBuilder implements ChannelMessageBuilderInterface {
             deletions = 0;
         }
 
-        text = text.replaceAll("\\$login", login)
-                .replaceAll("\\$mergeableEmoji", mergeableEmoji)
-                .replaceAll("\\$title", pullRequest.getTitle())
-                .replaceAll("\\$repository", pullRequest.getRepository().getFullName())
-                .replaceAll("\\$age", getIssueAge(pullRequest))
-                .replaceAll("\\$deletions", String.valueOf(deletions))
-                .replaceAll("\\$additions", String.valueOf(additions))
-                .replaceAll("\\$link", getUrl(pullRequest, trackingParams))
-                .replaceAll("\\$assignee-logins", getAssigneeLogins(pullRequest))
-                .replaceAll("\\$assignee-login-links", getAssigneeLoginLinks(pullRequest));
+        var processedText = text.replaceAll("\\$login", login)
+            .replaceAll("\\$mergeableEmoji", mergeableEmoji)
+            .replaceAll("\\$title", pullRequest.getTitle())
+            .replaceAll("\\$repository", pullRequest.getRepository().getFullName())
+            .replaceAll("\\$age", getIssueAge(pullRequest))
+            .replaceAll("\\$deletions", String.valueOf(deletions))
+            .replaceAll("\\$additions", String.valueOf(additions))
+            .replaceAll("\\$link", getUrl(pullRequest, trackingParams))
+            .replaceAll("\\$assignee-logins", getAssigneeLogins(pullRequest))
+            .replaceAll("\\$assignee-login-links", getAssigneeLoginLinks(pullRequest));
 
-        if (text.contains("$button")) {
-            text = text.replaceAll("\\$button", "");
-            return markdownSection(text).withAccessory(linkButton(pullRequest, trackingParams));
+        if (processedText.contains("$button")) {
+            processedText = processedText.replaceAll("\\$button", "");
+            var section = markdownSection(processedText);
+            section.setAccessory(linkButton(pullRequest, trackingParams));
+
+            return section;
         }
 
-        return markdownSection(text);
+        return markdownSection(processedText);
     }
 
     @Override
-    public Block createLine(GitHubIssue issue, String text, Map<String, String> trackingParams) {
+    public SectionBlock createLine(GitHubIssue issue, String text, Map<String, String> trackingParams) {
         String login;
 
         try {
@@ -135,7 +141,7 @@ public class ChannelMessageBuilder implements ChannelMessageBuilderInterface {
             login = "Unknown";
         }
 
-        text = text.replaceAll("\\$login", login)
+        var processedText = text.replaceAll("\\$login", login)
                 .replaceAll("\\$title", issue.getTitle())
                 .replaceAll("\\$repository", issue.getRepository().getFullName())
                 .replaceAll("\\$age", getIssueAge(issue))
@@ -143,22 +149,25 @@ public class ChannelMessageBuilder implements ChannelMessageBuilderInterface {
                 .replaceAll("\\$assignee-login-links", getAssigneeLoginLinks(issue))
                 .replaceAll("\\$link", getUrl(issue, trackingParams));
 
-        if (text.contains("$button")) {
-            text = text.replaceAll("\\$button", "");
-            return markdownSection(text).withAccessory(linkButton(issue, trackingParams));
+        if (processedText.contains("$button")) {
+            processedText = processedText.replaceAll("\\$button", "");
+            var section = markdownSection(processedText);
+            section.setAccessory(linkButton(issue, trackingParams));
+
+            return section;
         }
 
-        return markdownSection(text);
+        return markdownSection(processedText);
     }
 
-    private Section markdownSection(String markdown) {
-        return Section.of(Text.of(TextType.MARKDOWN, markdown));
+    private SectionBlock markdownSection(String markdown) {
+        return section(s -> s.text(markdownText(markdown)));
     }
 
-    private Button linkButton(GitHubIssue issue, Map<String, String> trackingParams) {
+    private ButtonElement linkButton(GitHubIssue issue, Map<String, String> trackingParams) {
         String url = getUrl(issue, trackingParams);
 
-        return Button.of(Text.of(TextType.PLAIN_TEXT, "Open"), issue.getNodeId()).withUrl(url);
+        return button(b -> b.text(plainText(pt -> pt.text("Open"))).value(issue.getNodeId()).url(url));
     }
 
     private String getUrl(GitHubIssue issue, Map<String, String> trackingParams) {

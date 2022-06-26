@@ -4,9 +4,8 @@ import com.bbaga.githubscheduledreminderapp.domain.notifications.slack.BoundedUn
 import com.bbaga.githubscheduledreminderapp.domain.notifications.slack.ChannelMessageDeleteQueueItem;
 import com.bbaga.githubscheduledreminderapp.domain.notifications.slack.SearchAndDeleteEventListener;
 import com.bbaga.githubscheduledreminderapp.domain.notifications.slack.SearchMessageQueueItem;
-import com.hubspot.slack.client.SlackClient;
-import com.hubspot.slack.client.SlackClientFactory;
-import com.hubspot.slack.client.SlackClientRuntimeConfig;
+import com.slack.api.Slack;
+import com.slack.api.methods.MethodsClient;
 import java.io.FileInputStream;
 import java.nio.charset.StandardCharsets;
 import org.apache.commons.io.IOUtils;
@@ -35,7 +34,7 @@ public class SlackClientConfig {
 
   @Bean
   @Qualifier("slack.app")
-  public SlackClient slackApp() throws Exception {
+  public MethodsClient slackApp() throws Exception {
     if (!slackApiTokenFile.isEmpty() && slackApiToken.isEmpty()) {
       try(FileInputStream inputStream = new FileInputStream(slackApiTokenFile)) {
         slackApiToken = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
@@ -46,16 +45,12 @@ public class SlackClientConfig {
       throw new IllegalStateException("Slack API Token must be configured, see the SLACK_API_TOKEN and SLACK_API_TOKEN_FILE environment variables.");
     }
 
-    SlackClientRuntimeConfig runtimeConfig = SlackClientRuntimeConfig.builder()
-        .setTokenSupplier(() -> slackApiToken)
-        .build();
-
-    return SlackClientFactory.defaultFactory().build(runtimeConfig);
+    return Slack.getInstance().methods(slackApiToken);
   }
 
   @Bean
   @Qualifier("slack.user")
-  public SlackClient slackUser() throws Exception {
+  public MethodsClient slackUser() throws Exception {
     if (!slackApiUserTokenFile.isEmpty() && slackApiUserToken.isEmpty()) {
       try(FileInputStream inputStream = new FileInputStream(slackApiUserTokenFile)) {
         slackApiUserToken = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
@@ -67,11 +62,7 @@ public class SlackClientConfig {
       return null;
     }
 
-    SlackClientRuntimeConfig runtimeConfig = SlackClientRuntimeConfig.builder()
-        .setTokenSupplier(() -> slackApiUserToken)
-        .build();
-
-    return SlackClientFactory.defaultFactory().build(runtimeConfig);
+    return Slack.getInstance().methods(slackApiUserToken);
   }
 
   @Bean

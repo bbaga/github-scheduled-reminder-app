@@ -6,17 +6,14 @@ import com.bbaga.githubscheduledreminderapp.domain.statistics.UrlBuilderInterfac
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubIssue;
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubPullRequest;
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubUser;
-import com.hubspot.algebra.Result;
-import com.hubspot.slack.client.SlackClient;
-import com.hubspot.slack.client.methods.params.chat.ChatPostMessageParams;
-import com.hubspot.slack.client.models.blocks.Block;
-import com.hubspot.slack.client.models.blocks.Divider;
-import com.hubspot.slack.client.models.blocks.Header;
-import com.hubspot.slack.client.models.blocks.Section;
-import com.hubspot.slack.client.models.blocks.objects.Text;
-import com.hubspot.slack.client.models.blocks.objects.TextType;
-import com.hubspot.slack.client.models.response.SlackError;
-import com.hubspot.slack.client.models.response.chat.ChatPostMessageResponse;
+import com.slack.api.methods.MethodsClient;
+import com.slack.api.methods.SlackApiException;
+import com.slack.api.methods.request.chat.ChatPostMessageRequest;
+import com.slack.api.methods.response.chat.ChatPostMessageResponse;
+import com.slack.api.model.block.DividerBlock;
+import com.slack.api.model.block.HeaderBlock;
+import com.slack.api.model.block.LayoutBlock;
+import com.slack.api.model.block.SectionBlock;
 import org.junit.jupiter.api.Test;
 import org.kohsuke.github.GHRepository;
 import org.mockito.ArgumentCaptor;
@@ -26,26 +23,24 @@ import java.io.IOException;
 import java.net.URL;
 import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import org.springframework.context.ApplicationEventPublisher;
 
+import static com.slack.api.model.block.Blocks.section;
+import static com.slack.api.model.block.composition.BlockCompositions.plainText;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ChannelNotificationTest {
 
     @Test
-    void sendCalledWithEmptySets() {
-        SlackClient client = Mockito.mock(SlackClient.class);
+    void sendCalledWithEmptySets() throws SlackApiException, IOException {
+        MethodsClient client = Mockito.mock(MethodsClient.class);
         ChannelMessageBuilderInterface mockMessageBuilder = Mockito.mock(ChannelMessageBuilderInterface.class);
-        Mockito.when(mockMessageBuilder.createNoResultsMessage(Mockito.anyString())).thenReturn(Section.of(Text.of(TextType.PLAIN_TEXT, "text")));
+        Mockito.when(mockMessageBuilder.createNoResultsMessage(Mockito.anyString())).thenReturn(section(s -> s.text(plainText("text"))));
 
         ApplicationEventPublisher mockEventPublisher = Mockito.mock(ApplicationEventPublisher.class);
 
-        //noinspection unchecked
-        Result<ChatPostMessageResponse, SlackError> result = (Result<ChatPostMessageResponse, SlackError>) Mockito.mock(Result.class);
-        CompletableFuture<Result<ChatPostMessageResponse, SlackError>> future = new CompletableFuture<>();
-        future.complete(result);
+        ChatPostMessageResponse result = Mockito.mock(ChatPostMessageResponse.class);
 
         ChannelNotification service = new ChannelNotification(client, mockMessageBuilder, mockEventPublisher);
         SlackNotificationConfiguration config = new SlackNotificationConfiguration();
@@ -54,16 +49,16 @@ class ChannelNotificationTest {
         notification.setConfig(config);
         ArrayList<GitHubIssue> issues = new ArrayList<>();
 
-        Mockito.when(client.postMessage(Mockito.any())).thenReturn(future);
+        Mockito.when(client.chatPostMessage(Mockito.any(ChatPostMessageRequest.class))).thenReturn(result);
         service.send(new ChannelNotificationDataProvider.Data(notification, issues));
-        Mockito.verify(client, Mockito.times(1)).postMessage(Mockito.any());
+        Mockito.verify(client, Mockito.times(1)).chatPostMessage(Mockito.any(ChatPostMessageRequest.class));
     }
 
     @Test
-    void sendCalled() throws IOException {
+    void sendCalled() throws IOException, SlackApiException {
         ApplicationEventPublisher mockEventPublisher = Mockito.mock(ApplicationEventPublisher.class);
 
-        SlackClient client = Mockito.mock(SlackClient.class);
+        MethodsClient client = Mockito.mock(MethodsClient.class);
         UrlBuilderInterface urlBuilder = Mockito.mock(UrlBuilderInterface.class);
         ChannelMessageBuilderInterface messageBuilder = new ChannelMessageBuilder(urlBuilder);
 
@@ -92,10 +87,7 @@ class ChannelNotificationTest {
         Mockito.when(pr.getCreatedAt()).thenReturn(Date.from(Instant.now()));
         Mockito.when(pr.getMergeableState()).thenReturn("clean");
 
-        //noinspection unchecked
-        Result<ChatPostMessageResponse, SlackError> result = (Result<ChatPostMessageResponse, SlackError>) Mockito.mock(Result.class);
-        CompletableFuture<Result<ChatPostMessageResponse, SlackError>> future = new CompletableFuture<>();
-        future.complete(result);
+        ChatPostMessageResponse result = Mockito.mock(ChatPostMessageResponse.class);
 
         ChannelNotification service = new ChannelNotification(client, messageBuilder, mockEventPublisher);
         SlackNotificationConfiguration config = new SlackNotificationConfiguration();
@@ -106,27 +98,27 @@ class ChannelNotificationTest {
         issues.add(issue);
         issues.add(pr);
 
-        Mockito.when(client.postMessage(Mockito.any())).thenReturn(future);
+        Mockito.when(client.chatPostMessage(Mockito.any(ChatPostMessageRequest.class))).thenReturn(result);
         service.send(new ChannelNotificationDataProvider.Data(notification, issues));
 
-        ArgumentCaptor<ChatPostMessageParams> postCaptor = ArgumentCaptor.forClass(ChatPostMessageParams.class);
+        ArgumentCaptor<ChatPostMessageRequest> postCaptor = ArgumentCaptor.forClass(ChatPostMessageRequest.class);
 
         // Verify message
-        Mockito.verify(client, Mockito.times(1)).postMessage(postCaptor.capture());
+        Mockito.verify(client, Mockito.times(1)).chatPostMessage(postCaptor.capture());
 
-        ChatPostMessageParams postMessageParams = postCaptor.getValue();
+        ChatPostMessageRequest postMessageParams = postCaptor.getValue();
 
-        List<Block> blocks = postMessageParams.getBlocks();
+        List<LayoutBlock> blocks = postMessageParams.getBlocks();
 
         assertEquals(8, blocks.size());
-        assertTrue(blocks.get(0) instanceof Header);
-        assertTrue(blocks.get(1) instanceof Section);
-        assertTrue(blocks.get(2) instanceof Divider);
-        assertTrue(blocks.get(3) instanceof Section);
-        assertTrue(blocks.get(4) instanceof Section);
-        assertTrue(blocks.get(5) instanceof Divider);
-        assertTrue(blocks.get(6) instanceof Section);
-        assertTrue(blocks.get(7) instanceof Section);
+        assertTrue(blocks.get(0) instanceof HeaderBlock);
+        assertTrue(blocks.get(1) instanceof SectionBlock);
+        assertTrue(blocks.get(2) instanceof DividerBlock);
+        assertTrue(blocks.get(3) instanceof SectionBlock);
+        assertTrue(blocks.get(4) instanceof SectionBlock);
+        assertTrue(blocks.get(5) instanceof DividerBlock);
+        assertTrue(blocks.get(6) instanceof SectionBlock);
+        assertTrue(blocks.get(7) instanceof SectionBlock);
 
         // Verify PR methods
         Mockito.verify(pr, Mockito.times(1)).getAdditions();

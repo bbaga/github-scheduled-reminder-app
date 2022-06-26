@@ -1,5 +1,9 @@
 package com.bbaga.githubscheduledreminderapp.domain.notifications.slack;
 
+import static com.slack.api.model.block.Blocks.divider;
+import static com.slack.api.model.block.Blocks.section;
+import static com.slack.api.model.block.composition.BlockCompositions.markdownText;
+
 import com.bbaga.githubscheduledreminderapp.domain.configuration.Notification;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.NotificationConfigurationInterface;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.SlackNotificationConfiguration;
@@ -8,16 +12,20 @@ import com.bbaga.githubscheduledreminderapp.domain.notifications.NotificationInt
 import com.bbaga.githubscheduledreminderapp.domain.statistics.StatisticsEvent;
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubIssue;
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubPullRequest;
-import com.hubspot.slack.client.SlackClient;
-import com.hubspot.slack.client.methods.ResultSort;
-import com.hubspot.slack.client.methods.ResultSortOrder;
-import com.hubspot.slack.client.methods.params.chat.ChatPostMessageParams;
-import com.hubspot.slack.client.methods.params.search.SearchMessagesParams;
-import com.hubspot.slack.client.methods.params.users.UsersInfoParams;
-import com.hubspot.slack.client.models.blocks.*;
-import com.hubspot.slack.client.models.blocks.objects.Text;
-import com.hubspot.slack.client.models.blocks.objects.TextType;
+import com.slack.api.methods.MethodsClient;
+import com.slack.api.methods.SlackApiException;
+import com.slack.api.methods.request.chat.ChatPostMessageRequest;
+import com.slack.api.methods.request.search.SearchMessagesRequest;
+import com.slack.api.methods.response.chat.ChatPostMessageResponse;
+import com.slack.api.methods.response.users.UsersInfoResponse;
+import com.slack.api.model.block.HeaderBlock;
+import com.slack.api.model.block.LayoutBlock;
+import com.slack.api.model.block.SectionBlock;
+import com.slack.api.model.block.composition.TextObject;
+import java.io.IOException;
 import java.time.Instant;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -27,12 +35,14 @@ import java.util.stream.Collectors;
 
 @Service
 public class ChannelNotification implements NotificationInterface<ChannelNotificationDataProvider.Data> {
-    private final SlackClient slackClient;
+    private final MethodsClient slackClient;
     private final ChannelMessageBuilderInterface messageBuilder;
     private final ApplicationEventPublisher eventPublisher;
 
+    private final Logger logger = LoggerFactory.getLogger(ChannelNotification.class);
+
     public ChannelNotification(
-        @Qualifier("slack.app")SlackClient slackClient,
+        @Qualifier("slack.app")MethodsClient slackClient,
         ChannelMessageBuilderInterface messageBuilder,
         ApplicationEventPublisher eventPublisher
     ) {
@@ -99,11 +109,11 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
             templateConfig.setDeleteOldMessages(false);
         }
 
-        List<Block> sections = new ArrayList<>();
-        List<Block> issueSections = new ArrayList<>();
-        List<Block> prSections = new ArrayList<>();
+        List<LayoutBlock> sections = new ArrayList<>();
+        List<LayoutBlock> issueSections = new ArrayList<>();
+        List<LayoutBlock> prSections = new ArrayList<>();
 
-        sections.add(Header.of(Text.of(TextType.PLAIN_TEXT, templateConfig.getHeaderMain())));
+        sections.add(messageBuilder.createHeader(templateConfig.getHeaderMain()));
 
         var slackChannel = slackConfig.getChannel();
 
@@ -166,7 +176,7 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
                         issueSectionsSize
                     )
                 );
-                sections.add(Divider.builder().build());
+                sections.add(divider());
 
                 sections.addAll(issueSections);
             }
@@ -193,39 +203,40 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
                                 prSectionsSize
                         )
                 );
-                sections.add(Divider.builder().build());
+                sections.add(divider());
 
                 sections.addAll(prSections);
             }
         }
 
         String configIdLine = String.format("config id: _%s_", notification.getFullName());
-        sections.add(Section.of(Text.of(TextType.MARKDOWN, configIdLine)));
+        sections.add(section(s -> s.text(markdownText(configIdLine))));
 
-        ChatPostMessageParams.Builder paramBuilder = ChatPostMessageParams.builder();
+        var requestBuilder = ChatPostMessageRequest.builder()
+            .channel(slackChannel);
 
-        if (templateConfig.getMode().equals(TemplateConfig.MODE_FREE_TEXT)) {
-            List<String> textPieces = sections.stream().map(block -> {
-                Text text = null;
+        List<String> textPieces = sections.stream().map(block -> {
+            TextObject text = null;
 
-                if (block instanceof Header) {
-                    text = ((Header) block).getText();
-                }
+            if (block instanceof HeaderBlock) {
+                text = ((HeaderBlock) block).getText();
+            }
 
-                if (block instanceof SectionIF) {
-                    text = ((SectionIF) block).getText();
-                }
+            if (block instanceof SectionBlock) {
+                text = ((SectionBlock) block).getText();
+            }
 
-                if (text != null) {
-                    return text.getText();
-                }
+            if (text != null) {
+                return text.getText();
+            }
 
-                return null;
-            }).filter(Objects::nonNull).collect(Collectors.toList());
+            return null;
+        }).filter(Objects::nonNull).collect(Collectors.toList());
 
-            paramBuilder = paramBuilder.setText(String.join("\n", textPieces));
-        } else {
-            paramBuilder = paramBuilder.setBlocks(sections);
+        requestBuilder.text(String.join("\n", textPieces));
+
+        if (templateConfig.getMode().equals(TemplateConfig.MODE_BLOCK)) {
+            requestBuilder.blocks(sections);
         }
 
         eventPublisher.publishEvent(
@@ -234,54 +245,75 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
                 "notification."+notification.getFullName()+".slack.channel.posted"
             )
         );
+        ChatPostMessageResponse response;
 
-        var result = slackClient.postMessage(
-            paramBuilder.setChannelId(slackChannel).build()
-        ).join();
+        try {
+            response = slackClient.chatPostMessage(requestBuilder.build());
+        } catch (SlackApiException | IOException apiException) {
+            logger.error(apiException.getLocalizedMessage());
+            return;
+        }
 
         if (!templateConfig.getDeleteOldMessages()) {
             return;
         }
 
-        result.ifOk(m -> {
-            String userId = m.getMessage().get("user").toString();
+        if (!response.isOk()) {
+            logger.error(response.getError());
+            return;
+        }
 
-            var timestampParts = m.getTs().split("\\.");
-            long seconds, nanoAdjustment;
-            Instant deleteMessagesBefore;
+        var message = response.getMessage();
+        var userId = message.getUser();
 
-            if (timestampParts.length > 0) {
-                seconds = Long.parseLong(timestampParts[0]);
-                nanoAdjustment = timestampParts.length > 1 ? Long.parseLong(timestampParts[1]) : 0;
+        var timestampParts = message.getTs().split("\\.");
+        long seconds, nanoAdjustment;
+        Instant deleteMessagesBefore;
 
-                deleteMessagesBefore = Instant.ofEpochSecond(seconds, nanoAdjustment);
-            } else {
-                // how come there is nothing?
-                deleteMessagesBefore = Instant.now();
-            }
+        if (timestampParts.length > 0) {
+            seconds = Long.parseLong(timestampParts[0]);
+            nanoAdjustment = timestampParts.length > 1 ? Long.parseLong(timestampParts[1]) : 0;
 
-            // Setting offset to 5 minutes
-            deleteMessagesBefore = deleteMessagesBefore.minusSeconds(300);
+            deleteMessagesBefore = Instant.ofEpochSecond(seconds, nanoAdjustment);
+        } else {
+            // how come there is nothing?
+            deleteMessagesBefore = Instant.now();
+        }
 
-            var userInfoResults = slackClient.findUser(UsersInfoParams.builder().setUserId(userId).build()).join();
-            Instant finalDeleteMessagesBefore = deleteMessagesBefore;
-            userInfoResults.ifOk(user -> {
-                user.getUser().getUsername().ifPresent(username -> {
+        // Setting offset to 5 minutes
+        deleteMessagesBefore = deleteMessagesBefore.minusSeconds(300);
 
-                    var params = SearchMessagesParams.builder()
-                        .setCount(100)
-                        .setQuery("in:" + slackChannel + " from:"+username)
-                        .setSort(ResultSort.TIMESTAMP)
-                        .setSortOrder(ResultSortOrder.DESC)
-                        .build();
+        UsersInfoResponse userInfoResponse;
 
-                    eventPublisher.publishEvent(SearchAndDeleteEvent.create(this, params, finalDeleteMessagesBefore));
-                });
-            });
-        });
+        try {
+            userInfoResponse = slackClient.usersInfo(req -> req.user(userId));
+        } catch (IOException | SlackApiException e) {
+            logger.error(e.getLocalizedMessage());
+            return;
+        }
+
+        if (!userInfoResponse.isOk()) {
+            logger.error(userInfoResponse.getError());
+        }
+
+        Instant finalDeleteMessagesBefore = deleteMessagesBefore;
+        var user = userInfoResponse.getUser();
+
+        if (user.getName().isEmpty()) {
+            logger.debug("Bot's username could not be identified. Skipping old message removal.");
+        }
+
+        var searchRequest = SearchMessagesRequest.builder()
+            .query("in:" + slackChannel + " from:" + user.getName())
+            .count(25)
+            .sort("timestamp")
+            .sortDir("desc")
+            .build();
+
+        eventPublisher.publishEvent(SearchAndDeleteEvent.create(this, searchRequest, finalDeleteMessagesBefore));
     }
 
-    private List<Block> getTruncatedGroup(List<Block> sections, int sectionsSize, int maxGroupSize) {
+    private List<LayoutBlock> getTruncatedGroup(List<LayoutBlock> sections, int sectionsSize, int maxGroupSize) {
         return sections.subList(sectionsSize - maxGroupSize, sectionsSize);
     }
 }
