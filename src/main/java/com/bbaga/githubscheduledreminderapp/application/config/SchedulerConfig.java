@@ -4,7 +4,7 @@ import com.bbaga.githubscheduledreminderapp.application.jobs.ScheduledStateDump;
 import com.bbaga.githubscheduledreminderapp.application.jobs.SlackChannelMessageDelete;
 import com.bbaga.githubscheduledreminderapp.domain.jobs.scheduling.InstallationScanJobScheduler;
 import com.bbaga.githubscheduledreminderapp.domain.jobs.scheduling.NotificationJobScheduler;
-import com.hubspot.slack.client.SlackClient;
+import com.slack.api.methods.MethodsClient;
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
@@ -24,7 +24,7 @@ public class SchedulerConfig {
   @Qualifier("Scheduler")
   public Scheduler schedulerBootstrap(
       Scheduler scheduler,
-      @Qualifier("slack.user") ObjectProvider<SlackClient> slackUserClient
+      @Qualifier("slack.user") ObjectProvider<MethodsClient> slackUserClient
   ) throws Exception {
 
     JobDetail job = JobBuilder.newJob(ScheduledStateDump.class)

@@ -1,16 +1,16 @@
 package com.bbaga.githubscheduledreminderapp.domain.notifications.slack;
 
-import com.hubspot.slack.client.methods.params.search.SearchMessagesParams;
+import com.slack.api.methods.request.search.SearchMessagesRequest;
 import java.time.Instant;
 import org.springframework.context.ApplicationEvent;
 
 public class SearchAndDeleteEvent extends ApplicationEvent {
-    final private SearchMessagesParams searchMessagesParams;
+    final private SearchMessagesRequest searchMessagesParams;
     final private Instant deleteMessagesBefore;
 
     public SearchAndDeleteEvent(
         Object source,
-        SearchMessagesParams searchMessagesParams,
+        SearchMessagesRequest searchMessagesParams,
         Instant deleteMessagesBefore
     ) {
         super(source);
@@ -18,7 +18,7 @@ public class SearchAndDeleteEvent extends ApplicationEvent {
         this.deleteMessagesBefore = deleteMessagesBefore;
     }
 
-    public SearchMessagesParams getSearchMessagesParams() {
+    public SearchMessagesRequest getSearchMessagesParams() {
         return searchMessagesParams;
     }
 
@@ -28,7 +28,7 @@ public class SearchAndDeleteEvent extends ApplicationEvent {
 
     public static SearchAndDeleteEvent create(
         Object source,
-        SearchMessagesParams searchMessagesParams,
+        SearchMessagesRequest searchMessagesParams,
         Instant deleteMessagesBefore
     ) {
         return new SearchAndDeleteEvent(source, searchMessagesParams, deleteMessagesBefore);

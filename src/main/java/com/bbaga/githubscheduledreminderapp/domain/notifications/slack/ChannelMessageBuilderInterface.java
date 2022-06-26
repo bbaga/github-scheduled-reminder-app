@@ -2,14 +2,15 @@ package com.bbaga.githubscheduledreminderapp.domain.notifications.slack;
 
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubIssue;
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubPullRequest;
-import com.hubspot.slack.client.models.blocks.Block;
+import com.slack.api.model.block.HeaderBlock;
+import com.slack.api.model.block.SectionBlock;
 import java.util.Map;
 
 public interface ChannelMessageBuilderInterface {
-    Block createHeader(String text);
-    Block createHeaderIssues(String text, String overflowFormat, int showing, int from);
-    Block createHeaderPRs(String text, String overflowFormat, int showing, int from);
-    Block createLine(GitHubPullRequest pullRequest, String text, Map<String, String> trackingParams);
-    Block createLine(GitHubIssue issue, String text, Map<String, String> trackingParams);
-    Block createNoResultsMessage(String text);
+    HeaderBlock createHeader(String text);
+    SectionBlock createHeaderIssues(String text, String overflowFormat, int showing, int from);
+    SectionBlock createHeaderPRs(String text, String overflowFormat, int showing, int from);
+    SectionBlock createLine(GitHubPullRequest pullRequest, String text, Map<String, String> trackingParams);
+    SectionBlock createLine(GitHubIssue issue, String text, Map<String, String> trackingParams);
+    SectionBlock createNoResultsMessage(String text);
 }

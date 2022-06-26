@@ -64,15 +64,11 @@
 			<artifactId>snakeyaml</artifactId>
 			<version>1.30</version>
 		</dependency>
+
 		<dependency>
-			<groupId>com.hubspot.slack</groupId>
-			<artifactId>slack-base</artifactId>
-			<version>1.12</version>
-		</dependency>
-		<dependency>
-			<groupId>com.hubspot.slack</groupId>
-			<artifactId>slack-java-client</artifactId>
-			<version>1.12</version>
+			<groupId>com.slack.api</groupId>
+			<artifactId>slack-api-client</artifactId>
+			<version>1.23.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
