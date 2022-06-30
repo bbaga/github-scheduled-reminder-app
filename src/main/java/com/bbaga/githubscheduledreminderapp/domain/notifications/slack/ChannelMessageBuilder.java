@@ -13,6 +13,7 @@ import com.slack.api.model.block.LayoutBlock;
 import com.slack.api.model.block.SectionBlock;
 import com.slack.api.model.block.element.ButtonElement;
 import java.util.Map;
+import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -110,8 +111,8 @@ public class ChannelMessageBuilder implements ChannelMessageBuilderInterface {
         }
 
         var processedText = text.replaceAll("\\$login", login)
-            .replaceAll("\\$mergeableEmoji", mergeableEmoji)
-            .replaceAll("\\$title", pullRequest.getTitle())
+            .replaceAll("\\$mergeableEmoji", Matcher.quoteReplacement(mergeableEmoji))
+            .replaceAll("\\$title", Matcher.quoteReplacement(pullRequest.getTitle()))
             .replaceAll("\\$repository", pullRequest.getRepository().getFullName())
             .replaceAll("\\$age", getIssueAge(pullRequest))
             .replaceAll("\\$deletions", String.valueOf(deletions))
