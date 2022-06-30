@@ -215,25 +215,27 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
         var requestBuilder = ChatPostMessageRequest.builder()
             .channel(slackChannel);
 
-        List<String> textPieces = sections.stream().map(block -> {
-            TextObject text = null;
+        if (templateConfig.getMode().equals(TemplateConfig.MODE_FREE_TEXT)) {
+            List<String> textPieces = sections.stream().map(block -> {
+                TextObject text = null;
 
-            if (block instanceof HeaderBlock) {
-                text = ((HeaderBlock) block).getText();
-            }
+                if (block instanceof HeaderBlock) {
+                    text = ((HeaderBlock) block).getText();
+                }
 
-            if (block instanceof SectionBlock) {
-                text = ((SectionBlock) block).getText();
-            }
+                if (block instanceof SectionBlock) {
+                    text = ((SectionBlock) block).getText();
+                }
 
-            if (text != null) {
-                return text.getText();
-            }
+                if (text != null) {
+                    return text.getText();
+                }
 
-            return null;
-        }).filter(Objects::nonNull).collect(Collectors.toList());
+                return null;
+            }).filter(Objects::nonNull).collect(Collectors.toList());
 
-        requestBuilder.text(String.join("\n", textPieces));
+            requestBuilder.text(String.join("\n", textPieces));
+        }
 
         if (templateConfig.getMode().equals(TemplateConfig.MODE_BLOCK)) {
             requestBuilder.blocks(sections);
