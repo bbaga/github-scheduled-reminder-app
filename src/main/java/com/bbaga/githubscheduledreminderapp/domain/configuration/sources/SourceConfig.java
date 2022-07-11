@@ -4,6 +4,7 @@ import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.filters
 import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.filters.AuthorFilterConfig;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.filters.DraftFilterConfig;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.filters.LabelFilterConfig;
+import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.filters.PathFilterConfig;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -36,6 +37,7 @@ public abstract class SourceConfig {
             @JsonSubTypes.Type(value = DraftFilterConfig.class, name = DRAFT_FILTER),
             @JsonSubTypes.Type(value = LabelFilterConfig.class, name = LABEL_FILTER),
             @JsonSubTypes.Type(value = AuthorFilterConfig.class, name = AUTHOR_FILTER),
+            @JsonSubTypes.Type(value = PathFilterConfig.class, name = PATH_FILTER),
     })
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type")
     protected ArrayList<AbstractFilterConfig> filters;
