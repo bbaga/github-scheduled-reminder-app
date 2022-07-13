@@ -34,7 +34,7 @@ public class GitHubPullRequest extends GitHubIssue {
     }
 
     public Iterable<String> listFileNames() throws IOException {
-        return pullRequest.listFiles().toSet().stream().map(GHPullRequestFileDetail::getFilename).collect(Collectors.toSet());
+        return pullRequest.listFiles().withPageSize(100).toSet().stream().map(GHPullRequestFileDetail::getFilename).collect(Collectors.toSet());
     }
 
     public GHPullRequest unwrap() {
