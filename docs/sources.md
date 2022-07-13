@@ -144,3 +144,19 @@ filters:
       - usernameA
       - usernameB
 ```
+
+### Path-filter
+This filter will remove the PRs and Issues based on whether the modified files in the PR start with the given paths.
+
+```yaml
+filters:
+  - type: path-filter
+    include:
+      - src/foo
+```
+
+The example above would match the following paths:
+
+ - `src/foo`
+ - `src/foo.txt`
+ - `src/foo/bar`
