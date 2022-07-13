@@ -30,7 +30,7 @@ public class PathFilter implements IssueFilterInterface {
         }
 
         try {
-            for (var file : pullRequest.listFileNames()) {
+            for (var file : pullRequest.getFilenames()) {
                 for (var includePath : includePaths) {
                     if (file.startsWith(includePath)) {
                         return false;

@@ -1,10 +1,9 @@
 package com.bbaga.githubscheduledreminderapp.infrastructure.github;
 
 import org.kohsuke.github.GHPullRequest;
-import org.kohsuke.github.GHPullRequestFileDetail;
 
 import java.io.IOException;
-import java.util.stream.Collectors;
+import java.util.Iterator;
 
 public class GitHubPullRequest extends GitHubIssue {
     private final GHPullRequest pullRequest;
@@ -33,8 +32,20 @@ public class GitHubPullRequest extends GitHubIssue {
         return pullRequest.isDraft();
     }
 
-    public Iterable<String> listFileNames() throws IOException {
-        return pullRequest.listFiles().withPageSize(100).toSet().stream().map(GHPullRequestFileDetail::getFilename).collect(Collectors.toSet());
+    public Iterable<String> getFilenames() throws IOException {
+        var iterator = pullRequest.listFiles().withPageSize(100).iterator();
+
+        return () -> new Iterator<>() {
+            @Override
+            public boolean hasNext() {
+                return iterator.hasNext();
+            }
+
+            @Override
+            public String next() {
+                return iterator.next().getFilename();
+            }
+        };
     }
 
     public GHPullRequest unwrap() {

@@ -20,7 +20,7 @@ public class PathFilterTest {
 
         // No paths configured
         GitHubPullRequest pr = Mockito.mock(GitHubPullRequest.class);
-        Mockito.when(pr.listFileNames()).thenReturn(Arrays.asList("src/foo/foo.java", "src/bar/bar.java"));
+        Mockito.when(pr.getFilenames()).thenReturn(Arrays.asList("src/foo/foo.java", "src/bar/bar.java"));
         Assertions.assertFalse(filter.filter(pr));
 
         // Exact matching path configured
@@ -43,7 +43,7 @@ public class PathFilterTest {
         filter.configure(config);
 
         GitHubPullRequest pr = Mockito.mock(GitHubPullRequest.class);
-        Mockito.when(pr.listFileNames()).thenThrow(IOException.class);
+        Mockito.when(pr.getFilenames()).thenThrow(IOException.class);
         Assertions.assertFalse(filter.filter(pr));
     }
 
