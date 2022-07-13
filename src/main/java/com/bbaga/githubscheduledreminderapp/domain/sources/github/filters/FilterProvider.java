@@ -14,6 +14,8 @@ public class FilterProvider {
             filter = new LabelFilter();
         } else if (type.equals(Filters.AUTHOR_FILTER.label)) {
             filter = new AuthorFilter();
+        } else if (type.equals(Filters.PATH_FILTER.label)) {
+            filter = new PathFilter();
         } else {
             throw new RuntimeException(String.format("Unknown filter type: \"%s\"", type));
         }
