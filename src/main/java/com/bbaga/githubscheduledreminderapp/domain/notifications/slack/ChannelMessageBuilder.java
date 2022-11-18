@@ -15,6 +15,7 @@ import com.slack.api.model.block.element.ButtonElement;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
+import org.kohsuke.github.GHPullRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -119,7 +120,9 @@ public class ChannelMessageBuilder implements ChannelMessageBuilderInterface {
             .replaceAll("\\$additions", String.valueOf(additions))
             .replaceAll("\\$link", getUrl(pullRequest, trackingParams))
             .replaceAll("\\$assignee-logins", getAssigneeLogins(pullRequest))
-            .replaceAll("\\$assignee-login-links", getAssigneeLoginLinks(pullRequest));
+            .replaceAll("\\$assignee-login-links", getAssigneeLoginLinks(pullRequest))
+            .replaceAll("\\$reviewer-logins", getRequestedReviewersLogins(pullRequest))
+            .replaceAll("\\$reviewer-login-links", getRequestedReviewersLoginLinks(pullRequest));
 
         if (processedText.contains("$button")) {
             processedText = processedText.replaceAll("\\$button", "");
@@ -187,6 +190,24 @@ public class ChannelMessageBuilder implements ChannelMessageBuilderInterface {
 
     private String getAssigneeLogins(GitHubIssue issue) {
         return issue.getAssignees().stream().map(GitHubUser::getLogin).collect(Collectors.joining(", "));
+    }
+
+    private String getRequestedReviewersLogins(GitHubPullRequest pullRequest) {
+        try {
+            return pullRequest.getRequestedReviewers().stream().map(GitHubUser::getLogin)
+                .collect(Collectors.joining(", "));
+        } catch (IOException ignore) {
+        }
+        return "";
+    }
+
+    private String getRequestedReviewersLoginLinks(GitHubPullRequest pullRequest) {
+        try {
+            return pullRequest.getRequestedReviewers().stream()
+                .map(user -> "<" + user.getHtmlUrl() + "|" + user.getLogin() + ">").collect(Collectors.joining(", "));
+        } catch (IOException ignore) {
+        }
+        return "";
     }
 
     private String getAssigneeLoginLinks(GitHubIssue issue) {

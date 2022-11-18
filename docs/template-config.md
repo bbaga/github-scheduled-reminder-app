@@ -116,8 +116,10 @@ Possible values: Any `string`
 - `$repository`: will be replaced with the repository's name in which the issue was found.
 - `$age`: will be replaced with the time passed since the creation of the issue.
 - `$link`: will be replaced with an HTTP url leading to the issue.
-- `$assignee-logins`: will be replaced with a comma separated list of GitHub login names.
-- `$assignee-login-links`: will be replaced with a comma separated list of GitHub login names linking to the GitHub profile pages.
+- `$assignee-logins`: will be replaced with a comma separated list of GitHub login names from assigned reviewers on an Issue or PR.
+- `$assignee-login-links`: will be replaced with a comma separated list of GitHub login names linking to the GitHub profile pages from assigned reviewers on an Issue or PR.
+- `$reviewer-logins`: will be replaced with a comma separated list of GitHub login names from requested reviewers on a PR.
+- `$reviewer-login-links`: will be replaced with a comma separated list of GitHub login names linking to the GitHub profile pages from assigned reviewers on a PR.
 - `$button`: will be replaced with a button leading to the issue, this option is available on when the `mode` option is set to `block`.
 
 #### `no-results`
