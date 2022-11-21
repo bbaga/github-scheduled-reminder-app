@@ -214,6 +214,12 @@ class ChannelNotificationTest {
         assertTrue(blocks.get(6) instanceof SectionBlock);
         assertTrue(blocks.get(7) instanceof SectionBlock);
 
+        //Verify Sections contain template config text
+        assertEquals(((SectionBlock) blocks.get(3)).getText().getText(), "userLogin Issue title org/repo 0 hour "
+            + "userLogin <null|userLogin>");
+        assertEquals(((SectionBlock) blocks.get(6)).getText().getText(), "userLogin PR title org/repo 0 hour 0 0 "
+            + "userLogin <null|userLogin> userLogin <null|userLogin>");
+
         // Verify PR methods
         Mockito.verify(pr, Mockito.times(1)).getAdditions();
         Mockito.verify(pr, Mockito.times(1)).getDeletions();

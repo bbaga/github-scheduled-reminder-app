@@ -9,6 +9,7 @@ import static com.slack.api.model.block.composition.BlockCompositions.*;
 import static com.slack.api.model.block.element.BlockElements.*;
 
 import com.slack.api.model.block.HeaderBlock;
+import com.slack.api.model.block.LayoutBlock;
 import com.slack.api.model.block.SectionBlock;
 import com.slack.api.model.block.element.ButtonElement;
 import java.util.Map;
@@ -42,13 +43,13 @@ public class ChannelMessageBuilder implements ChannelMessageBuilderInterface {
         String counter;
 
         if (showing < from) {
-            counter = overflowFormat.replace("\\$showing", String.valueOf(showing))
-                                .replace("\\$from", String.valueOf(from));
+            counter = overflowFormat.replaceAll("\\$showing", String.valueOf(showing))
+                                .replaceAll("\\$from", String.valueOf(from));
         } else {
             counter = String.valueOf(showing);
         }
 
-        return markdownSection(text.replace("\\$counter", counter));
+        return markdownSection(text.replaceAll("\\$counter", counter));
     }
 
     @Override
@@ -56,13 +57,13 @@ public class ChannelMessageBuilder implements ChannelMessageBuilderInterface {
         String counter;
 
         if (showing < from) {
-            counter = overflowFormat.replace("\\$showing", String.valueOf(showing))
-                    .replace("\\$from", String.valueOf(showing));
+            counter = overflowFormat.replaceAll("\\$showing", String.valueOf(showing))
+                    .replaceAll("\\$from", String.valueOf(showing));
         } else {
             counter = String.valueOf(showing);
         }
 
-        return markdownSection(text.replace("\\$counter", counter));
+        return markdownSection(text.replaceAll("$counter", counter));
     }
 
     @Override
@@ -81,7 +82,6 @@ public class ChannelMessageBuilder implements ChannelMessageBuilderInterface {
         try {
             mergeableState = pullRequest.getMergeableState();
         } catch (IOException ignored) {
-            //Ignored Exception
         }
 
         if (List.of("clean", "has_hooks").contains(mergeableState)) {
@@ -110,21 +110,21 @@ public class ChannelMessageBuilder implements ChannelMessageBuilderInterface {
             deletions = 0;
         }
 
-        var processedText = text.replace("\\$login", login)
-            .replace("\\$mergeableEmoji", Matcher.quoteReplacement(mergeableEmoji))
-            .replace("\\$title", Matcher.quoteReplacement(pullRequest.getTitle()))
-            .replace("\\$repository", pullRequest.getRepository().getFullName())
-            .replace("\\$age", getIssueAge(pullRequest))
-            .replace("\\$deletions", String.valueOf(deletions))
-            .replace("\\$additions", String.valueOf(additions))
-            .replace("\\$link", getUrl(pullRequest, trackingParams))
-            .replace("\\$assignee-logins", getAssigneeLogins(pullRequest))
-            .replace("\\$assignee-login-links", getAssigneeLoginLinks(pullRequest))
-            .replace("\\$reviewer-logins", getRequestedReviewersLogins(pullRequest))
-            .replace("\\$reviewer-login-links", getRequestedReviewersLoginLinks(pullRequest));
+        var processedText = text.replaceAll("\\$login", login)
+            .replaceAll("\\$mergeableEmoji", Matcher.quoteReplacement(mergeableEmoji))
+            .replaceAll("\\$title", Matcher.quoteReplacement(pullRequest.getTitle()))
+            .replaceAll("\\$repository", pullRequest.getRepository().getFullName())
+            .replaceAll("\\$age", getIssueAge(pullRequest))
+            .replaceAll("\\$deletions", String.valueOf(deletions))
+            .replaceAll("\\$additions", String.valueOf(additions))
+            .replaceAll("\\$link", getUrl(pullRequest, trackingParams))
+            .replaceAll("\\$assignee-logins", getAssigneeLogins(pullRequest))
+            .replaceAll("\\$assignee-login-links", getAssigneeLoginLinks(pullRequest))
+            .replaceAll("\\$reviewer-logins", getRequestedReviewersLogins(pullRequest))
+            .replaceAll("\\$reviewer-login-links", getRequestedReviewersLoginLinks(pullRequest));
 
         if (processedText.contains("$button")) {
-            processedText = processedText.replace("\\$button", "");
+            processedText = processedText.replaceAll("\\$button", "");
             var section = markdownSection(processedText);
             section.setAccessory(linkButton(pullRequest, trackingParams));
 
@@ -144,16 +144,16 @@ public class ChannelMessageBuilder implements ChannelMessageBuilderInterface {
             login = "Unknown";
         }
 
-        var processedText = text.replace("\\$login", login)
-                .replace("\\$title", issue.getTitle())
-                .replace("\\$repository", issue.getRepository().getFullName())
-                .replace("\\$age", getIssueAge(issue))
-                .replace("\\$assignee-logins", getAssigneeLogins(issue))
-                .replace("\\$assignee-login-links", getAssigneeLoginLinks(issue))
-                .replace("\\$link", getUrl(issue, trackingParams));
+        var processedText = text.replaceAll("\\$login", login)
+                .replaceAll("\\$title", issue.getTitle())
+                .replaceAll("\\$repository", issue.getRepository().getFullName())
+                .replaceAll("\\$age", getIssueAge(issue))
+                .replaceAll("\\$assignee-logins", getAssigneeLogins(issue))
+                .replaceAll("\\$assignee-login-links", getAssigneeLoginLinks(issue))
+                .replaceAll("\\$link", getUrl(issue, trackingParams));
 
         if (processedText.contains("$button")) {
-            processedText = processedText.replace("\\$button", "");
+            processedText = processedText.replaceAll("\\$button", "");
             var section = markdownSection(processedText);
             section.setAccessory(linkButton(issue, trackingParams));
 
@@ -191,6 +191,10 @@ public class ChannelMessageBuilder implements ChannelMessageBuilderInterface {
         return issue.getAssignees().stream().map(GitHubUser::getLogin).collect(Collectors.joining(", "));
     }
 
+    private String getAssigneeLoginLinks(GitHubIssue issue) {
+        return issue.getAssignees().stream().map(user -> "<"+user.getHtmlUrl()+"|"+user.getLogin()+">").collect(Collectors.joining(", "));
+    }
+
     private String getRequestedReviewersLogins(GitHubPullRequest pullRequest) {
         try {
             return pullRequest.getRequestedReviewers().stream().map(GitHubUser::getLogin)
@@ -209,10 +213,6 @@ public class ChannelMessageBuilder implements ChannelMessageBuilderInterface {
             //Ignored Exception
             return "";
         }
-    }
-
-    private String getAssigneeLoginLinks(GitHubIssue issue) {
-        return issue.getAssignees().stream().map(user -> "<"+user.getHtmlUrl()+"|"+user.getLogin()+">").collect(Collectors.joining(", "));
     }
 
     private String getIssueAge(GitHubIssue issue) {
