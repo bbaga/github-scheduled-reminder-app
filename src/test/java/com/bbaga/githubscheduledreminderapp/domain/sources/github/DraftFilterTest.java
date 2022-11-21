@@ -6,8 +6,6 @@ import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubIssue;
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubPullRequest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.kohsuke.github.GHIssue;
-import org.kohsuke.github.GHPullRequest;
 import org.mockito.Mockito;
 
 import java.io.IOException;

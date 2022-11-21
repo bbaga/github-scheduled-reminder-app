@@ -2,6 +2,7 @@ package com.bbaga.githubscheduledreminderapp.domain.notifications.slack;
 
 import com.bbaga.githubscheduledreminderapp.domain.configuration.Notification;
 import com.bbaga.githubscheduledreminderapp.domain.configuration.SlackNotificationConfiguration;
+import com.bbaga.githubscheduledreminderapp.domain.configuration.template.TemplateConfig;
 import com.bbaga.githubscheduledreminderapp.domain.statistics.UrlBuilderInterface;
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubIssue;
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubPullRequest;
@@ -133,5 +134,101 @@ class ChannelNotificationTest {
         Mockito.verify(issue, Mockito.times(1)).getUser();
         Mockito.verify(issue, Mockito.times(1)).getRepository();
         Mockito.verify(issue, Mockito.times(1)).getCreatedAt();
+    }
+
+    @Test
+    void sendCalled_CustomTemplate() throws IOException, SlackApiException {
+        ApplicationEventPublisher mockEventPublisher = Mockito.mock(ApplicationEventPublisher.class);
+
+        MethodsClient client = Mockito.mock(MethodsClient.class);
+        UrlBuilderInterface urlBuilder = Mockito.mock(UrlBuilderInterface.class);
+        ChannelMessageBuilderInterface messageBuilder = new ChannelMessageBuilder(urlBuilder);
+
+        Mockito.when(urlBuilder.copy()).thenReturn(urlBuilder);
+
+        GitHubIssue issue = Mockito.mock(GitHubIssue.class);
+        GitHubUser user = Mockito.mock(GitHubUser.class);
+        GHRepository repository = Mockito.mock(GHRepository.class);
+        GitHubPullRequest pr = Mockito.mock(GitHubPullRequest.class);
+        Mockito.when(user.getLogin()).thenReturn("userLogin");
+        Mockito.when(repository.getFullName()).thenReturn("org/repo");
+
+        Mockito.when(issue.getTitle()).thenReturn("Issue title");
+        Mockito.when(issue.getUser()).thenReturn(user);
+        Mockito.when(issue.getHtmlUrl()).thenReturn(new URL("https://google.com"));
+        Mockito.when(issue.getNodeId()).thenReturn("1234567");
+        Mockito.when(issue.getRepository()).thenReturn(repository);
+        Mockito.when(issue.getCreatedAt()).thenReturn(Date.from(Instant.now()));
+        Mockito.when(issue.getAssignees()).thenReturn(List.of(user));
+
+        Mockito.when(pr.getTitle()).thenReturn("PR title");
+        Mockito.when(pr.getNumber()).thenReturn(1);
+        Mockito.when(pr.getUser()).thenReturn(user);
+        Mockito.when(pr.getHtmlUrl()).thenReturn(new URL("https://google.com"));
+        Mockito.when(pr.getNodeId()).thenReturn("1234567");
+        Mockito.when(pr.getRepository()).thenReturn(repository);
+        Mockito.when(pr.getCreatedAt()).thenReturn(Date.from(Instant.now()));
+        Mockito.when(pr.getMergeableState()).thenReturn("clean");
+        Mockito.when(pr.getAssignees()).thenReturn(List.of(user));
+        Mockito.when(pr.getRequestedReviewers()).thenReturn(List.of(user));
+
+        ChatPostMessageResponse result = Mockito.mock(ChatPostMessageResponse.class);
+
+        TemplateConfig templateConfig = new TemplateConfig();
+        templateConfig.setLinePRs(
+            "$login $title $repository $age $deletions $additions $assignee-logins $assignee-login-links "
+                + "$reviewer-logins $reviewer-login-links");
+        templateConfig.setLineIssues(
+            "$login $title $repository $age $assignee-logins $assignee-login-links");
+
+        ChannelNotification service = new ChannelNotification(client, messageBuilder, mockEventPublisher);
+        SlackNotificationConfiguration config = new SlackNotificationConfiguration();
+        config.setChannel("test");
+        config.setTemplateConfig(templateConfig);
+
+        Notification notification = new Notification();
+        notification.setConfig(config);
+        ArrayList<GitHubIssue> issues = new ArrayList<>();
+        issues.add(issue);
+        issues.add(pr);
+
+        Mockito.when(client.chatPostMessage(Mockito.any(ChatPostMessageRequest.class))).thenReturn(result);
+        service.send(new ChannelNotificationDataProvider.Data(notification, issues));
+
+        ArgumentCaptor<ChatPostMessageRequest> postCaptor = ArgumentCaptor.forClass(ChatPostMessageRequest.class);
+
+        // Verify message
+        Mockito.verify(client, Mockito.times(1)).chatPostMessage(postCaptor.capture());
+
+        ChatPostMessageRequest postMessageParams = postCaptor.getValue();
+
+        List<LayoutBlock> blocks = postMessageParams.getBlocks();
+
+        assertEquals(8, blocks.size());
+        assertTrue(blocks.get(0) instanceof HeaderBlock);
+        assertTrue(blocks.get(1) instanceof SectionBlock);
+        assertTrue(blocks.get(2) instanceof DividerBlock);
+        assertTrue(blocks.get(3) instanceof SectionBlock);
+        assertTrue(blocks.get(4) instanceof SectionBlock);
+        assertTrue(blocks.get(5) instanceof DividerBlock);
+        assertTrue(blocks.get(6) instanceof SectionBlock);
+        assertTrue(blocks.get(7) instanceof SectionBlock);
+
+        // Verify PR methods
+        Mockito.verify(pr, Mockito.times(1)).getAdditions();
+        Mockito.verify(pr, Mockito.times(1)).getDeletions();
+        Mockito.verify(pr, Mockito.times(1)).getTitle();
+        Mockito.verify(pr, Mockito.times(1)).getUser();
+        Mockito.verify(pr, Mockito.times(1)).getRepository();
+        Mockito.verify(pr, Mockito.times(1)).getCreatedAt();
+        Mockito.verify(pr, Mockito.times(2)).getAssignees();
+        Mockito.verify(pr, Mockito.times(2)).getRequestedReviewers();
+
+        // Verify Issue methods
+        Mockito.verify(issue, Mockito.times(1)).getTitle();
+        Mockito.verify(issue, Mockito.times(1)).getUser();
+        Mockito.verify(issue, Mockito.times(1)).getRepository();
+        Mockito.verify(issue, Mockito.times(1)).getCreatedAt();
+        Mockito.verify(issue, Mockito.times(2)).getAssignees();
     }
 }
