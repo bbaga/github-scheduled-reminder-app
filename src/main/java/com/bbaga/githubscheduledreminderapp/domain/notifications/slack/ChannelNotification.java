@@ -15,7 +15,6 @@ import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubPullRequ
 import com.slack.api.methods.MethodsClient;
 import com.slack.api.methods.SlackApiException;
 import com.slack.api.methods.request.chat.ChatPostMessageRequest;
-import com.slack.api.methods.request.search.SearchMessagesRequest;
 import com.slack.api.methods.response.chat.ChatPostMessageResponse;
 import com.slack.api.methods.response.users.UsersInfoResponse;
 import com.slack.api.model.block.HeaderBlock;
@@ -305,14 +304,16 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
             logger.debug("Bot's username could not be identified. Skipping old message removal.");
         }
 
-        var searchRequest = SearchMessagesRequest.builder()
-            .query("in:" + slackChannel + " from:" + user.getName())
-            .count(25)
-            .sort("timestamp")
-            .sortDir("desc")
-            .build();
+        var searchRequest = SearchRequest.create(
+            message.getBotId(),
+            notification.getFullName(),
+            slackConfig.getChannel(),
+            response.getChannel(),
+            response.getTs(),
+            templateConfig
+        );
 
-        eventPublisher.publishEvent(SearchAndDeleteEvent.create(this, searchRequest, finalDeleteMessagesBefore));
+        eventPublisher.publishEvent(SearchAndDeleteEvent.create(this, searchRequest));
     }
 
     private List<LayoutBlock> getTruncatedGroup(List<LayoutBlock> sections, int sectionsSize, int maxGroupSize) {
