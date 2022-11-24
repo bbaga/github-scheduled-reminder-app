@@ -265,44 +265,6 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
         }
 
         var message = response.getMessage();
-        var userId = message.getUser();
-
-        var timestampParts = message.getTs().split("\\.");
-        long seconds, nanoAdjustment;
-        Instant deleteMessagesBefore;
-
-        if (timestampParts.length > 0) {
-            seconds = Long.parseLong(timestampParts[0]);
-            nanoAdjustment = timestampParts.length > 1 ? Long.parseLong(timestampParts[1]) : 0;
-
-            deleteMessagesBefore = Instant.ofEpochSecond(seconds, nanoAdjustment);
-        } else {
-            // how come there is nothing?
-            deleteMessagesBefore = Instant.now();
-        }
-
-        // Setting offset to 5 minutes
-        deleteMessagesBefore = deleteMessagesBefore.minusSeconds(300);
-
-        UsersInfoResponse userInfoResponse;
-
-        try {
-            userInfoResponse = slackClient.usersInfo(req -> req.user(userId));
-        } catch (IOException | SlackApiException e) {
-            logger.error(e.getLocalizedMessage());
-            return;
-        }
-
-        if (!userInfoResponse.isOk()) {
-            logger.error(userInfoResponse.getError());
-        }
-
-        Instant finalDeleteMessagesBefore = deleteMessagesBefore;
-        var user = userInfoResponse.getUser();
-
-        if (user.getName().isEmpty()) {
-            logger.debug("Bot's username could not be identified. Skipping old message removal.");
-        }
 
         var searchRequest = SearchRequest.create(
             message.getBotId(),
