@@ -97,13 +97,15 @@ public class SlackChannelMessageDelete implements Job {
                     )
                 );
 
+                // Limit the search to 5 pages of history per configuration
+                var paginationLimit = 5;
+
                 /**
                  * Notifications can be split into multiple messages
                  * `splitMessageMatch` will remember to queue messages to be deleted when a message "end" was found.
                  * Will be reset to `false` when a "main header" string was found.
                  */
                 var splitMessageMatch = false;
-                pagination:
                 do {
                     ConversationsHistoryResponse results = getConversationsHistoryPageResponse(cursor, params);
 
@@ -115,7 +117,6 @@ public class SlackChannelMessageDelete implements Job {
                     // Iterating over the messages found on the page
                     for (Message message : results.getMessages()) {
                         var match = false;
-                        var splitMessageMatchMemory = splitMessageMatch;
 
                         if (!isMessageRelevant(message, params.getBotId())) {
                             continue;
@@ -150,17 +151,13 @@ public class SlackChannelMessageDelete implements Job {
                             message.setChannel(params.getChannelId());
                             item.getAction().accept(message);
                         }
-
-                        if (splitMessageMatchMemory && !splitMessageMatch) {
-                            break pagination;
-                        }
                     }
 
                     hasMore = results.isHasMore();
                     if (hasMore) {
                         cursor = Optional.of(results.getResponseMetadata().getNextCursor());
                     }
-                } while (hasMore && limit-- > 0);
+                } while (hasMore && --limit > 0 && (--paginationLimit > 0 || splitMessageMatch));
             } catch (Exception exception) {
                 logger.error(exception.getLocalizedMessage());
             }
@@ -199,7 +196,7 @@ public class SlackChannelMessageDelete implements Job {
     private ConversationsHistoryResponse getConversationsHistoryPageResponse(Optional<String> cursor, SearchRequest params) throws IOException, SlackApiException {
         var request = ConversationsHistoryRequest.builder()
             .channel(params.getChannelId())
-            .limit(150)
+            .limit(5)
             .latest(params.getLatest());
 
         cursor.ifPresent(request::cursor);

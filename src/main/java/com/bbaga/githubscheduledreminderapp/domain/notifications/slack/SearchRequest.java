@@ -67,9 +67,12 @@ public class SearchRequest {
     if (this == o) {
       return true;
     }
-    if (!(o instanceof SearchRequest that)) {
+    if (!(o instanceof SearchRequest)) {
       return false;
     }
+
+    var that = (SearchRequest) o;
+
     return getNotificationId().equals(that.getNotificationId())
         && getChannelId().equals(that.getChannelId())
         && getLatest().equals(that.getLatest())
