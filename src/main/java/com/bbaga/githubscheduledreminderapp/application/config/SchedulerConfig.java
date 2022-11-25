@@ -12,7 +12,6 @@ import org.quartz.SchedulerException;
 import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,8 +22,7 @@ public class SchedulerConfig {
   @Bean
   @Qualifier("Scheduler")
   public Scheduler schedulerBootstrap(
-      Scheduler scheduler,
-      @Qualifier("slack.user") ObjectProvider<MethodsClient> slackUserClient
+      Scheduler scheduler
   ) throws Exception {
 
     JobDetail job = JobBuilder.newJob(ScheduledStateDump.class)
@@ -39,24 +37,21 @@ public class SchedulerConfig {
 
     scheduler.scheduleJob(job, scheduleDump);
 
-    // Enable clean up job when there is a Slack user client
-    slackUserClient.ifAvailable(client -> {
-      JobDetail SlackChannelMessageDeleteJob = JobBuilder.newJob(SlackChannelMessageDelete.class)
-          .withIdentity(SlackChannelMessageDelete.class.getName())
-          .storeDurably(true)
-          .build();
+    JobDetail SlackChannelMessageDeleteJob = JobBuilder.newJob(SlackChannelMessageDelete.class)
+        .withIdentity(SlackChannelMessageDelete.class.getName())
+        .storeDurably(true)
+        .build();
 
-      Trigger SlackChannelMessageDeleteTrigger = TriggerBuilder.newTrigger()
-          .withIdentity(SlackChannelMessageDelete.class.getName())
-          .withSchedule(SimpleScheduleBuilder.simpleSchedule().withIntervalInMinutes(1).repeatForever())
-          .build();
+    Trigger SlackChannelMessageDeleteTrigger = TriggerBuilder.newTrigger()
+        .withIdentity(SlackChannelMessageDelete.class.getName())
+        .withSchedule(SimpleScheduleBuilder.simpleSchedule().withIntervalInMinutes(1).repeatForever())
+        .build();
 
-      try {
-        scheduler.scheduleJob(SlackChannelMessageDeleteJob, SlackChannelMessageDeleteTrigger);
-      } catch (SchedulerException e) {
-        throw new RuntimeException(e);
-      }
-    });
+    try {
+      scheduler.scheduleJob(SlackChannelMessageDeleteJob, SlackChannelMessageDeleteTrigger);
+    } catch (SchedulerException e) {
+      throw new RuntimeException(e);
+    }
 
     return scheduler;
   }
