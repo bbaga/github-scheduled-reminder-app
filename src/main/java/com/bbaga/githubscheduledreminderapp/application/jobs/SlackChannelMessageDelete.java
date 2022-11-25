@@ -131,8 +131,6 @@ public class SlackChannelMessageDelete implements Job {
                         // Matching notification in a markdown/rich_text block
                         if (lastBlock.getType().equals("rich_text")) {
                             var text = message.getText();
-                            logger.info("Rich Text: " + text);
-                            logger.info("Rich Text ID: " + params.getNotificationId());
                             match = text.contains(params.getNotificationId());
 
                             // If the "main header" is not present in the text, we are dealing with a split message
