@@ -139,9 +139,10 @@ When `delete-old-messages` is `true`, previous notifications will be found based
 To fully enable this feature, the [`SLACK_API_USER_TOKEN`](https://github.com/bbaga/github-scheduled-reminder-app#slack_api_user_token) has to be provided as well. 
 
 ##### Required scopes
-`SLACK_API_TOKEN`: `chat:write`, `users:read` 
-
-`SLACK_API_USER_TOKEN`: `search:read` 
+`SLACK_API_TOKEN`: 
+- `chat:write`
+- `channels:history`
+- `groups:history`
 
 Possible values: `true`, `false`
 
