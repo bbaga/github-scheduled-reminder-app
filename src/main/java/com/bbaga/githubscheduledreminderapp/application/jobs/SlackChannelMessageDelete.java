@@ -137,7 +137,7 @@ public class SlackChannelMessageDelete implements Job {
 
                             // If the "main header" is not present in the text, we are dealing with a split message
                             if (text.startsWith(params.getTemplateConfig().getHeaderMain())) {
-                                match = splitMessageMatch;
+                                match = match || splitMessageMatch;
                                 splitMessageMatch = false;
                             } else if (match) {
                                 splitMessageMatch = true;
