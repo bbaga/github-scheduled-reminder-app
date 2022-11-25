@@ -98,14 +98,12 @@ Mandatory when `SLACK_API_TOKEN` isn't set. Location of the file containing the 
 **Required**: Yes
 
 ### `SLACK_API_USER_TOKEN`
-Certain Slack resources require user authentication. The user token is necessary to enable the old notification removal.
-You can learn more about the user token [here](https://api.slack.com/authentication/token-types)
+Certain Slack resources require user authentication. You can learn more about the user token [here](https://api.slack.com/authentication/token-types)
 
 **Required**: No
 
 ### `SLACK_API_USER_TOKEN_FILE`
-Certain Slack resources require user authentication. The user token is necessary to enable the old notification removal.
-You can learn more about the user token [here](https://api.slack.com/authentication/token-types)
+Certain Slack resources require user authentication. You can learn more about the user token [here](https://api.slack.com/authentication/token-types)
 
 **Required**: No
 
