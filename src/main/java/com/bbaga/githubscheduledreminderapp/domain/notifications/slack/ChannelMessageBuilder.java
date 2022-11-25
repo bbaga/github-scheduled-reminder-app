@@ -63,7 +63,7 @@ public class ChannelMessageBuilder implements ChannelMessageBuilderInterface {
             counter = String.valueOf(showing);
         }
 
-        return markdownSection(text.replaceAll("\\$counter", counter));
+        return markdownSection(text.replaceAll("$counter", counter));
     }
 
     @Override
@@ -119,7 +119,9 @@ public class ChannelMessageBuilder implements ChannelMessageBuilderInterface {
             .replaceAll("\\$additions", String.valueOf(additions))
             .replaceAll("\\$link", getUrl(pullRequest, trackingParams))
             .replaceAll("\\$assignee-logins", getAssigneeLogins(pullRequest))
-            .replaceAll("\\$assignee-login-links", getAssigneeLoginLinks(pullRequest));
+            .replaceAll("\\$assignee-login-links", getAssigneeLoginLinks(pullRequest))
+            .replaceAll("\\$reviewer-logins", getRequestedReviewersLogins(pullRequest))
+            .replaceAll("\\$reviewer-login-links", getRequestedReviewersLoginLinks(pullRequest));
 
         if (processedText.contains("$button")) {
             processedText = processedText.replaceAll("\\$button", "");
@@ -191,6 +193,26 @@ public class ChannelMessageBuilder implements ChannelMessageBuilderInterface {
 
     private String getAssigneeLoginLinks(GitHubIssue issue) {
         return issue.getAssignees().stream().map(user -> "<"+user.getHtmlUrl()+"|"+user.getLogin()+">").collect(Collectors.joining(", "));
+    }
+
+    private String getRequestedReviewersLogins(GitHubPullRequest pullRequest) {
+        try {
+            return pullRequest.getRequestedReviewers().stream().map(GitHubUser::getLogin)
+                .collect(Collectors.joining(", "));
+        } catch (IOException ignore) {
+            //Ignored Exception
+            return "";
+        }
+    }
+
+    private String getRequestedReviewersLoginLinks(GitHubPullRequest pullRequest) {
+        try {
+            return pullRequest.getRequestedReviewers().stream()
+                .map(user -> "<" + user.getHtmlUrl() + "|" + user.getLogin() + ">").collect(Collectors.joining(", "));
+        } catch (IOException ignore) {
+            //Ignored Exception
+            return "";
+        }
     }
 
     private String getIssueAge(GitHubIssue issue) {
