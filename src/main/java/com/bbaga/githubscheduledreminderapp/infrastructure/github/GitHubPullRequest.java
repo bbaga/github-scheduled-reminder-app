@@ -1,5 +1,7 @@
 package com.bbaga.githubscheduledreminderapp.infrastructure.github;
 
+import java.util.List;
+import java.util.stream.Collectors;
 import org.kohsuke.github.GHPullRequest;
 
 import java.io.IOException;
@@ -46,6 +48,10 @@ public class GitHubPullRequest extends GitHubIssue {
                 return iterator.next().getFilename();
             }
         };
+    }
+
+    public List<GitHubUser> getRequestedReviewers() throws IOException {
+        return pullRequest.getRequestedReviewers().stream().map(GitHubUser::create).collect(Collectors.toList());
     }
 
     public GHPullRequest unwrap() {
