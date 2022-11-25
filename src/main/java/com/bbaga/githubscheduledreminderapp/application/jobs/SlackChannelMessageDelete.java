@@ -196,7 +196,7 @@ public class SlackChannelMessageDelete implements Job {
     private ConversationsHistoryResponse getConversationsHistoryPageResponse(Optional<String> cursor, SearchRequest params) throws IOException, SlackApiException {
         var request = ConversationsHistoryRequest.builder()
             .channel(params.getChannelId())
-            .limit(5)
+            .limit(150)
             .latest(params.getLatest());
 
         cursor.ifPresent(request::cursor);
