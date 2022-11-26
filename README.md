@@ -13,3 +13,6 @@ Scheduled reminders about PRs and Issues. This project may be useful for teams u
 
 # Documentation
 The [documentation](./docs) is broken up to pages by topic, you'll find the index [here](./docs).
+
+# Contributing
+Contributions are welcome! Please see the [contribution guide](./CONTRIBUTING.md) for more details.
