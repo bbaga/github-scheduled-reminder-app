@@ -135,7 +135,7 @@ filters:
 ```
 
 ### Author-filter
-This filter will remove the PRs and Issues based on the author's login name.
+This filter will remove the PRs and Issues that are not authored by one of the included authors.
 
 ```yaml
 filters:
@@ -145,8 +145,19 @@ filters:
       - usernameB
 ```
 
+### Author-exclude-filter
+This filter will remove the PRs and Issues authored by one of the included authors
+
+```yaml
+filters:
+  - type: author-exclude-filter
+    exclude:
+      - usernameA
+      - usernameB
+```
+
 ### Path-filter
-This filter will remove the PRs and Issues based on whether the modified files in the PR start with the given paths.
+This filter will remove the PRs and Issues that do not have changed files in the included paths.
 
 ```yaml
 filters:
