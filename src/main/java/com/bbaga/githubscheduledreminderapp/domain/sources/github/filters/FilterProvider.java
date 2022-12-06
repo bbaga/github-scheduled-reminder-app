@@ -14,8 +14,6 @@ public class FilterProvider {
             filter = new LabelFilter();
         } else if (type.equals(Filters.AUTHOR_FILTER.label)) {
             filter = new AuthorFilter();
-        } else if (type.equals(Filters.AUTHOR_EXCLUDE_FILTER.label)) {
-            filter = new AuthorExcludeFilter();
         } else if (type.equals(Filters.PATH_FILTER.label)) {
             filter = new PathFilter();
         } else {

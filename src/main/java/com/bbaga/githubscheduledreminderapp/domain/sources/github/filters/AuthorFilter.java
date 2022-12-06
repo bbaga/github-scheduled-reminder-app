@@ -18,12 +18,30 @@ public class AuthorFilter implements IssueFilterInterface {
     @Override
     public Boolean filter(GitHubIssue issue) {
         List<String> includeAuthors = config.getIncludeAuthors();
+        List<String> excludeAuthors = config.getExcludeAuthors();
+
+        //Guard case - if both filters have nothing, filter nothing
+        if ((includeAuthors == null || includeAuthors.isEmpty()) &&
+            (excludeAuthors == null || excludeAuthors.isEmpty())) {
+            return false;
+        }
+
+        // Uses Include then exclude.
+        // If a name exists in both include and exclude, it will be excluded.
+
+        boolean result = false;
 
         try {
-            return includeAuthors == null || !includeAuthors.contains(issue.getUser().getLogin());
+            if (includeAuthors != null && !includeAuthors.isEmpty()) {
+                result = !includeAuthors.contains(issue.getUser().getLogin());
+            }
+            else if (excludeAuthors != null && !excludeAuthors.isEmpty()) {
+                result = excludeAuthors.contains(issue.getUser().getLogin());
+            }
+            return result;
         } catch (IOException ignore) {}
 
-        return false;
+        return result;
     }
 
     @Override

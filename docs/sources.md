@@ -135,7 +135,12 @@ filters:
 ```
 
 ### Author-filter
-This filter will remove the PRs and Issues that are not authored by one of the included authors.
+This filter will remove the PRs and Issues that are not authored by one of the included authors 
+or exclude PRs and Issues that are authored by one of the excluded authors. 
+
+Do not use both the include and exclude. 
+
+If and author exist in both lists the include will check first and include the author.
 
 ```yaml
 filters:
@@ -143,14 +148,6 @@ filters:
     include:
       - usernameA
       - usernameB
-```
-
-### Author-exclude-filter
-This filter will remove the PRs and Issues authored by one of the included authors
-
-```yaml
-filters:
-  - type: author-exclude-filter
     exclude:
       - usernameA
       - usernameB
