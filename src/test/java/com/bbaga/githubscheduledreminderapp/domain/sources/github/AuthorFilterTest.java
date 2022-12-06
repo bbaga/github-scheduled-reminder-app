@@ -56,7 +56,7 @@ class AuthorFilterTest {
         Assertions.assertFalse(filter.filter(pr));
 
         config.setIncludeAuthors(List.of());
-        Assertions.assertTrue(filter.filter(pr));
+        Assertions.assertFalse(filter.filter(pr));
     }
 
     @Test
@@ -91,6 +91,9 @@ class AuthorFilterTest {
         Assertions.assertFalse(filter.filter(pr));
 
         Mockito.when(pr.getUser()).thenReturn(mockExcludeUser);
+        Assertions.assertTrue(filter.filter(pr));
+
+        Mockito.when(pr.getUser()).thenReturn(mockUnkownUser);
         Assertions.assertTrue(filter.filter(pr));
     }
 
