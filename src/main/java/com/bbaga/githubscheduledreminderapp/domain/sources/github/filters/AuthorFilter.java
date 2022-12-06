@@ -27,20 +27,19 @@ public class AuthorFilter implements IssueFilterInterface {
         }
 
         // Uses Include then exclude.
-        // If a name exists in both include and exclude, it will be excluded.
-
+        // If a name exists in both it will be included - Therefore unfiltered - return false
         boolean result = false;
 
         try {
+            String login = issue.getUser().getLogin();
+
             if (includeAuthors != null && !includeAuthors.isEmpty()) {
-                result = !includeAuthors.contains(issue.getUser().getLogin());
+                result = !includeAuthors.contains(login);
             }
             else if (excludeAuthors != null && !excludeAuthors.isEmpty()) {
-                result = excludeAuthors.contains(issue.getUser().getLogin());
+                result = excludeAuthors.contains(login);
             }
-            return result;
         } catch (IOException ignore) {}
-
         return result;
     }
 

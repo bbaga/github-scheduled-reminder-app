@@ -7,7 +7,6 @@ import com.bbaga.githubscheduledreminderapp.domain.sources.github.filters.Author
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubPullRequest;
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubUser;
 import java.io.IOException;
-import java.util.Date;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,8 +49,6 @@ class AuthorFilterTest {
         filter.configure(config);
 
         GitHubPullRequest pr = mock(GitHubPullRequest.class);
-        Mockito.when(pr.isDraft()).thenReturn(false);
-        Mockito.when(pr.getUpdatedAt()).thenReturn(new Date());
         Mockito.when(pr.getUser()).thenReturn(mockIncludeUser);
         Assertions.assertFalse(filter.filter(pr));
 
@@ -67,8 +64,6 @@ class AuthorFilterTest {
         filter.configure(config);
 
         GitHubPullRequest pr = mock(GitHubPullRequest.class);
-        Mockito.when(pr.isDraft()).thenReturn(false);
-        Mockito.when(pr.getUpdatedAt()).thenReturn(new Date());
         Mockito.when(pr.getUser()).thenReturn(mockExcludeUser);
         Assertions.assertTrue(filter.filter(pr));
 
@@ -85,8 +80,6 @@ class AuthorFilterTest {
         filter.configure(config);
 
         GitHubPullRequest pr = mock(GitHubPullRequest.class);
-        Mockito.when(pr.isDraft()).thenReturn(true);
-        Mockito.when(pr.getUpdatedAt()).thenReturn(new Date());
         Mockito.when(pr.getUser()).thenReturn(mockIncludeUser);
         Assertions.assertFalse(filter.filter(pr));
 
@@ -106,8 +99,6 @@ class AuthorFilterTest {
         filter.configure(config);
 
         GitHubPullRequest pr = mock(GitHubPullRequest.class);
-        Mockito.when(pr.isDraft()).thenReturn(true);
-        Mockito.when(pr.getUpdatedAt()).thenReturn(new Date());
         Mockito.when(pr.getUser()).thenReturn(mockIncludeUser);
         Assertions.assertFalse(filter.filter(pr));
     }
@@ -120,8 +111,6 @@ class AuthorFilterTest {
         filter.configure(config);
 
         GitHubPullRequest pr = mock(GitHubPullRequest.class);
-        Mockito.when(pr.isDraft()).thenReturn(true);
-        Mockito.when(pr.getUpdatedAt()).thenReturn(new Date());
         Mockito.when(pr.getUser()).thenReturn(mockUnkownUser);
         Assertions.assertTrue(filter.filter(pr));
     }
@@ -134,8 +123,6 @@ class AuthorFilterTest {
         filter.configure(config);
 
         GitHubPullRequest pr = mock(GitHubPullRequest.class);
-        Mockito.when(pr.isDraft()).thenReturn(true);
-        Mockito.when(pr.getUpdatedAt()).thenReturn(new Date());
         Mockito.when(pr.getUser()).thenReturn(mockUnkownUser);
         Assertions.assertFalse(filter.filter(pr));
     }
