@@ -11,9 +11,13 @@ public class AuthorFilterConfig extends AbstractFilterConfig {
     @JsonProperty("include")
     private List<String> includeAuthors;
 
+    @JsonProperty("exclude")
+    private List<String> excludeAuthors;
+
     public AuthorFilterConfig() {
         super(Filters.AUTHOR_FILTER.label);
         includeAuthors = new ArrayList<>();
+        excludeAuthors = new ArrayList<>();
     }
 
     public List<String> getIncludeAuthors() {
@@ -22,5 +26,14 @@ public class AuthorFilterConfig extends AbstractFilterConfig {
 
     public void setIncludeAuthors(List<String> includeAuthors) {
         this.includeAuthors = includeAuthors;
+    }
+
+
+    public List<String> getExcludeAuthors() {
+        return excludeAuthors;
+    }
+
+    public void setExcludeAuthors(List<String> excludeAuthors) {
+        this.excludeAuthors = excludeAuthors;
     }
 }
