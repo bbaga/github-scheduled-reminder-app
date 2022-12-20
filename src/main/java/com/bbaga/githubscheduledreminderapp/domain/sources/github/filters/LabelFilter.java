@@ -4,6 +4,7 @@ import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.filters
 import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.filters.LabelFilterConfig;
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubIssue;
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubPullRequest;
+import java.util.stream.Collectors;
 import org.kohsuke.github.GHLabel;
 
 import java.io.IOException;
@@ -13,7 +14,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public class LabelFilter implements IssueFilterInterface {
+public class LabelFilter extends ExpireableFilter implements IssueFilterInterface {
     private LabelFilterConfig config;
 
     @Override
@@ -23,26 +24,44 @@ public class LabelFilter implements IssueFilterInterface {
 
     @Override
     public Boolean filter(GitHubIssue issue) {
-        List<String> excludedLabels = config.getExcludeLabels();
-        Instant now = Instant.now();
-        long ageInDays = 0;
 
-        try {
-            Date date = issue.getUpdatedAt();
-
-            if (date == null) {
-                date = issue.getCreatedAt();
-            }
-
-            ageInDays = ChronoUnit.DAYS.between(date.toInstant(), now);
-        } catch (IOException e) {
-            e.printStackTrace();
+        //No matter what if the filter is expired it should not filter results.
+        if (isFilterExpired(issue, config.getExpiryDays())) {
+            return false;
         }
 
-        for (GHLabel label : issue.getLabels()) {
-            if (excludedLabels.contains(label.getName().toLowerCase(Locale.ROOT)) && ageInDays < config.getExpiryDays()) {
-                return true;
+        List<String> includedLabels = config.getIncludeLabels();
+        List<String> excludedLabels = config.getExcludeLabels();
+
+        //Guard case - if both filters have nothing, filter nothing
+        if ((includedLabels == null || includedLabels.isEmpty()) &&
+            (excludedLabels == null || excludedLabels.isEmpty())) {
+            return false;
+        }
+
+        List<String> issueLabels =
+            issue.getLabels().stream().map(label -> label.getName().toLowerCase(Locale.ROOT)).toList();
+
+        if (includedLabels != null && !includedLabels.isEmpty()) {
+            boolean result = true;
+            for (String filterLabel : includedLabels) {
+                if (issueLabels.contains(filterLabel)) {
+                    result = false;
+                    break;
+                }
             }
+            return result;
+        }
+
+        if (excludedLabels != null && !excludedLabels.isEmpty()) {
+            boolean result = false;
+            for (String filterLabel : excludedLabels) {
+                if (issueLabels.contains(filterLabel)) {
+                    result = true;
+                    break;
+                }
+            }
+            return result;
         }
 
         return false;

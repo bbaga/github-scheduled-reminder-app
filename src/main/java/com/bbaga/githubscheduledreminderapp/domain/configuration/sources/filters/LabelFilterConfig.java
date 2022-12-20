@@ -1,5 +1,6 @@
 package com.bbaga.githubscheduledreminderapp.domain.configuration.sources.filters;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -14,15 +15,31 @@ public class LabelFilterConfig extends AbstractFilterConfig {
 
     public static final String LABEL_ACKNOWLEDGED = "acknowledged";
 
-    @JsonProperty("exclude-labels")
+    @JsonProperty("include")
+    private List<String> includeLabels;
+
+    @JsonProperty("exclude")
+    @JsonAlias("exclude-labels")
     private List<String> excludeLabels;
 
     @JsonProperty("expiry-days")
-    private int expiryDays = 90;
+    private int expiryDays = Integer.MAX_VALUE;
 
     public LabelFilterConfig() {
         super(Filters.LABEL_FILTER.label);
         excludeLabels = new ArrayList<>(List.of(LABEL_ACKNOWLEDGED));
+        includeLabels = new ArrayList<>();
+    }
+
+    public List<String> getIncludeLabels() { return  includeLabels; }
+
+    public void setIncludeLabels(List<String> includeLabels) {
+        if (includeLabels != null) {
+            includeLabels = includeLabels.stream().map(
+                (String label) -> label.toLowerCase(Locale.ROOT)).collect(toCollection(ArrayList::new)
+            );
+        }
+        this.includeLabels = includeLabels;
     }
 
     public List<String> getExcludeLabels() {
@@ -35,7 +52,6 @@ public class LabelFilterConfig extends AbstractFilterConfig {
                 (String label) -> label.toLowerCase(Locale.ROOT)).collect(toCollection(ArrayList::new)
             );
         }
-
         this.excludeLabels = excludeLabels;
     }
 

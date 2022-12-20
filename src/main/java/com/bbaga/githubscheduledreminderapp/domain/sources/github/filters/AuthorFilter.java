@@ -7,7 +7,7 @@ import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubPullRequ
 import java.io.IOException;
 import java.util.List;
 
-public class AuthorFilter implements IssueFilterInterface {
+public class AuthorFilter extends ExpireableFilter implements IssueFilterInterface{
     private AuthorFilterConfig config;
 
     @Override
@@ -17,6 +17,12 @@ public class AuthorFilter implements IssueFilterInterface {
 
     @Override
     public Boolean filter(GitHubIssue issue) {
+
+        //No matter what if the filter is expired it should not filter results.
+        if (isFilterExpired(issue, config.getExpiryDays())) {
+            return false;
+        }
+
         List<String> includeAuthors = config.getIncludeAuthors();
         List<String> excludeAuthors = config.getExcludeAuthors();
 
@@ -26,25 +32,23 @@ public class AuthorFilter implements IssueFilterInterface {
             return false;
         }
 
-        // Uses Include then exclude.
+        // Uses Include over exclude.
         // If a name exists in both it will be included - Therefore unfiltered - return false
-        boolean result = false;
-
         try {
             String login = issue.getUser().getLogin();
 
             if (includeAuthors != null && !includeAuthors.isEmpty()) {
-                result = !includeAuthors.contains(login);
+                return !includeAuthors.contains(login);
             }
             else if (excludeAuthors != null && !excludeAuthors.isEmpty()) {
-                result = excludeAuthors.contains(login);
+                return excludeAuthors.contains(login);
             }
         } catch (IOException ignore) {}
-        return result;
+        return false;
     }
 
     @Override
-    public Boolean filter(GitHubPullRequest issue) {
-        return this.filter((GitHubIssue) issue);
+    public Boolean filter(GitHubPullRequest pullRequest) {
+        return this.filter((GitHubIssue) pullRequest);
     }
 }
