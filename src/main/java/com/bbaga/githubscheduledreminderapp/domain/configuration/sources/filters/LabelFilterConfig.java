@@ -23,7 +23,7 @@ public class LabelFilterConfig extends AbstractFilterConfig {
     private List<String> excludeLabels;
 
     @JsonProperty("expiry-days")
-    private int expiryDays = Integer.MAX_VALUE;
+    private int expiryDays = 90;
 
     public LabelFilterConfig() {
         super(Filters.LABEL_FILTER.label);

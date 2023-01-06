@@ -15,7 +15,7 @@ public class PathFilterConfig extends AbstractFilterConfig {
     private List<String> excludePaths;
 
     @JsonProperty("expiry-days")
-    private int expiryDays = Integer.MAX_VALUE;
+    private int expiryDays = 90;
 
     public PathFilterConfig() {
         super(Filters.PATH_FILTER.label);
