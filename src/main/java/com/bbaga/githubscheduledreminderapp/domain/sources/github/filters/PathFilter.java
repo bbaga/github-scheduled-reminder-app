@@ -6,8 +6,9 @@ import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubIssue;
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubPullRequest;
 
 import java.io.IOException;
+import java.util.List;
 
-public class PathFilter implements IssueFilterInterface {
+public class PathFilter extends ExpireableFilter implements IssueFilterInterface {
     private PathFilterConfig config;
 
     @Override
@@ -23,22 +24,54 @@ public class PathFilter implements IssueFilterInterface {
 
     @Override
     public Boolean filter(GitHubPullRequest pullRequest) {
-        var includePaths = config.getIncludePaths();
-        if (includePaths == null || includePaths.isEmpty()) {
-            // Nothing to filter by, so ignore this filter
+
+        //No matter what if the filter is expired it should not filter results.
+        if (isFilterExpired(pullRequest, config.getExpiryDays())) {
             return false;
         }
 
+        List<String> includePaths = config.getIncludePaths();
+        List<String> excludePaths = config.getExcludePaths();
+
+        //Guard case - if both filters have nothing, filter nothing
+        if ((includePaths == null || includePaths.isEmpty()) &&
+            (excludePaths == null || excludePaths.isEmpty())) {
+            return false;
+        }
+
+        boolean includePathSatisfied = false;
+        boolean excludePathSatisfied = false;
+
         try {
             for (var file : pullRequest.getFilenames()) {
-                for (var includePath : includePaths) {
-                    if (file.startsWith(includePath)) {
-                        return false;
+                if (includePaths != null && !includePaths.isEmpty()) {
+                    for (var includePath : includePaths) {
+                        if (file.startsWith(includePath)) {
+                            includePathSatisfied = true;
+                            break;
+                        }
+                    }
+                }
+                else if (excludePaths != null && !excludePaths.isEmpty()) {
+                    for (var excludePath : excludePaths) {
+                        if (file.startsWith(excludePath)) {
+                            excludePathSatisfied = true;
+                            break;
+                        }
                     }
                 }
             }
         } catch (IOException ignore) {}
+        boolean result = false;
 
-        return true;
+        // If we have includes use those.
+        // Otherwise use excludes.
+        if (includePaths != null && !includePaths.isEmpty()) {
+            result = !includePathSatisfied;
+        } else {
+            result = excludePathSatisfied;
+        }
+
+        return result;
     }
 }

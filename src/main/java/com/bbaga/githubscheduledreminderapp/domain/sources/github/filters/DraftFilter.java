@@ -5,12 +5,7 @@ import com.bbaga.githubscheduledreminderapp.domain.configuration.sources.filters
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubIssue;
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubPullRequest;
 
-import java.io.IOException;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.Date;
-
-public class DraftFilter implements IssueFilterInterface {
+public class DraftFilter extends ExpireableFilter implements IssueFilterInterface {
     private DraftFilterConfig config;
 
     @Override
@@ -25,23 +20,13 @@ public class DraftFilter implements IssueFilterInterface {
 
     @Override
     public Boolean filter(GitHubPullRequest pr) {
-        Instant now = Instant.now();
-        long ageInDays = 2;
-
-        try {
-            Date date = pr.getUpdatedAt();
-
-            if (date == null) {
-                date = pr.getCreatedAt();
-            }
-
-            ageInDays = ChronoUnit.DAYS.between(date.toInstant(), now);
-        } catch (IOException e) {
-            e.printStackTrace();
+        //No matter what if the filter is expired it should not filter results.
+        if (isFilterExpired(pr, config.getExpiryDays())) {
+            return false;
         }
 
         try {
-            return !config.getIncludeDrafts() && pr.isDraft() && ageInDays < config.getExpiryDays();
+            return !config.getIncludeDrafts() && pr.isDraft();
         } catch (java.io.IOException e) {
             e.printStackTrace();
         }

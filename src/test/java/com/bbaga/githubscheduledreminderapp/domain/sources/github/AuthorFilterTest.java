@@ -7,6 +7,7 @@ import com.bbaga.githubscheduledreminderapp.domain.sources.github.filters.Author
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubPullRequest;
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubUser;
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,9 +51,12 @@ class AuthorFilterTest {
 
         GitHubPullRequest pr = mock(GitHubPullRequest.class);
         Mockito.when(pr.getUser()).thenReturn(mockIncludeUser);
+        Mockito.when(pr.getUpdatedAt()).thenReturn(new Date());
+        //Included authors should not be filtered
         Assertions.assertFalse(filter.filter(pr));
 
         config.setIncludeAuthors(List.of());
+        //Both Filters have nothing - no filtering
         Assertions.assertFalse(filter.filter(pr));
     }
 
@@ -65,10 +69,88 @@ class AuthorFilterTest {
 
         GitHubPullRequest pr = mock(GitHubPullRequest.class);
         Mockito.when(pr.getUser()).thenReturn(mockExcludeUser);
+        Mockito.when(pr.getUpdatedAt()).thenReturn(new Date());
+        //Excluded authors should be filtered
         Assertions.assertTrue(filter.filter(pr));
 
         config.setExcludeAuthors(List.of());
+        //Both Filters have nothing - no filtering
         Assertions.assertFalse(filter.filter(pr));
+    }
+
+    @Test
+    void filter_include_with_expiraton() throws IOException {
+        AuthorFilterConfig config = new AuthorFilterConfig();
+        config.setIncludeAuthors(List.of(INCLUDE_USERNAME));
+        config.setExpiryDays(100);
+        AuthorFilter filter = new AuthorFilter();
+        filter.configure(config);
+
+        GitHubPullRequest pr = mock(GitHubPullRequest.class);
+        Mockito.when(pr.getUser()).thenReturn(mockExcludeUser);
+        Mockito.when(pr.getUpdatedAt()).thenReturn(new Date());
+        //non-Included authors should be filtered when expiration is not active
+        Assertions.assertTrue(filter.filter(pr));
+    }
+
+    @Test
+    void filter_include_with_no_expiraton() throws IOException {
+        AuthorFilterConfig config = new AuthorFilterConfig();
+        config.setIncludeAuthors(List.of(INCLUDE_USERNAME));
+        config.setExpiryDays(-1);
+        AuthorFilter filter = new AuthorFilter();
+        filter.configure(config);
+
+        GitHubPullRequest pr = mock(GitHubPullRequest.class);
+        Mockito.when(pr.getUser()).thenReturn(mockExcludeUser);
+        Mockito.when(pr.getUpdatedAt()).thenReturn(new Date());
+        //non-Included authors should not be filtered when expiration is not active
+        Assertions.assertFalse(filter.filter(pr));
+    }
+
+    @Test
+    void filter_exclude_with_expiration() throws IOException {
+        AuthorFilterConfig config = new AuthorFilterConfig();
+        config.setExcludeAuthors(List.of(EXCLUDE_USERNAME));
+        config.setExpiryDays(-1);
+        AuthorFilter filter = new AuthorFilter();
+        filter.configure(config);
+
+        GitHubPullRequest pr = mock(GitHubPullRequest.class);
+        Mockito.when(pr.getUser()).thenReturn(mockExcludeUser);
+        Mockito.when(pr.getUpdatedAt()).thenReturn(new Date());
+        //Excluded authors should not be filtered when expiration is active
+        Assertions.assertFalse(filter.filter(pr));
+    }
+
+    @Test
+    void filter_exclude_with_no_expiration() throws IOException {
+        AuthorFilterConfig config = new AuthorFilterConfig();
+        config.setExcludeAuthors(List.of(EXCLUDE_USERNAME));
+        config.setExpiryDays(100);
+        AuthorFilter filter = new AuthorFilter();
+        filter.configure(config);
+
+        GitHubPullRequest pr = mock(GitHubPullRequest.class);
+        Mockito.when(pr.getUser()).thenReturn(mockExcludeUser);
+        Mockito.when(pr.getUpdatedAt()).thenReturn(new Date());
+        //Excluded authors should be filtered when expiration is not active
+        Assertions.assertTrue(filter.filter(pr));
+    }
+
+    @Test
+    void filter_exclude_with_null_expiration() throws IOException {
+        AuthorFilterConfig config = new AuthorFilterConfig();
+        config.setExcludeAuthors(List.of(EXCLUDE_USERNAME));
+        config.setExpiryDays(100);
+        AuthorFilter filter = new AuthorFilter();
+        filter.configure(config);
+
+        GitHubPullRequest pr = mock(GitHubPullRequest.class);
+        Mockito.when(pr.getUser()).thenReturn(mockExcludeUser);
+        Mockito.when(pr.getUpdatedAt()).thenReturn(new Date());
+        //Excluded authors should be filtered when expiration is not active
+        Assertions.assertTrue(filter.filter(pr));
     }
 
     @Test
@@ -81,12 +163,16 @@ class AuthorFilterTest {
 
         GitHubPullRequest pr = mock(GitHubPullRequest.class);
         Mockito.when(pr.getUser()).thenReturn(mockIncludeUser);
+        Mockito.when(pr.getUpdatedAt()).thenReturn(new Date());
+        //Included user should not be filtered
         Assertions.assertFalse(filter.filter(pr));
 
         Mockito.when(pr.getUser()).thenReturn(mockExcludeUser);
+        //Excluded user should be filtered
         Assertions.assertTrue(filter.filter(pr));
 
         Mockito.when(pr.getUser()).thenReturn(mockUnkownUser);
+        //non-Included user should be filtered
         Assertions.assertTrue(filter.filter(pr));
     }
 
@@ -100,30 +186,8 @@ class AuthorFilterTest {
 
         GitHubPullRequest pr = mock(GitHubPullRequest.class);
         Mockito.when(pr.getUser()).thenReturn(mockIncludeUser);
-        Assertions.assertFalse(filter.filter(pr));
-    }
-
-    @Test
-    void filter_unknownUser_Include() throws IOException {
-        AuthorFilterConfig config = new AuthorFilterConfig();
-        config.setIncludeAuthors(List.of(INCLUDE_USERNAME));
-        AuthorFilter filter = new AuthorFilter();
-        filter.configure(config);
-
-        GitHubPullRequest pr = mock(GitHubPullRequest.class);
-        Mockito.when(pr.getUser()).thenReturn(mockUnkownUser);
-        Assertions.assertTrue(filter.filter(pr));
-    }
-
-    @Test
-    void filter_unknownUser_Exclude() throws IOException {
-        AuthorFilterConfig config = new AuthorFilterConfig();
-        config.setExcludeAuthors(List.of(EXCLUDE_USERNAME));
-        AuthorFilter filter = new AuthorFilter();
-        filter.configure(config);
-
-        GitHubPullRequest pr = mock(GitHubPullRequest.class);
-        Mockito.when(pr.getUser()).thenReturn(mockUnkownUser);
+        Mockito.when(pr.getUpdatedAt()).thenReturn(new Date());
+        //Included and Excluded User should not be filtered
         Assertions.assertFalse(filter.filter(pr));
     }
 }

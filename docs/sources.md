@@ -114,7 +114,8 @@ config:
 ## Filters
 
 ### Draft-filter
-This filter will remove the draft PRs from the report by default. If the PR hasn't been updated in 90 days, it will appear in the reports again. 
+This filter will remove the draft PRs from the report.
+By default this filter will expire never expire.
 
 ```yaml
 filters:
@@ -124,23 +125,30 @@ filters:
 ```
 
 ### Label-filter
-This filter will remove the PRs and Issues from the report based on the configured labels. If the PR or Issue hasn't been updated in 90 days, they will appear in the reports again.
+This filter will remove the PRs and Issues that are not labeled by one of the included labels
+or exclude PRs and Issues that are labeled by one of the exclude labels.
+Do not use both the include and exclude.
+If a label exist in both lists the include will check first and include the label.
+By default this filter will expire never expire.
 
 ```yaml
 filters:
   - type: label-filter
-    exclude-labels:
-      - acknowledged
+    include:
+      - include-label
+    exclude:  
+      - exclude-label
+    exclude-labels: (Deprecated to match other labels)
+      - exclude-label
     expiry-days: 90
 ```
 
 ### Author-filter
 This filter will remove the PRs and Issues that are not authored by one of the included authors 
-or exclude PRs and Issues that are authored by one of the excluded authors. 
-
-Do not use both the include and exclude. 
-
+or exclude PRs and Issues that are authored by one of the exclude authors.
+Do not use both the include and exclude.
 If and author exist in both lists the include will check first and include the author.
+By default this filter will expire never expire. 
 
 ```yaml
 filters:
@@ -151,16 +159,26 @@ filters:
     exclude:
       - usernameA
       - usernameB
+    expiry-days: 90
 ```
 
 ### Path-filter
-This filter will remove the PRs and Issues that do not have changed files in the included paths.
+This filter will remove the PRs and Issues that do not have a file in the include paths
+or exclude PRs and Issues that do have a path in the exclude paths.
+Do not use both the include and exclude.
+If a path exist in both lists the include will check first and include the path.
+Because this uses a starts with you should not include a directory and then exclude files within that sub-directoey.
+Instead just exclude the files and the parent will be automatically included.
+By default this filter will expire never expire.
 
 ```yaml
 filters:
   - type: path-filter
     include:
       - src/foo
+    exclude:
+      - src/foo/bar
+    expiry-days: 90
 ```
 
 The example above would match the following paths:

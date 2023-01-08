@@ -14,6 +14,9 @@ public class AuthorFilterConfig extends AbstractFilterConfig {
     @JsonProperty("exclude")
     private List<String> excludeAuthors;
 
+    @JsonProperty("expiry-days")
+    private int expiryDays = 90;
+
     public AuthorFilterConfig() {
         super(Filters.AUTHOR_FILTER.label);
         includeAuthors = new ArrayList<>();
@@ -35,5 +38,13 @@ public class AuthorFilterConfig extends AbstractFilterConfig {
 
     public void setExcludeAuthors(List<String> excludeAuthors) {
         this.excludeAuthors = excludeAuthors;
+    }
+
+    public int getExpiryDays() {
+        return expiryDays;
+    }
+
+    public void setExpiryDays(int expiryDays) {
+        this.expiryDays = expiryDays;
     }
 }
