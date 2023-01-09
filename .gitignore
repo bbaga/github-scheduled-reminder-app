@@ -37,3 +37,8 @@ build/
 
 ### .env ###
 .env
+
+### keys ###
+**/*.key
+**/*.der
+**/*.pem
