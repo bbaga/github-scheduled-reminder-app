@@ -38,9 +38,8 @@ public class SearchByReviewersPRsSource implements SearchAsSourceInterface <GitH
         List<String> searchSubjects,
         String queryTemplate
     ) {
-        SearchIssueBuilder builder = SearchIssueBuilder.from(client.searchIssues());
-
         for (String subject : searchSubjects) {
+            SearchIssueBuilder builder = SearchIssueBuilder.from(client.searchIssues());
             builder.query(String.format(queryTemplate, repo.getFullName(), subject))
                 .forEach((GHIssue issue) -> this.processIssue(repo, issues, issue));
         }
