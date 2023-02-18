@@ -16,3 +16,6 @@ The [documentation](./docs) is broken up to pages by topic, you'll find the inde
 
 # Contributing
 Contributions are welcome! Please see the [contribution guide](./CONTRIBUTING.md) for more details.
+
+# Supported by
+[![JetBrains Logo](https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.svg)](https://www.jetbrains.com/)
