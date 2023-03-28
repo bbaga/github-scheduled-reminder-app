@@ -68,7 +68,7 @@
 		<dependency>
 			<groupId>com.slack.api</groupId>
 			<artifactId>slack-api-client</artifactId>
-			<version>1.28.0</version>
+			<version>1.28.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
