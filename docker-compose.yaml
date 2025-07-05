@@ -1,7 +1,7 @@
 version: "3.14"
 services:
   app:
-    image: openjdk:17
+    image: eclipse-temurin:21-jdk-ubi9-minimal
     volumes:
       - ./:/sources
       - ~/.m2/repository:/root/.m2/repository
