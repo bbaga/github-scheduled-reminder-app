@@ -8,7 +8,7 @@ Any contribution to the contents of the repository must be done through pull req
 
 ## Proposing changes
 ### Supported JVM versions
-Java 17
+Java 21+
 
 ### Development
 For a guide on how to run the application for development/testing purposes, please see [the relevant documentation](./docs/development.md).
