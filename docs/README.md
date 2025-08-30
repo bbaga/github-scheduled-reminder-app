@@ -7,3 +7,5 @@ The objective of this tool is to offer functionality comparable to [GitHub's tea
     - [Sources](./sources.md)
     - [Template configuration options](./template-config.md)
     - [Persistent State Storage](./persistent-state-storage.md)
+- API
+  - [State](state-api.md)
