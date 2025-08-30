@@ -6,15 +6,18 @@ import com.bbaga.githubscheduledreminderapp.infrastructure.configuration.InRepoC
 import com.bbaga.githubscheduledreminderapp.infrastructure.configuration.InRepoConfigParser;
 import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubBuilderFactory;
 import org.kohsuke.github.*;
-import org.quartz.SchedulerException;
+import org.quartz.*;
+import org.quartz.impl.matchers.GroupMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 @RestController
@@ -26,19 +29,22 @@ public class State {
     private final GitHubBuilderFactory gitHubBuilderFactory;
     private final InRepoConfigParser inRepoConfigParser;
     private final Logger logger = LoggerFactory.getLogger(State.class);
+    private final Scheduler scheduler;
 
     State(
         GitHub gitHubClient,
         GitHubBuilderFactory gitHubBuilderFactory,
         ConcurrentHashMap<String, ConfigGraphNode> state,
         ConfigGraphUpdater configGraphUpdater,
-        InRepoConfigParser inRepoConfigParser
+        InRepoConfigParser inRepoConfigParser,
+        @Qualifier("Scheduler") Scheduler scheduler
     ) {
         this.gitHubClient = gitHubClient;
         this.gitHubBuilderFactory = gitHubBuilderFactory;
         this.state = state;
         this.configGraphUpdater = configGraphUpdater;
         this.inRepoConfigParser = inRepoConfigParser;
+        this.scheduler = scheduler;
     }
 
     @GetMapping("/state/config")
@@ -77,6 +83,17 @@ public class State {
             }
 
             configGraphUpdater.clearOutdated(installationId, repositoryFullName, timestamp);
+
+            Set<TriggerKey> triggerKeys = scheduler.getTriggerKeys(GroupMatcher.triggerGroupEquals("notifications"));
+            for (TriggerKey triggerKey : triggerKeys) {
+                if (triggerKey.getName().startsWith(repositoryFullName) && !state.containsKey(triggerKey.getName())) {
+                    JobKey jobKey = new JobKey(triggerKey.getName());
+                    JobDetail job = scheduler.getJobDetail(jobKey);
+                    if (job != null) {
+                        scheduler.deleteJob(jobKey);
+                    }
+                }
+            }
         } catch (GHFileNotFoundException | SchedulerException e) {
             logger.error(e.getMessage());
             return "Something wen wrong, please check the logs.";
