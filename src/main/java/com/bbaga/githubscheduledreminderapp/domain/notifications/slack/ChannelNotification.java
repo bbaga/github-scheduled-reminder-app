@@ -15,6 +15,7 @@ import com.bbaga.githubscheduledreminderapp.infrastructure.github.GitHubPullRequ
 import com.slack.api.methods.MethodsClient;
 import com.slack.api.methods.SlackApiException;
 import com.slack.api.methods.request.chat.ChatPostMessageRequest;
+import com.slack.api.methods.request.search.SearchMessagesRequest;
 import com.slack.api.methods.response.chat.ChatPostMessageResponse;
 import com.slack.api.methods.response.users.UsersInfoResponse;
 import com.slack.api.model.block.HeaderBlock;
@@ -265,17 +266,53 @@ public class ChannelNotification implements NotificationInterface<ChannelNotific
         }
 
         var message = response.getMessage();
+        var userId = message.getUser();
 
-        var searchRequest = SearchRequest.create(
-            message.getBotId(),
-            notification.getFullName(),
-            slackConfig.getChannel(),
-            response.getChannel(),
-            response.getTs(),
-            templateConfig
-        );
+        var timestampParts = message.getTs().split("\\.");
+        long seconds, nanoAdjustment;
+        Instant deleteMessagesBefore;
 
-        eventPublisher.publishEvent(SearchAndDeleteEvent.create(this, searchRequest));
+        if (timestampParts.length > 0) {
+            seconds = Long.parseLong(timestampParts[0]);
+            nanoAdjustment = timestampParts.length > 1 ? Long.parseLong(timestampParts[1]) : 0;
+
+            deleteMessagesBefore = Instant.ofEpochSecond(seconds, nanoAdjustment);
+        } else {
+            // how come there is nothing?
+            deleteMessagesBefore = Instant.now();
+        }
+
+        // Setting offset to 5 minutes
+        deleteMessagesBefore = deleteMessagesBefore.minusSeconds(300);
+
+        UsersInfoResponse userInfoResponse;
+
+        try {
+            userInfoResponse = slackClient.usersInfo(req -> req.user(userId));
+        } catch (IOException | SlackApiException e) {
+            logger.error(e.getLocalizedMessage());
+            return;
+        }
+
+        if (!userInfoResponse.isOk()) {
+            logger.error(userInfoResponse.getError());
+        }
+
+        Instant finalDeleteMessagesBefore = deleteMessagesBefore;
+        var user = userInfoResponse.getUser();
+
+        if (user.getName().isEmpty()) {
+            logger.debug("Bot's username could not be identified. Skipping old message removal.");
+        }
+
+        var searchRequest = SearchMessagesRequest.builder()
+            .query("in:" + slackChannel + " from:" + user.getName())
+            .count(25)
+            .sort("timestamp")
+            .sortDir("desc")
+            .build();
+
+        eventPublisher.publishEvent(SearchAndDeleteEvent.create(this, searchRequest, finalDeleteMessagesBefore));
     }
 
     private List<LayoutBlock> getTruncatedGroup(List<LayoutBlock> sections, int sectionsSize, int maxGroupSize) {

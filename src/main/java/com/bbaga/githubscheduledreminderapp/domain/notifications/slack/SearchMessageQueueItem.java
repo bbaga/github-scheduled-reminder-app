@@ -1,26 +1,24 @@
 package com.bbaga.githubscheduledreminderapp.domain.notifications.slack;
 
-import com.slack.api.methods.request.conversations.ConversationsHistoryRequest;
 import com.slack.api.methods.request.search.SearchMessagesRequest;
 import com.slack.api.model.MatchedItem;
-import com.slack.api.model.Message;
 import java.util.Objects;
 import java.util.function.Consumer;
 
 public class SearchMessageQueueItem {
-  protected SearchRequest params;
-  protected Consumer<Message> action;
+  protected SearchMessagesRequest params;
+  protected Consumer<MatchedItem> action;
 
-  public SearchMessageQueueItem(SearchRequest params, Consumer<Message> action) {
+  public SearchMessageQueueItem(SearchMessagesRequest params, Consumer<MatchedItem> action) {
     this.params = params;
     this.action = action;
   }
 
-  public SearchRequest getParams() {
+  public SearchMessagesRequest getParams() {
     return params;
   }
 
-  public Consumer<Message> getAction() {
+  public Consumer<MatchedItem> getAction() {
     return action;
   }
 
